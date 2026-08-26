@@ -1,0 +1,620 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+/* =========================================================
+   eProf — Design System
+   Carregado DEPOIS do <style> de cada página, por isso vence
+   a cascata sem precisar de !important (salvo onde anotado).
+   ========================================================= */
+
+:root{
+  --laranja: #ED6939;
+  --laranja-escuro: #D4531F;
+  --laranja-bg: #FDEEE8;
+  --azul: #12509A;
+  --azul-escuro: #0D3D78;
+  --azul-claro: #EAF1FA;
+  --bg: #F4F6FA;
+  --texto: #1D1D1D;
+  --texto-suave: #616161;
+  --borda: #E4E8EE;
+  --verde: #3DC200;
+  --verde-bg: #D8F3CC;
+  --amarelo: #F0B429;
+  --ambar-escuro: #B5790F;
+  --vermelho: #E5484D;
+  --branco: #FFFFFF;
+  --raio: 16px;
+  --raio-sm: 10px;
+  --font-display: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+  --font-body: 'Inter', 'Segoe UI', sans-serif;
+}
+
+body{
+  font-family: var(--font-display);
+  background: var(--branco);
+  color: var(--texto);
+  font-size: 14px;
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar{
+  width: 230px;
+  min-width: 230px;
+  flex-shrink: 0;
+  background: var(--bg);
+  border-right: 1px solid var(--borda);
+  padding: 26px 18px 20px;
+  overflow-y: auto;
+}
+
+.sidebar-logo{
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 2px 4px 10px;
+  border-bottom: none;
+}
+.logo-img{ width: auto; height: 118px; }
+
+/* etiqueta laranja sob a logo */
+.portal-tag{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: var(--laranja);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  white-space: nowrap;
+  padding: 12px 14px;
+  border-radius: 8px;
+}
+
+.nav{
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  gap: 6px;
+  padding: 0;
+  overflow: visible;
+}
+.nav-item{
+  gap: 14px;
+  padding: 13px 14px;
+  border-radius: 10px;
+  color: var(--texto-suave);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 500;
+}
+.nav-item svg{ width: 20px; height: 20px; }
+.nav-item:not(.active):hover{ background: #ECEFF4; color: var(--texto); }
+.nav-item.active{
+  background: var(--branco);
+  color: var(--azul);
+  font-weight: 500;
+  border-right: none;
+  box-shadow: 0 1px 3px rgba(29,29,29,0.08);
+}
+.nav-item.active svg{ color: var(--laranja); }
+
+/* "Sair da conta" segue o fluxo da navegação, como mais um item */
+.sidebar-bottom{
+  margin-top: 6px;
+  padding: 0;
+  border-top: none;
+}
+.logout{
+  gap: 14px;
+  padding: 13px 14px;
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--texto-suave);
+}
+.logout:hover{ background: #ECEFF4; color: var(--texto); }
+.logout svg{ width: 20px; height: 20px; }
+
+/* ================= MAIN / TOPBAR ================= */
+.main{
+  background: var(--branco);
+  position: relative;
+}
+/* canto côncavo onde a sidebar encontra o conteúdo */
+.main::before{
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 22px; height: 22px;
+  background: radial-gradient(circle 22px at 0 0, transparent 22px, var(--bg) 22px);
+  pointer-events: none;
+  z-index: 25;
+}
+
+.topbar{
+  background: var(--bg);
+  border-bottom: 1px solid var(--borda);
+  padding: 20px 34px;
+}
+.topbar-left{ gap: 16px; }
+.topbar-left .icon-cal,
+.topbar .page-icon{ color: var(--laranja); stroke: var(--laranja); }
+.topbar-title{
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 24px;
+  color: var(--texto);
+}
+.topbar-sub{ font-size: 13px; color: var(--texto-suave); margin-top: 2px; }
+.topbar-right{ gap: 12px; }
+
+.avatar{
+  width: 40px; height: 40px;
+  background: linear-gradient(160deg, var(--laranja), var(--azul));
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+}
+.user-name{
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--texto);
+}
+.user-role{ font-size: 12px; color: var(--texto-suave); }
+
+/* ================= BARRA SECUNDÁRIA (mês / filtros) ================= */
+.cal-header{
+  background: var(--branco);
+  border-bottom: 1px solid var(--borda);
+  padding: 14px 34px;
+}
+.month-label{
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--texto);
+}
+.month-nav button{
+  color: var(--texto-suave);
+  border-radius: 8px;
+  font-size: 18px;
+  padding: 2px 8px;
+}
+.month-nav button:hover{ background: var(--azul-claro); color: var(--azul); }
+.legend{ gap: 18px; }
+.legend-item{ font-size: 12.5px; color: var(--texto-suave); }
+.dot-orange{ background: var(--laranja); }
+.dot-blue{ background: var(--azul); }
+.today-btn{
+  border: 1px solid var(--borda);
+  background: var(--branco);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--texto-suave);
+}
+.today-btn:hover{
+  background: var(--azul-claro);
+  border-color: var(--azul);
+  color: var(--azul);
+}
+
+/* ================= GRADE DE AULAS ================= */
+.cal-grid-wrapper{ background: var(--branco); }
+
+/* A grade tinha uma primeira coluna de 168px para rótulos de linha que nunca
+   recebeu conteúdo — os 6 dias agora ocupam toda a largura. A segunda faixa
+   estica na vertical para as divisórias irem até o fim da área visível. */
+.cal-grid{
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: auto 1fr;
+  min-width: 780px;
+  min-height: 100%;
+}
+.day-cell{ align-self: stretch; }
+.row-label-header,
+.day-col-header{ background: var(--branco); padding: 14px 8px 0; }
+.day-col-header.today-col{ background: #FFF8F4; }
+
+.day-header-box{
+  background: var(--bg);
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 10px;
+}
+.day-header-box.today{ background: var(--laranja-bg); border-color: var(--laranja); }
+.day-name{ font-size: 12px; color: var(--texto-suave); margin-bottom: 2px; }
+.day-num{
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--texto);
+}
+.day-header-box.today .day-name,
+.day-header-box.today .day-num{ color: var(--laranja-escuro); }
+
+.day-cell{
+  background: var(--branco);
+  border-right: 1px solid var(--borda);
+  padding: 0 10px 16px;
+}
+.day-cell.today-col{ background: #FFF8F4; }
+
+.period-label{
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--texto-suave);
+  letter-spacing: 0.06em;
+  padding: 14px 0 8px;
+}
+
+/* ================= CARD DE AULA ================= */
+.class-card{
+  background: var(--bg);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-sm);
+  padding: 12px 13px;
+  margin-bottom: 8px;
+  transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+.class-card:hover{
+  border-color: var(--laranja);
+  box-shadow: 0 4px 14px rgba(237,105,57,0.14);
+  transform: translateY(-1px);
+}
+/* Aulas de ed. infantil marcam a borda esquerda via style inline (#1e4db7),
+   valor lido pelo JS — mantemos o atributo e só ajustamos a cor aqui.
+   O seletor por [style] deixa de casar assim que o JS mexe em card.style
+   (o navegador reserializa o atributo e o hex vira rgb()), por isso o
+   data-tipo, que o index.html grava em cada card no carregamento. */
+.class-card[data-tipo="infantil"],
+.class-card[style*="1e4db7"]{ border-left-color: var(--azul) !important; }
+
+.card-tag{
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 7px;
+}
+.tag-orange{ background: var(--laranja-bg); color: var(--laranja-escuro); }
+.tag-blue{ background: var(--azul-claro); color: var(--azul); }
+
+.class-card .card-title{
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--texto);
+  margin-bottom: 6px;
+}
+.card-info{ font-size: 11.5px; color: var(--texto-suave); gap: 5px; margin-bottom: 3px; }
+.card-info svg{ width: 12px; height: 12px; }
+.card-link{ font-size: 11.5px; font-weight: 600; margin-top: 7px; }
+.link-plan{ color: var(--azul); }
+.link-warn{ color: var(--ambar-escuro); }
+.card-ext{ color: var(--texto-suave); opacity: .6; }
+
+/* ================= DIVERSOS ================= */
+.help-btn{
+  width: 42px; height: 42px;
+  background: var(--azul);
+  box-shadow: 0 4px 14px rgba(18,80,154,0.3);
+  font-family: var(--font-display);
+  font-size: 17px;
+}
+.help-btn:hover{ background: var(--azul-escuro); }
+
+::-webkit-scrollbar{ width: 8px; height: 8px; }
+::-webkit-scrollbar-track{ background: transparent; }
+::-webkit-scrollbar-thumb{ background: #CDD3DC; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover{ background: #B0B7C0; }
+
+
+/* =========================================================
+   CONTEÚDO — turmas / horário / planejamento / planejamento2
+   ========================================================= */
+
+.content{ padding: 26px 34px; }
+
+/* ---------- barra de filtros ---------- */
+.filter-bar{
+  background: var(--branco);
+  border-bottom: 1px solid var(--borda);
+  padding: 14px 34px;
+}
+
+/* ---------- campos ---------- */
+.search-input,
+.filter-select,
+.filter-disc,
+.filter-pill,
+.form-input{
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  color: var(--texto);
+}
+.search-input input,
+.form-input{ font-family: var(--font-display); font-size: 13.5px; color: var(--texto); }
+.search-input input::placeholder{ color: #9AA1AB; }
+.search-input:focus-within,
+.filter-select:focus,
+.form-input:focus{
+  outline: none;
+  border-color: var(--azul);
+  box-shadow: 0 0 0 3px rgba(18,80,154,0.10);
+}
+.form-label{
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--texto-suave);
+}
+
+/* pílulas de filtro */
+.tipo-btn{
+  border: 1.5px solid var(--laranja);
+  border-radius: 20px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--texto);
+}
+.tipo-btn:hover{ background: var(--laranja-bg); }
+.tipo-btn.semanal{ border-color: var(--azul); }
+.tipo-btn.semanal:hover{ background: var(--azul-claro); }
+.filter-pill.active{ border-color: var(--laranja); background: var(--laranja-bg); color: var(--laranja-escuro); }
+
+/* ---------- botões ---------- */
+.btn-criar,
+.add-btn{
+  background: var(--laranja);
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13.5px;
+  color: #fff;
+}
+.btn-criar:hover,
+.add-btn:hover{ background: var(--laranja-escuro); }
+.btn-criar.blue{ background: var(--azul); }
+.btn-criar.blue:hover{ background: var(--azul-escuro); }
+
+.select-turma-btn,
+.ver-horarios-btn,
+.ver-detalhes-btn,
+.add-slot-btn{
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+.select-turma-btn:hover,
+.ver-horarios-btn:hover,
+.ver-detalhes-btn:hover,
+.add-slot-btn:hover{
+  background: var(--azul-claro);
+  border-color: var(--azul);
+  color: var(--azul);
+}
+
+/* ---------- cards ---------- */
+.plan-card,
+.table-card,
+.history-card,
+.stat-card,
+.alunos-table{
+  background: var(--bg);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+}
+.plan-card:hover{
+  border-color: var(--laranja);
+  box-shadow: 0 6px 20px rgba(237,105,57,0.14);
+}
+/* superfícies aninhadas ficam brancas (padrão da referência) */
+.plan-card-preview{ background: var(--branco); }
+.plan-card-preview.orange{ background: var(--laranja-bg); }
+.plan-card-preview.blue{ background: var(--azul-claro); }
+.slot-card{
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-sm);
+}
+.plan-card-title{
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--texto);
+}
+.plan-card-desc,
+.plan-meta-row{ font-size: 12.5px; color: var(--texto-suave); }
+
+/* ---------- abas (sublinhado, como na referência) ---------- */
+.tabs{
+  background: var(--branco);
+  border-bottom: 1px solid var(--borda);
+  padding: 0 34px;
+  gap: 4px;
+}
+.tab{
+  padding: 12px 18px;
+  border-radius: 0;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--texto-suave);
+}
+.tab:hover{ background: none; color: var(--texto); }
+.tab.active{
+  background: none;
+  box-shadow: none;
+  color: var(--laranja);
+  border-bottom-color: var(--laranja);
+  font-weight: 700;
+}
+
+/* ---------- selos ---------- */
+.badge-visib,
+.disc-badge,
+.badge-discipline,
+.badge-ativo,
+.badge-inativo,
+.tag-exp{
+  border-radius: 20px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 11px;
+  width: fit-content;
+  align-self: flex-start;
+}
+.badge-visib.publico{ background: var(--verde-bg); color: #2E8B00; }
+.badge-visib.privado{ background: var(--azul-claro); color: var(--azul); }
+.disc-badge.orange,
+.badge-discipline{ background: var(--laranja-bg); color: var(--laranja-escuro); }
+.disc-badge.blue,
+.badge-blue{ background: var(--azul-claro); color: var(--azul); }
+.badge-ativo{ background: var(--verde-bg); color: #2E8B00; }
+
+/* ---------- tabelas / listas ---------- */
+.schedule-table th,
+.alunos-header{
+  background: var(--bg);
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--texto-suave);
+}
+.schedule-table td,
+.aluno-row,
+.history-item,
+.turma-row{ border-color: var(--borda); }
+.schedule-table tr:hover td,
+.aluno-row:hover,
+.turma-row:hover{ background: var(--azul-claro); }
+.aluno-avatar{
+  background: linear-gradient(160deg, var(--laranja), var(--azul));
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+/* ---------- estatísticas / histórico ---------- */
+.history-title{
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 20px;
+  color: var(--texto);
+}
+.history-icon{ border-radius: 50%; }
+.icon-yellow{ background: #FDF3D9; color: var(--amarelo); }
+.icon-green{ background: var(--verde-bg); color: #2E8B00; }
+.icon-red{ background: #FDE9E9; color: var(--vermelho); }
+.history-text{ font-size: 13px; color: var(--texto); }
+.history-date{ font-size: 11.5px; color: var(--texto-suave); }
+
+.stat-label{ font-family: var(--font-display); font-size: 12.5px; color: var(--texto-suave); }
+.stat-updated{ font-size: 11px; color: var(--laranja); }
+.stat-value{
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 26px;
+  color: var(--azul);
+}
+.stat-value.orange{ color: var(--laranja); }
+.stat-link{ color: var(--azul); font-size: 11.5px; font-weight: 600; }
+.stat-link:hover{ color: var(--azul-escuro); }
+
+/* ---------- cabeçalho de turma / progresso ---------- */
+.info-label{ font-family: var(--font-display); font-size: 14px; font-weight: 400; color: var(--texto-suave); }
+.info-value{ font-family: var(--font-display); font-size: 14px; font-weight: 400; color: var(--texto); }
+.progress-track{ background: var(--borda); border-radius: 4px; }
+.progress-fill{ border-radius: 4px; }
+.fill-orange{ background: var(--laranja); }
+.fill-blue{ background: var(--azul); }
+.progress-info{ font-size: 12px; color: var(--texto-suave); }
+
+/* ---------- modais ---------- */
+.modal-overlay{ background: rgba(15,23,32,0.45); }
+.modal,
+.modal-escolha{ border-radius: var(--raio); border: 1px solid var(--borda); }
+.modal-header,
+.modal-escolha-header{ border-bottom: 1px solid var(--borda); }
+.modal-title{
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--texto);
+}
+.modal-subtitle{ font-size: 12.5px; color: var(--texto-suave); }
+.modal-close{ border-radius: 8px; color: var(--texto-suave); }
+.modal-close:hover{ background: var(--bg); color: var(--texto); }
+.escolha-card{ border: 1px solid var(--borda); border-radius: var(--raio-sm); background: var(--bg); }
+.escolha-card:hover{ border-color: var(--laranja); background: var(--laranja-bg); }
+/* controle segmentado: superfície branca + texto colorido, como o item ativo do menu */
+.toggle-wrap{
+  background: var(--bg);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: 3px;
+}
+.toggle-btn{
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--texto-suave);
+}
+.toggle-btn:hover{ color: var(--texto); }
+.toggle-btn.active{
+  background: var(--branco);
+  color: var(--laranja);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(29,29,29,0.10);
+}
+.toggle-btn.active.blue{ background: var(--branco); color: var(--azul); }
+
+/* alternador de visualização em "Minhas aulas" */
+.view-toggle{ display: flex; gap: 2px; }
+.view-toggle .toggle-btn{
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.view-toggle .toggle-btn.active{ background: var(--branco); }
+.view-toggle .dot{ display: inline-block; flex-shrink: 0; width: 9px; height: 9px; }
+.view-toggle .toggle-btn:not(.active) .dot{ opacity: .45; }
+
+/* ---------- estados vazios ---------- */
+.empty-state{ color: var(--texto-suave); font-size: 14px; }
+.empty-state svg{ color: #C7CDD4; }

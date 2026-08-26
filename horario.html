@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Pedagógico — Servidores</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; display: flex; height: 100vh; overflow: hidden; font-size: 13px; color: #333; }
+    .sidebar { display: flex; flex-direction: column; }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; }
+    .logo-img { width: 104px; height: auto; display: block; }
+    .nav { flex: 1 1 auto; }
+    .nav-item { display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background .15s; text-decoration: none; }
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .logout { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .logout svg { width: 16px; height: 16px; }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 12px; }
+    .user-info { text-align: right; }
+    .cal-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .ctx-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 7px 12px; font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--texto); }
+    .ctx-pill svg { width: 15px; height: 15px; color: var(--laranja); }
+    .ctx-pill select { border: none; background: none; font: inherit; color: inherit; cursor: pointer; outline: none; max-width: 260px; }
+    .stamp { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--texto-suave); }
+    .view-wrap { flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--branco); }
+    .content { padding: 26px 34px; }
+    .section-title { font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--texto); }
+    .section-hint { font-size: 12px; color: var(--texto-suave); font-weight: 400; }
+    .back-btn { display: inline-flex; align-items: center; gap: 7px; background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 8px 14px; font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--texto-suave); cursor: pointer; margin-bottom: 16px; text-decoration: none; }
+    .back-btn:hover { border-color: var(--azul); color: var(--azul); }
+    .back-btn svg { width: 15px; height: 15px; }
+    .tbl-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .search { display: inline-flex; align-items: center; gap: 8px; background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 8px 12px; min-width: 280px; }
+    .search:focus-within { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(18,80,154,.10); }
+    .search input { border: none; outline: none; font-family: var(--font-display); font-size: 13.5px; width: 100%; color: var(--texto); background: none; }
+    .search svg { width: 15px; height: 15px; color: var(--texto-suave); }
+    .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--laranja-bg); color: var(--laranja-escuro); border: none; border-radius: 20px; padding: 6px 12px; font-family: var(--font-display); font-size: 12.5px; font-weight: 600; cursor: pointer; }
+    .tbl-wrap { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); overflow: hidden; }
+    .tbl { width: 100%; border-collapse: collapse; }
+    .tbl th { text-align: left; padding: 12px 14px; font-family: var(--font-display); font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); background: var(--bg); border-bottom: 1px solid var(--borda); white-space: nowrap; }
+    .tbl td { padding: 12px 14px; border-bottom: 1px solid var(--borda); font-size: 13px; color: var(--texto); vertical-align: middle; }
+    .tbl tbody tr:last-child td { border-bottom: none; }
+    .tbl tbody tr { cursor: pointer; }
+    .tbl tbody tr:hover td { background: var(--azul-claro); }
+    .cell-name { display: flex; align-items: center; gap: 11px; }
+    .cell-name b { font-weight: 600; }
+    .row-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(160deg, var(--laranja), var(--azul)); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 11px; flex-shrink: 0; }
+    .muted { color: var(--texto-suave); }
+    .vinc-badge { color: var(--laranja); font-family: var(--font-display); font-weight: 700; }
+    .cargo-badge { color: var(--azul); font-family: var(--font-display); font-weight: 700; }
+
+    .overlay { position: fixed; inset: 0; background: rgba(15,23,32,.45); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; }
+    .overlay.open { opacity: 1; pointer-events: auto; }
+    .sp { position: fixed; top: 0; right: 0; height: 100vh; width: 860px; max-width: 96vw; background: var(--branco); border-left: 1px solid var(--borda); box-shadow: -8px 0 30px rgba(15,23,32,.14); transform: translateX(100%); transition: transform .24s ease; z-index: 41; display: flex; flex-direction: column; }
+    .sp.narrow { width: 460px; }
+    .sp.open { transform: translateX(0); }
+    .sp-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-bottom: 1px solid var(--borda); background: var(--bg); }
+    .sp-topbar .t { font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--texto); }
+    .sp-close { border: 1px solid var(--borda); background: var(--branco); border-radius: 8px; cursor: pointer; color: var(--texto-suave); padding: 7px; display: flex; }
+    .sp-close:hover { border-color: var(--azul); color: var(--azul); }
+    .sp-close svg { width: 16px; height: 16px; }
+    .sp-body { padding: 20px; overflow-y: auto; flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-content: start; }
+    @media (max-width: 760px){ .sp-body { grid-template-columns: 1fr; } }
+    .card { background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio); padding: 18px; }
+    .prof-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .prof-av { width: 58px; height: 58px; border-radius: 50%; background: linear-gradient(160deg, var(--laranja), var(--azul)); color: #fff; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 20px; flex-shrink: 0; }
+    .prof-name { font-family: var(--font-display); font-weight: 700; font-size: 19px; color: var(--texto); }
+    .prof-sub { font-size: 12.5px; color: var(--texto-suave); margin-top: 2px; }
+    .prof-kv { display: grid; grid-template-columns: 22px auto; gap: 10px 8px; align-items: center; font-size: 13px; margin-top: 4px; }
+    .prof-kv svg { width: 15px; height: 15px; color: var(--texto-suave); }
+    .prof-kv .k { color: var(--texto-suave); }
+    .prof-kv .kline { grid-column: 1 / -1; display: grid; grid-template-columns: 22px 90px 1fr; gap: 8px; align-items: center; }
+    .status-track { height: 8px; border-radius: 4px; background: #ECEFF4; overflow: hidden; flex: 1; }
+    .split { display: grid; grid-template-columns: 1fr 190px; gap: 18px; }
+    @media (max-width: 620px){ .split { grid-template-columns: 1fr; } }
+    .etapas { display: flex; flex-direction: column; gap: 7px; }
+    .etapa { text-align: center; border-radius: 20px; padding: 7px 12px; font-family: var(--font-display); font-size: 12.5px; font-weight: 600; border: 1px solid var(--borda); background: var(--branco); color: #B9BEC6; }
+    .etapa.on-laranja { background: var(--laranja-bg); color: var(--laranja-escuro); border-color: #F3D2C0; }
+    .etapa.on-azul { background: var(--azul-claro); color: var(--azul); border-color: #C8DCF3; }
+    .etapa.on-verde { background: var(--verde-bg); color: #2E8B00; border-color: #BCE6A8; }
+    .etapa.on-roxo { background: #EFEAF7; color: #6B3FA0; border-color: #DCD0EC; }
+    .disc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    @media (max-width: 620px){ .disc-grid { grid-template-columns: repeat(2, 1fr); } }
+    .disc { display: flex; align-items: center; gap: 8px; border: 1px solid var(--borda); border-radius: 10px; padding: 8px 10px; background: var(--branco); font-size: 11.5px; font-weight: 600; color: #B9BEC6; }
+    .disc .di { width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #F0F2F6; color: #C2C7CE; flex-shrink: 0; }
+    .disc .di svg { width: 15px; height: 15px; }
+    .disc.on { color: var(--texto); border-color: var(--c); }
+    .disc.on .di { background: var(--cbg); color: var(--c); }
+    .mini-tbl { width: 100%; border-collapse: collapse; }
+    .mini-tbl th { text-align: left; padding: 8px 6px; font-family: var(--font-display); font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); border-bottom: 1px solid var(--borda); }
+    .mini-tbl td { padding: 11px 6px; border-bottom: 1px solid var(--borda); font-size: 12.5px; }
+    .mini-tbl tr:last-child td { border-bottom: none; }
+    .eye { color: var(--laranja); } .eye svg { width: 16px; height: 16px; }
+    .empty { text-align: center; padding: 30px 10px; color: var(--texto-suave); }
+    .empty svg { width: 38px; height: 38px; color: #C7CDD4; margin-bottom: 10px; }
+    .sp-foot { padding: 12px 20px; border-top: 1px solid var(--borda); background: var(--bg); font-size: 11px; color: var(--texto-suave); line-height: 1.5; }
+    .sp-foot svg { width: 13px; height: 13px; vertical-align: -2px; margin-right: 4px; }
+    .sp-tabs { display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid var(--borda); }
+    .sp-tab { padding: 12px 16px; border: none; background: none; border-bottom: 3px solid transparent; margin-bottom: -1px; font-family: var(--font-display); font-size: 13.5px; font-weight: 500; color: var(--texto-suave); cursor: pointer; }
+    .sp-tab:hover { color: var(--texto); }
+    .sp-tab.active { color: var(--laranja); border-bottom-color: var(--laranja); font-weight: 700; }
+    .sp-simple { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+    .b-cargo { background: var(--verde-bg); color: #2E8B00; }
+    .tabpane { display: flex; flex-direction: column; gap: 12px; }
+    .tabpane[hidden] { display: none; }
+    .fcard { background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio-sm); padding: 14px 16px; }
+    .flabel { font-family: var(--font-display); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); margin-bottom: 6px; }
+    .fval { font-size: 14px; color: var(--texto); font-weight: 500; }
+    .fval.empty { color: #B9BEC6; padding: 0; text-align: left; }
+    .vinc-card { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio-sm); padding: 12px 14px; }
+    .vinc-ic { width: 34px; height: 34px; border-radius: 9px; background: var(--azul-claro); color: var(--azul); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .vinc-nome { font-size: 13px; font-weight: 500; color: var(--texto); flex: 1; }
+    .vinc-cargo { font-size: 11.5px; font-weight: 600; color: var(--laranja-escuro); background: var(--laranja-bg); border-radius: 20px; padding: 4px 12px; white-space: nowrap; }
+    .vinc-cargos { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .badge { border-radius: 20px; font-family: var(--font-display); font-weight: 600; font-size: 11px; padding: 3px 11px; display: inline-block; white-space: nowrap; }
+    .b-exercicio { background: var(--verde-bg); color: #2E8B00; }
+    .b-licenca { background: #FDF3D9; color: var(--ambar-escuro); }
+    .b-afastado { background: #FDE9E9; color: var(--vermelho); }
+    .b-cedido { background: var(--azul-claro); color: var(--azul); }
+    .help-btn { position: fixed; bottom: 20px; right: 20px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+  </style>
+  <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="logo.png" alt="Rede Municipal" class="logo-img" />
+    <span class="portal-tag">Painel Pedagógico</span>
+  </div>
+  <nav class="nav">
+    <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
+    <a href="turmas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/></svg> Escolas</a>
+    <a href="horario.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Servidores</a>
+    <a href="ocorrencias.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Ocorrências</a>
+    <a href="calendario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendário</a>
+    <a href="comunicacao.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Comunicação</a>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Suporte</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 5.34L3.93 6.75M21 12h-2M5 12H3M19.07 19.07l-1.41-1.41M5.34 18.66l-1.41 1.41M12 19v2M12 3V1"/></svg> Configurações</div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sair da conta</div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <svg class="page-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg>
+      <div><div class="topbar-title">Servidores</div><div class="topbar-sub" id="pageSub">Rede Municipal de Ensino · Porto Seguro/BA</div></div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-info"><div class="user-name">Ana Ribeiro</div><div class="user-role">Secretaria de Educação</div></div>
+      <div class="avatar">AR</div>
+    </div>
+  </div>
+
+  <div class="cal-header">
+    <span class="ctx-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg><select id="escolaSel" aria-label="Escola"></select></span>
+    <span class="stamp">Origem: Folha/RH · dados de 06/08/2026</span>
+  </div>
+
+  <div class="view-wrap">
+    <div class="content">
+      <a class="back-btn" id="backEscola" style="display:none"></a>
+      <div class="tbl-toolbar">
+        <div class="section-title" id="listTitle">Servidores</div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="busca" placeholder="Buscar por nome, matrícula ou cargo" oninput="renderLista()" aria-label="Buscar" /></label>
+          <button class="chip" id="chipCargo" style="display:none" onclick="limparCargo()"></button>
+        </div>
+      </div>
+      <div class="tbl-wrap"><table class="tbl">
+        <thead><tr><th>Servidor</th><th>Cargo</th><th>Escola</th></tr></thead>
+        <tbody id="listBody"></tbody>
+      </table></div>
+      <div class="section-hint" style="margin-top:12px;">Nenhum aluno é identificado neste painel. Origem: Folha/RH da prefeitura.</div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="fechar()"></div>
+<aside class="sp" id="sp" role="dialog" aria-modal="true" aria-labelledby="spName" tabindex="-1"></aside>
+<div class="help-btn">?</div>
+
+<script>
+const iniciais = n => n.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+const svgP = (p,c=16) => `<svg viewBox="0 0 24 24" width="${c}" height="${c}" fill="none" stroke="currentColor" stroke-width="2">${p}</svg>`;
+const pad2 = n => String(n).padStart(2,'0');
+const ETAPAS_ALL = [ { nome:'Ed. Infantil', cor:'verde' }, { nome:'Fundamental I', cor:'laranja' }, { nome:'Fundamental II', cor:'azul' }, { nome:'EJA I', cor:'roxo' }, { nome:'EJA II', cor:'roxo' } ];
+const DISC_ALL = [
+  { nome:'Agroecologia', c:'#2E8B00', bg:'#D8F3CC', ic:'<path d="M11 20A7 7 0 019 6c4 0 6 3 6 3s-1 11-4 11z"/><path d="M11 20c0-4 2-8 5-10"/>' },
+  { nome:'Arte', c:'#D6409F', bg:'#F7E4F1', ic:'<circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 000 20 2 2 0 002-2 2 2 0 011.8-2H18a4 4 0 004-4 10 10 0 00-10-10z"/>' },
+  { nome:'Ciências', c:'#12509A', bg:'#EAF1FA', ic:'<path d="M9 2v6l-5 9a2 2 0 002 3h12a2 2 0 002-3l-5-9V2"/><line x1="8" y1="2" x2="16" y2="2"/>' },
+  { nome:'Diversidade Afro e Indígena', c:'#ED6939', bg:'#FDEEE8', ic:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/>' },
+  { nome:'Educação Física', c:'#ED6939', bg:'#FDEEE8', ic:'<circle cx="12" cy="5" r="2"/><path d="M12 7v6l-3 8M12 13l3 8M6 10l6-2 6 2"/>' },
+  { nome:'Ensino Religioso', c:'#B5790F', bg:'#FDF3D9', ic:'<path d="M12 2v20M6 8h12"/>' },
+  { nome:'Geografia', c:'#12509A', bg:'#EAF1FA', ic:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/>' },
+  { nome:'Leitura e Produção de Texto', c:'#6B3FA0', bg:'#EFEAF7', ic:'<path d="M4 19V5a2 2 0 012-2h11l3 3v13a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><line x1="8" y1="8" x2="15" y2="8"/><line x1="8" y1="12" x2="15" y2="12"/>' },
+  { nome:'História', c:'#B5790F', bg:'#FDF3D9', ic:'<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/>' },
+  { nome:'História de Porto Seguro', c:'#B5790F', bg:'#FDF3D9', ic:'<path d="M3 21h18M6 21V8l6-4 6 4v13"/><path d="M10 21v-5h4v5"/>' },
+  { nome:'Língua Inglesa', c:'#12509A', bg:'#EAF1FA', ic:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/>' },
+  { nome:'Língua Portuguesa', c:'#ED6939', bg:'#FDEEE8', ic:'<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>' },
+  { nome:'Matemática', c:'#3DC200', bg:'#D8F3CC', ic:'<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/>' },
+];
+const SIT_LBL = { exercicio:'Em exercício', licenca:'Licença', afastado:'Afastado', cedido:'Cedido' };
+
+const NOMES_ESC = [
+'E.M. Cidade Alta','E.M. Baianão','E.M. Frei Calixto','CMEI Estrela do Mar',"E.M. Arraial d'Ajuda",'E.M. Trancoso','E.M. Vera Cruz','E.M. Pindorama','CMEI Primeiros Passos','E.M. Coroa Vermelha',
+'E.M. Caraíva','E.M. Vale do Jequitibá','E.M. Mundaí','E.M. Taperapuã','E.M. Cambolo','CMEI Girassol','E.M. Juçara','E.M. Mirante','E.M. Itaquena','E.M. Guaiú',
+'E.M. Nova Brasília','E.M. Parque Ecológico','CMEI Pequeno Príncipe','E.M. Fontana','E.M. Alto do Mercado','E.M. Gruta Azul','E.M. Ponta Grande','E.M. Rio da Prata','E.M. Vale Verde','CMEI Semente do Saber',
+'E.M. Monte Pascoal','E.M. Pataxó','E.M. Aldeia Jaqueira','E.M. Barra Velha','E.M. Corumbau','E.M. Km 40','E.M. Santo André','E.M. Santa Cruz','E.M. Outeiro','E.M. Recife de Fora',
+'CMEI Arco-Íris','E.M. Vila de Trancoso','E.M. Nova Aliança','E.M. José de Anchieta','E.M. Pero Vaz','E.M. Tancredo Neves','E.M. Paulo Freire','E.M. Anísio Teixeira','CMEI Mundo Encantado','E.M. Castro Alves',
+'E.M. Rui Barbosa','E.M. Cecília Meireles','E.M. Monteiro Lobato','E.M. Darcy Ribeiro','E.M. Zumbi dos Palmares','E.M. Chico Mendes','CMEI Vovó Maria','E.M. Nova Alegria','E.M. Boa Esperança','E.M. Campo Verde'
+];
+const ESCOLAS = {}; NOMES_ESC.forEach((n,i)=> ESCOLAS[String(31097401+i)] = n);
+
+const FIRST = ['Ana','Bruno','Carla','Diego','Elaine','Fábio','Gisele','Hugo','Iara','João','Karla','Luís','Marta','Nara','Otávio','Paula','Rafael','Sônia','Tiago','Vera','Wesley','Yara','Cléber','Zélia','Marcos','Priscila','Anderson','Luciana','Fernanda','Roberto'];
+const LAST = ['Silva','Souza','Oliveira','Santos','Rocha','Fontes','Melo','Prado','Carvalho','Barros','Nunes','Alves','Farias','Menezes','Ribeiro','Gomes','Antunes','Castro','Duarte','Teles','Aquino','Vasconcelos','Andrade','Pinto'];
+const DISC_POOL = DISC_ALL.map(d=>d.nome);
+const TURMA_POOL = ['1º ANO A','2º ANO A','3º ANO A','4º ANO B','5º ANO A','6º ANO A','7º ANO B','8º ANO A','9º ANO A'];
+const VINCULOS = ['efetivo','efetivo','contrato','designado'];
+
+function gerarEquipe(inep){
+  const nomeEsc = ESCOLAS[inep] || ''; const cmei = nomeEsc.startsWith('CMEI');
+  const base = parseInt(inep.slice(-3)); const rr = k => ((base*9301 + k*49297) % 233280) / 233280;
+  const team = []; let idx = 0;
+  const add = (grupo, cargo, opts={}) => {
+    const nome = FIRST[Math.floor(rr(100+idx*3)*FIRST.length)] + ' ' + LAST[Math.floor(rr(101+idx*3)*LAST.length)];
+    const sr = rr(102+idx*3);
+    const situacao = sr>0.94 ? 'cedido' : sr>0.9 ? 'afastado' : sr>0.85 ? 'licenca' : 'exercicio';
+    const detalhe = situacao==='licenca'?'Licença maternidade':situacao==='afastado'?'Afastamento para tratamento de saúde':situacao==='cedido'?'Cedido à Secretaria':null;
+    const carga = grupo==='Professores' ? [20,40][Math.floor(rr(103+idx*3)*2)] : 40;
+    const acesso = rr(105+idx*3)>0.22 ? pad2(1+Math.floor(rr(106+idx*3)*27))+'/07/2026' : 'nunca';
+    const myIdx = parseInt(inep) - 31097401;
+    const cargos = [cargo];
+    if (rr(110+idx*3) > 0.86) cargos.push(cargo.includes('Professor') ? 'Coordenador(a) pedagógico(a)' : 'Professor(a)');
+    const lotacoes = [{ escola: nomeEsc, cargos }];
+    const multiChance = grupo==='Professores' ? 0.5 : 0.85;
+    if (rr(108+idx*3) > multiChance){ const extra = rr(109+idx*3) > 0.82 ? 2 : 1; for(let k=0;k<extra;k++){ let j = Math.floor(rr(120+idx*3+k)*60); if(j===myIdx) j=(j+1)%60; lotacoes.push({ escola: ESCOLAS[String(31097401+j)]||nomeEsc, cargos:[cargo] }); } }
+    const vinculos = lotacoes.length;
+    const ncargos = new Set(lotacoes.flatMap(l=>l.cargos)).size;
+    team.push({ m: inep.slice(2)+pad2(idx), nome, cargo, grupo, vinculo: VINCULOS[Math.floor(rr(107+idx*3)*4)], carga, situacao, detalhe, acesso, escola: inep, lotacoes, vinculos, ncargos, etapas:[], disc:[], turmas:[], ocor:[], ...opts });
+    idx++;
+  };
+  add('Direção','Diretor(a)');
+  const nc = cmei ? 1 : 2 + Math.floor(rr(1)*2); for(let i=0;i<nc;i++) add('Coordenação','Coordenador(a) pedagógico(a)');
+  const np = cmei ? 8 + Math.floor(rr(2)*8) : 16 + Math.floor(rr(2)*22);
+  for(let i=0;i<np;i++){
+    const d = DISC_POOL[Math.floor(rr(300+i)*DISC_POOL.length)];
+    const etapa = cmei ? 'Ed. Infantil' : (rr(320+i)>0.5 ? 'Fundamental I' : 'Fundamental II');
+    const nt = 1 + Math.floor(rr(340+i)*2);
+    const turmas = Array.from({length:nt}, (_,k)=>({ t: TURMA_POOL[Math.floor(rr(360+i*2+k)*TURMA_POOL.length)], n: etapa, turno: rr(380+i+k)>0.5?'Matutino':'Vespertino' }));
+    const ocor = rr(400+i)>0.86 ? [{ t: turmas[0].t, tipo:'Infrequência', data: pad2(1+Math.floor(rr(410+i)*27))+'/07/2026' }] : [];
+    add('Professores', 'Professor(a)', { etapas:[etapa], disc:[d], turmas, ocor });
+  }
+  add('Secretaria','Secretário(a) escolar');
+  if(!cmei || rr(3)>0.4) add('Secretaria','Auxiliar de secretaria');
+  return team;
+}
+
+const params = new URLSearchParams(location.search);
+const cameFromEscola = !!(params.get('escola') && ESCOLAS[params.get('escola')]);
+let escolaAtual = params.get('escola') && ESCOLAS[params.get('escola')] ? params.get('escola') : '31097401';
+let filtroCargo = params.get('cargo') || '';
+let SERVIDORES = gerarEquipe(escolaAtual);
+
+(function(){
+  const sel = document.getElementById('escolaSel');
+  sel.innerHTML = Object.entries(ESCOLAS).map(([i,n])=>`<option value="${i}" ${escolaAtual===i?'selected':''}>${n}</option>`).join('');
+  sel.addEventListener('change', e=>{ location.href = 'horario.html?escola='+e.target.value; });
+})();
+document.getElementById('pageSub').textContent = `${ESCOLAS[escolaAtual]} · Rede Municipal · Porto Seguro/BA`;
+(function(){ const b=document.getElementById('backEscola'); if(cameFromEscola){ b.href='turmas.html#'+escolaAtual; b.innerHTML=`${svgP('<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',15)} Voltar ao perfil de ${ESCOLAS[escolaAtual]}`; b.style.display='inline-flex'; } })();
+
+function limparCargo(){ filtroCargo=''; document.getElementById('chipCargo').style.display='none'; renderLista(); }
+
+function renderLista(){
+  const q = (document.getElementById('busca').value||'').toLowerCase();
+  let lista = SERVIDORES.filter(s=>{
+    if(filtroCargo && s.grupo!==filtroCargo) return false;
+    if(q && !(s.nome.toLowerCase().includes(q)||s.m.includes(q)||s.cargo.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  document.getElementById('listTitle').innerHTML = `Servidores <span class="section-hint">· ${ESCOLAS[escolaAtual]} (${lista.length})</span>`;
+  const chip = document.getElementById('chipCargo');
+  if(filtroCargo){ chip.style.display='inline-flex'; chip.innerHTML = `${filtroCargo} ✕`; } else chip.style.display='none';
+  document.getElementById('listBody').innerHTML = lista.map(s=>`
+    <tr tabindex="0" onclick="abrir('${s.m}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrir('${s.m}')}">
+      <td><div class="cell-name"><span class="row-avatar">${iniciais(s.nome)}</span><b>${s.nome}</b></div></td>
+      <td>${s.ncargos>1 ? `<span class="cargo-badge">${s.ncargos} cargos</span>` : s.cargo}</td>
+      <td>${s.vinculos>1 ? `<span class="vinc-badge">${s.vinculos} vínculos</span>` : (ESCOLAS[s.escola]||'—')}</td>
+    </tr>`).join('') || `<tr><td colspan="3" class="muted" style="text-align:center;padding:30px;">Nenhum servidor encontrado.</td></tr>`;
+}
+
+let lastFocus=null;
+function abrir(m){
+  const s = SERVIDORES.find(x=>x.m===m); if(!s) return;
+  lastFocus = document.activeElement;
+  const sp0 = document.getElementById('sp');
+  if(s.grupo!=='Professores'){ sp0.classList.add('narrow'); sp0.innerHTML = simpleHtml(s); }
+  else { sp0.classList.remove('narrow'); sp0.innerHTML = richHtml(s); }
+  document.getElementById('overlay').classList.add('open');
+  sp0.classList.add('open');
+  history.replaceState(null,'',`horario.html?escola=${escolaAtual}#${s.m}`);
+  sp0.focus();
+  document.addEventListener('keydown', escHandler);
+}
+function richHtml(s){
+  const nunca = s.acesso==='nunca';
+  const etapasHtml = ETAPAS_ALL.map(et=>`<div class="etapa ${s.etapas.includes(et.nome)?'on-'+et.cor:''}">${et.nome}</div>`).join('');
+  const discHtml = DISC_ALL.map(d=>`<div class="disc ${s.disc.includes(d.nome)?'on':''}" style="--c:${d.c};--cbg:${d.bg}"><span class="di">${svgP(d.ic,15)}</span>${d.nome}</div>`).join('');
+  const turmasCard = `
+    <div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:12px;">${svgP('<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/>',18)} Quadro de turmas</div>
+      ${s.turmas.length? `<table class="mini-tbl"><thead><tr><th>Turma</th><th>Nível de Ensino</th><th>Turno</th><th></th></tr></thead><tbody>${s.turmas.map(t=>`<tr><td><b>${t.t}</b></td><td class="muted">${t.n}</td><td>${t.turno}</td><td class="eye">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',16)}</td></tr>`).join('')}</tbody></table>` : `<div class="empty">${svgP('<circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/>',38)}<div>Nenhuma turma vinculada</div></div>` }
+    </div>`;
+  const ocorCard = `
+    <div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:12px;">${svgP('<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',18)} Registro de ocorrências</div>
+      ${s.ocor.length? `<table class="mini-tbl"><thead><tr><th>Turma</th><th>Tipo</th><th>Data</th></tr></thead><tbody>${s.ocor.map(o=>`<tr><td>${o.t}</td><td>${o.tipo}</td><td class="muted">${o.data}</td></tr>`).join('')}</tbody></table>` : `<div class="empty">${svgP('<circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/>',38)}<div>Nenhum registro encontrado</div></div>` }
+    </div>`;
+  const linkIc = '<path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>';
+  const temMultiplo = s.lotacoes.length>1 || s.lotacoes.some(l=>l.cargos.length>1);
+  const lotacoesCard = temMultiplo ? `<div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:12px;">${svgP(linkIc,18)} Vínculos</div>${s.lotacoes.map(l=>`<div class="vinc-card" style="margin-bottom:8px;"><span class="vinc-ic">${svgP(linkIc,18)}</span><span class="vinc-nome">${l.escola}</span><span class="vinc-cargos">${l.cargos.map(c=>`<span class="vinc-cargo">${c}</span>`).join('')}</span></div>`).join('')}</div>` : '';
+  return `
+    <div class="sp-topbar"><div class="t">Detalhe do servidor</div>
+      <button class="sp-close" onclick="fechar()" aria-label="Fechar">${svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',16)}</button></div>
+    <div class="sp-body">
+      <div class="card">
+        <div class="split">
+          <div>
+            <div class="prof-head"><div class="prof-av">${iniciais(s.nome)}</div>
+              <div><div class="prof-name" id="spName">${s.nome}</div><div class="prof-sub">${s.cargo} · ${ESCOLAS[s.escola]||''}</div></div></div>
+            <div class="prof-sub" style="margin-bottom:12px;">${nunca?'Este(a) servidor(a) nunca acessou a plataforma':'Último acesso em '+s.acesso}</div>
+            <div class="prof-kv">
+              <div class="kline">${svgP('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',15)}<span class="k">Status</span><span class="status-track"><span style="display:block;height:100%;border-radius:4px;width:${s.situacao==='exercicio'?100:s.situacao==='licenca'?55:40}%;background:${s.situacao==='exercicio'?'var(--verde)':s.situacao==='licenca'?'var(--amarelo)':'var(--vermelho)'}"></span></span></div>
+              ${svgP('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>',15)}<span class="k">Situação: <b style="color:var(--texto)">${SIT_LBL[s.situacao]}${s.detalhe?' · '+s.detalhe:''}</b></span>
+              ${svgP('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',15)}<span class="k">Vínculo: <b style="color:var(--texto);text-transform:capitalize">${s.vinculo}</b> · ${s.carga}h</span>
+              ${svgP('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/>',15)}<span class="k">Matrícula: <b style="color:var(--texto)">${s.m}</b></span>
+            </div>
+          </div>
+          <div class="etapas">${etapasHtml}</div>
+        </div>
+      </div>
+      <div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;margin-bottom:12px;">Disciplinas</div><div class="disc-grid">${discHtml}</div></div>
+      ${turmasCard}
+      ${ocorCard}
+      ${lotacoesCard}
+    </div>
+    <div class="sp-foot">${svgP('<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>',13)} Este painel não exibe avaliação de desempenho, saúde, processo administrativo ou dados bancários (política da rede). Acesso registrado em auditoria.</div>`;
+}
+function simpleHtml(s){
+  const email = s.nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z]/g,'')+'@eprof.app';
+  const d = s.m.slice(-4);
+  const contato = `(73) 9 ${d}-${String(4000+(parseInt(d)%5000)).padStart(4,'0')}`;
+  return `
+    <div class="sp-topbar"><div class="t">Visualizar usuário</div>
+      <button class="sp-close" onclick="fechar()" aria-label="Fechar">${svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',16)}</button></div>
+    <div class="sp-tabs">
+      <button class="sp-tab active" onclick="spTab(this,'dados')">Dados</button>
+      <button class="sp-tab" onclick="spTab(this,'vinculos')">Vínculos</button>
+    </div>
+    <div class="sp-simple">
+      <div class="tabpane" data-pane="dados">
+        ${fcard('CPF','—',true)}${fcard('Data de nascimento','—',true)}${fcard('E-mail',email)}${fcard('Contato',contato)}
+      </div>
+      <div class="tabpane" data-pane="vinculos" hidden>
+        ${s.lotacoes.map(l=>`
+        <div class="vinc-card">
+          <span class="vinc-ic">${svgP('<path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>',18)}</span>
+          <span class="vinc-nome">${l.escola}</span>
+          <span class="vinc-cargos">${l.cargos.map(c=>`<span class="vinc-cargo">${c}</span>`).join('')}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="sp-foot">${svgP('<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>',13)} Acesso a este perfil é registrado em auditoria.</div>`;
+}
+function fcard(label,val,empty){ return `<div class="fcard"><div class="flabel">${label}</div><div class="fval${empty?' empty':''}">${val}</div></div>`; }
+function spTab(btn,name){
+  document.querySelectorAll('#sp .sp-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#sp .tabpane').forEach(p=>{ p.hidden = p.dataset.pane!==name; });
+}
+function escHandler(e){ if(e.key==='Escape') fechar(); }
+function fechar(){
+  document.getElementById('sp').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.removeEventListener('keydown', escHandler);
+  history.replaceState(null,'',`horario.html?escola=${escolaAtual}`);
+  if(lastFocus&&lastFocus.focus) lastFocus.focus();
+}
+
+renderLista();
+const h = location.hash.slice(1);
+if(h && SERVIDORES.some(s=>s.m===h)) abrir(h);
+</script>
+
+</body>
+</html>

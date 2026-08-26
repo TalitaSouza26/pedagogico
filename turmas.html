@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Pedagógico — Escolas</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; display: flex; height: 100vh; overflow: hidden; font-size: 13px; color: #333; }
+    .sidebar { display: flex; flex-direction: column; }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; }
+    .logo-img { width: 104px; height: auto; display: block; }
+    .nav { flex: 1 1 auto; }
+    .nav-item { display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background .15s; text-decoration: none; }
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .logout { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .logout svg { width: 16px; height: 16px; }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 12px; }
+    .user-info { text-align: right; }
+    .cal-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .ctx-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 7px 12px; font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--texto); }
+    .ctx-pill svg { width: 15px; height: 15px; color: var(--laranja); }
+    .stamp { font-size: 12.5px; color: var(--texto-suave); }
+    .view-wrap { flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--branco); }
+    .content { padding: 26px 34px; }
+    .section-title { font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--texto); }
+    .section-hint { font-size: 12px; color: var(--texto-suave); font-weight: 400; }
+
+    .esc-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 4px 0 16px; flex-wrap: wrap; }
+    .search { display: inline-flex; align-items: center; gap: 8px; background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 9px 13px; min-width: 320px; }
+    .search:focus-within { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(18,80,154,.10); }
+    .search input { border: none; outline: none; font-family: var(--font-display); font-size: 13.5px; width: 100%; color: var(--texto); background: none; }
+    .search svg { width: 16px; height: 16px; color: var(--texto-suave); }
+    .filtros { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .fsel { display: inline-flex; align-items: center; gap: 8px; background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 8px 12px; font-size: 12.5px; color: var(--texto-suave); font-family: var(--font-display); }
+    .fsel select { border: none; background: none; font: inherit; color: var(--texto); font-weight: 500; cursor: pointer; outline: none; }
+    .btn-redef { border: 1px solid var(--borda); background: var(--branco); border-radius: 10px; padding: 9px 14px; font-family: var(--font-display); font-size: 12.5px; font-weight: 600; color: var(--laranja-escuro); cursor: pointer; }
+    .btn-redef:hover { border-color: var(--laranja); background: var(--laranja-bg); }
+
+    .tbl-wrap { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); overflow: hidden; }
+    .tbl { width: 100%; border-collapse: collapse; }
+    .tbl th { text-align: left; padding: 12px 14px; font-family: var(--font-display); font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); background: var(--bg); border-bottom: 1px solid var(--borda); white-space: nowrap; }
+    .tbl td { padding: 13px 14px; border-bottom: 1px solid var(--borda); font-size: 13px; color: var(--texto); vertical-align: middle; }
+    .tbl tbody tr:last-child td { border-bottom: none; }
+    .tbl tbody tr { cursor: pointer; }
+    .tbl tbody tr:hover td { background: var(--azul-claro); }
+    .cell-name { display: flex; align-items: center; gap: 11px; }
+    .cell-name b { font-weight: 600; }
+    .muted { color: var(--texto-suave); }
+    .t-verde { color: #2E8B00; } .t-azul { color: var(--azul); } .t-ambar { color: var(--ambar-escuro); } .t-vermelho { color: var(--vermelho); }
+    .esc-ic { width: 36px; height: 36px; border-radius: 9px; background: var(--azul-claro); color: var(--azul); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .esc-inep { font-size: 11.5px; color: var(--texto-suave); margin-top: 2px; }
+    .st-ativa { background: var(--verde-bg); color: #2E8B00; border-radius: 20px; padding: 4px 16px; font-family: var(--font-display); font-weight: 600; font-size: 11.5px; display: inline-block; }
+    .st-inativa { background: #EEF0F3; color: var(--texto-suave); border-radius: 20px; padding: 4px 16px; font-family: var(--font-display); font-weight: 600; font-size: 11.5px; display: inline-block; }
+    .eye { border: none; background: none; cursor: pointer; color: var(--laranja); padding: 5px; border-radius: 6px; display: inline-flex; }
+    .eye:hover { background: var(--laranja-bg); }
+
+    /* PAINEL LATERAL DA ESCOLA */
+    .overlay { position: fixed; inset: 0; background: rgba(15,23,32,.45); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; }
+    .overlay.open { opacity: 1; pointer-events: auto; }
+    .sp { position: fixed; top: 0; right: 0; height: 100vh; width: 580px; max-width: 96vw; background: var(--branco); border-left: 1px solid var(--borda); box-shadow: -8px 0 30px rgba(15,23,32,.14); transform: translateX(100%); transition: transform .24s ease; z-index: 41; display: flex; flex-direction: column; }
+    .sp.open { transform: translateX(0); }
+    .sp-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-bottom: 1px solid var(--borda); background: var(--bg); }
+    .sp-title { display: flex; align-items: center; gap: 12px; font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--texto); }
+    .sp-title .tic { width: 34px; height: 34px; border-radius: 9px; background: var(--laranja-bg); color: var(--laranja); display: flex; align-items: center; justify-content: center; }
+    .sp-title .tic svg { width: 18px; height: 18px; }
+    .sp-close { border: 1px solid var(--borda); background: var(--branco); border-radius: 8px; cursor: pointer; color: var(--texto-suave); padding: 7px; display: flex; }
+    .sp-close:hover { border-color: var(--azul); color: var(--azul); }
+    .sp-close svg { width: 16px; height: 16px; }
+    .sp-tabs { display: flex; gap: 4px; padding: 0 22px; border-bottom: 1px solid var(--borda); }
+    .sp-tab { padding: 13px 14px; border: none; background: none; border-bottom: 3px solid transparent; margin-bottom: -1px; font-family: var(--font-display); font-size: 13.5px; font-weight: 500; color: var(--texto-suave); cursor: pointer; }
+    .sp-tab:hover { color: var(--texto); }
+    .sp-tab.active { color: var(--laranja); border-bottom-color: var(--laranja); font-weight: 700; }
+    .sp-body { padding: 20px 22px; overflow-y: auto; flex: 1; }
+    .tabpane[hidden] { display: none; }
+    .esc-head { display: flex; align-items: center; gap: 14px; background: var(--azul-claro); border: 1px solid #C8DCF3; border-radius: var(--raio); padding: 16px 18px; margin-bottom: 18px; }
+    .esc-head .eic { width: 50px; height: 50px; border-radius: 12px; background: var(--branco); color: var(--azul); display: flex; align-items: center; justify-content: center; border: 1px solid #C8DCF3; flex-shrink: 0; }
+    .esc-head .eic svg { width: 24px; height: 24px; }
+    .esc-name { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--texto); margin-bottom: 8px; }
+    .esc-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .eb-loc { background: var(--laranja-bg); color: var(--laranja-escuro); border-radius: 20px; padding: 3px 11px; font-size: 11.5px; font-weight: 600; }
+    .eb-ativa { background: var(--verde-bg); color: #2E8B00; border-radius: 20px; padding: 3px 11px; font-size: 11.5px; font-weight: 600; }
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio-sm); padding: 18px 12px; text-align: center; }
+    .stat-num { font-family: var(--font-display); font-weight: 800; font-size: 28px; line-height: 1; }
+    .stat-lbl { font-size: 12px; color: var(--texto-suave); margin-top: 8px; }
+    .fcard { background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio-sm); padding: 12px 15px; margin-bottom: 10px; }
+    .flabel { font-family: var(--font-display); font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); margin-bottom: 4px; }
+    .fval { font-size: 14px; color: var(--texto); font-weight: 500; }
+    .fval.empty { color: #B9BEC6; }
+    .diretor-card { display: flex; align-items: center; gap: 14px; background: var(--azul-claro); border: 1px solid #C8DCF3; border-radius: var(--raio); padding: 14px 16px; margin-top: 8px; }
+    .diretor-card .dav { width: 46px; height: 46px; border-radius: 50%; background: var(--branco); color: var(--azul); display: flex; align-items: center; justify-content: center; border: 1px solid #C8DCF3; flex-shrink: 0; }
+    .diretor-card .dav svg { width: 22px; height: 22px; }
+    .diretor-card .dlbl { font-size: 11px; color: var(--texto-suave); }
+    .diretor-card .dnome { font-family: var(--font-display); font-weight: 600; font-size: 14px; color: var(--texto); }
+    .diretor-card .dmail { font-size: 12px; color: var(--texto-suave); }
+    .ver-todos { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--laranja); text-decoration: none; }
+    .ver-todos:hover { color: var(--laranja-escuro); }
+    .turma-card, .user-card { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio-sm); padding: 12px 14px; margin-bottom: 8px; }
+    .turma-ic, .user-av { width: 40px; height: 40px; border-radius: 10px; background: var(--azul-claro); color: var(--azul); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .turma-nome, .user-nome { font-family: var(--font-display); font-weight: 600; font-size: 14px; color: var(--texto); }
+    .turma-turno, .user-cpf { font-size: 12px; color: var(--texto-suave); margin-top: 2px; }
+    .turma-alunos { text-align: right; font-size: 11px; color: var(--texto-suave); white-space: nowrap; }
+    .turma-alunos b { display: block; font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--texto); }
+    .badge { border-radius: 20px; font-family: var(--font-display); font-weight: 600; font-size: 11.5px; padding: 4px 12px; white-space: nowrap; }
+    .b-dir { background: #EFEAF7; color: #6B3FA0; }
+    .b-coord { background: var(--verde-bg); color: #2E8B00; }
+    .b-aux { background: #EEF0F3; color: var(--texto-suave); }
+    .b-prof { background: var(--azul-claro); color: var(--azul); }
+    .user-arrow { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 1px solid var(--borda); border-radius: 8px; color: var(--laranja); text-decoration: none; flex-shrink: 0; }
+    .user-arrow:hover { border-color: var(--laranja); background: var(--laranja-bg); }
+
+    /* PÁGINA (dashboard ao clicar no nome) */
+    .pg-back { display: inline-flex; align-items: center; gap: 7px; background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 8px 14px; font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--texto-suave); cursor: pointer; margin-bottom: 16px; }
+    .pg-back:hover { border-color: var(--azul); color: var(--azul); }
+    .pg-back svg { width: 15px; height: 15px; }
+    .pg-title { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--texto); }
+    .pg-sub { font-size: 13px; color: var(--texto-suave); margin: 2px 0 18px; }
+    .pg-note { display: flex; align-items: flex-start; gap: 10px; background: var(--azul-claro); border: 1px solid #C8DCF3; color: var(--azul); border-radius: var(--raio-sm); padding: 11px 14px; font-size: 12.5px; margin-bottom: 22px; }
+    .pg-note svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+    .pg-kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 22px; }
+    @media (max-width: 1180px){ .pg-kpi-row { grid-template-columns: repeat(2, 1fr); } }
+    .pg-kpi { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .pg-kpi-l { display: flex; align-items: center; gap: 13px; }
+    .pg-kpi-ic { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .pg-kpi-lbl { font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--texto-suave); }
+    .pg-kpi-sub { font-size: 10.5px; color: #9AA1AB; margin-top: 2px; }
+    .pg-kpi-sub.up { color: #2E8B00; } .pg-kpi-sub.down { color: var(--vermelho); }
+    .pg-kpi-val { font-family: var(--font-display); font-weight: 800; font-size: 30px; color: var(--laranja); line-height: 1; white-space: nowrap; }
+    .ic-azul { background: var(--azul-claro); color: var(--azul); } .ic-roxo { background: #EFEAF7; color: #6B3FA0; } .ic-verde { background: var(--verde-bg); color: #2E8B00; } .ic-laranja { background: var(--laranja-bg); color: var(--laranja-escuro); } .ic-ambar { background: #FDF3D9; color: var(--ambar-escuro); } .ic-vermelho { background: #FDE9E9; color: var(--vermelho); }
+    .pg-panel { background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio); padding: 20px; }
+    .pg-cargo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    @media (max-width: 900px){ .pg-cargo-grid { grid-template-columns: repeat(2, 1fr); } }
+    .pg-cargo { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio-sm); padding: 16px; text-decoration: none; color: inherit; display: block; transition: border-color .15s, box-shadow .15s; }
+    .pg-cargo:hover { border-color: var(--laranja); box-shadow: 0 4px 14px rgba(237,105,57,.14); }
+    .pg-cargo-num { font-family: var(--font-display); font-weight: 800; font-size: 26px; color: var(--azul); line-height: 1; }
+    .pg-cargo-lbl { font-size: 12px; color: var(--texto-suave); margin-top: 6px; }
+    .vg-split { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 20px; }
+    @media (max-width: 820px){ .vg-split { grid-template-columns: 1fr; gap: 22px; } }
+    .vg-big { font-family: var(--font-display); font-weight: 800; font-size: 48px; color: #2E8B00; line-height: 1; }
+    .vg-sub2 { font-size: 12.5px; color: var(--texto-suave); margin: 6px 0 22px; }
+    .vg-turno-title { font-family: var(--font-display); font-weight: 600; font-size: 13px; color: var(--texto); margin-bottom: 12px; }
+    .vg-turno { display: flex; flex-direction: column; gap: 11px; }
+    .vg-tr { display: grid; grid-template-columns: 74px 1fr 28px; align-items: center; gap: 10px; font-size: 12.5px; color: var(--texto-suave); }
+    .vg-tr-bar { height: 7px; border-radius: 4px; background: #ECEFF4; overflow: hidden; }
+    .vg-tr-bar span { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, #3DC200, #2E8B00); }
+    .vg-tr b { font-family: var(--font-display); color: var(--texto); text-align: right; }
+    .apt-list { display: flex; flex-direction: column; gap: 9px; max-height: 240px; overflow-y: auto; }
+    .apt-row { display: grid; grid-template-columns: 1fr 90px 30px; align-items: center; gap: 10px; font-size: 12px; }
+    .apt-nome { color: var(--texto); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .apt-bar { height: 7px; border-radius: 4px; background: #ECEFF4; overflow: hidden; }
+    .apt-fill { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--azul), var(--azul-escuro)); }
+    .apt-num { font-family: var(--font-display); font-weight: 700; font-size: 12.5px; color: var(--texto); text-align: right; }
+    .pg-ficha { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 20px; }
+    .pg-fl { display: block; font-family: var(--font-display); font-size: 11.5px; color: var(--texto-suave); margin-bottom: 3px; }
+    .pg-fv { font-family: var(--font-display); font-size: 14px; font-weight: 500; color: var(--texto); }
+    .pg-aulas-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 20px; background: var(--laranja); color: #fff; border: none; border-radius: var(--raio-sm); padding: 14px; font-family: var(--font-display); font-weight: 600; font-size: 14px; cursor: pointer; }
+    .pg-aulas-btn:hover { background: var(--laranja-escuro); }
+    .pg-aulas-btn svg { width: 18px; height: 18px; }
+    .aulas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    @media (max-width: 1000px){ .aulas-grid { grid-template-columns: 1fr; } }
+    .aulas-col { background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio); padding: 16px; }
+    .aulas-head { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--texto); margin-bottom: 14px; }
+    .aulas-head svg { color: var(--laranja); }
+    .aulas-empty { text-align: center; color: var(--texto-suave); padding: 40px 10px; }
+    .aulas-empty svg { color: #C7CDD4; margin-bottom: 12px; }
+    .aula-card { border: 1px solid var(--borda); border-radius: var(--raio-sm); padding: 14px; margin-bottom: 10px; }
+    .aula-card.t-verde { background: #F1FAF3; } .aula-card.t-roxo { background: #F7EEF6; } .aula-card.t-laranja { background: #FDF3EC; } .aula-card.t-azul { background: #EEF4FB; }
+    .aula-prof { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 600; font-size: 13.5px; color: var(--texto); margin-bottom: 10px; }
+    .aula-av { width: 26px; height: 26px; border-radius: 50%; background: var(--laranja); color: #fff; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .aula-av svg { width: 14px; height: 14px; }
+    .aula-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; font-size: 11.5px; color: var(--texto-suave); }
+    .aula-i { display: flex; align-items: center; gap: 5px; }
+    .aula-i svg { flex-shrink: 0; }
+    .aula-ch { margin-top: 10px; font-size: 11.5px; font-weight: 600; }
+    .ch-indisponivel { color: var(--texto-suave); }
+    .ch-pendente { color: var(--laranja-escuro); }
+    .ch-validada { color: #2E8B00; }
+
+    .help-btn { position: fixed; bottom: 20px; right: 20px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+  </style>
+  <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="logo.png" alt="Rede Municipal" class="logo-img" />
+    <span class="portal-tag">Painel Pedagógico</span>
+  </div>
+  <nav class="nav">
+    <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
+    <a href="turmas.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/></svg> Escolas</a>
+    <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Servidores</a>
+    <a href="ocorrencias.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Ocorrências</a>
+    <a href="calendario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendário</a>
+    <a href="comunicacao.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Comunicação</a>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Suporte</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 5.34L3.93 6.75M21 12h-2M5 12H3M19.07 19.07l-1.41-1.41M5.34 18.66l-1.41 1.41M12 19v2M12 3V1"/></svg> Configurações</div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sair da conta</div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <svg class="page-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/></svg>
+      <div><div class="topbar-title">Escolas</div><div class="topbar-sub">Rede Municipal de Ensino · Porto Seguro/BA</div></div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-info"><div class="user-name">Ana Ribeiro</div><div class="user-role">Secretaria de Educação</div></div>
+      <div class="avatar">AR</div>
+    </div>
+  </div>
+
+  <div class="cal-header">
+    <span class="ctx-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg> Rede municipal · todas as escolas</span>
+    <span class="stamp">Dados de 06/08/2026</span>
+  </div>
+
+  <div class="view-wrap">
+    <div class="content" id="view"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="fecharEscola()"></div>
+<aside class="sp" id="escPanel" role="dialog" aria-modal="true" aria-labelledby="escName" tabindex="-1"></aside>
+<div class="help-btn">?</div>
+
+<script>
+const fmt = n => (n==null ? '—' : n.toLocaleString('pt-BR'));
+const iniciais = n => n.replace(/^E\.M\.|^CMEI/,'').trim().split(/\s+/).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+const banda = f => f>=94 ? 'verde' : f>=88 ? 'azul' : f>=84 ? 'ambar' : 'vermelho';
+const svgP = (p,c=18) => `<svg viewBox="0 0 24 24" width="${c}" height="${c}" fill="none" stroke="currentColor" stroke-width="2">${p}</svg>`;
+const slug = n => n.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z]/g,'');
+const pad2 = n => String(n).padStart(2,'0');
+
+const NOMES = [
+'E.M. Cidade Alta','E.M. Baianão','E.M. Frei Calixto','CMEI Estrela do Mar',"E.M. Arraial d'Ajuda",'E.M. Trancoso','E.M. Vera Cruz','E.M. Pindorama','CMEI Primeiros Passos','E.M. Coroa Vermelha',
+'E.M. Caraíva','E.M. Vale do Jequitibá','E.M. Mundaí','E.M. Taperapuã','E.M. Cambolo','CMEI Girassol','E.M. Juçara','E.M. Mirante','E.M. Itaquena','E.M. Guaiú',
+'E.M. Nova Brasília','E.M. Parque Ecológico','CMEI Pequeno Príncipe','E.M. Fontana','E.M. Alto do Mercado','E.M. Gruta Azul','E.M. Ponta Grande','E.M. Rio da Prata','E.M. Vale Verde','CMEI Semente do Saber',
+'E.M. Monte Pascoal','E.M. Pataxó','E.M. Aldeia Jaqueira','E.M. Barra Velha','E.M. Corumbau','E.M. Km 40','E.M. Santo André','E.M. Santa Cruz','E.M. Outeiro','E.M. Recife de Fora',
+'CMEI Arco-Íris','E.M. Vila de Trancoso','E.M. Nova Aliança','E.M. José de Anchieta','E.M. Pero Vaz','E.M. Tancredo Neves','E.M. Paulo Freire','E.M. Anísio Teixeira','CMEI Mundo Encantado','E.M. Castro Alves',
+'E.M. Rui Barbosa','E.M. Cecília Meireles','E.M. Monteiro Lobato','E.M. Darcy Ribeiro','E.M. Zumbi dos Palmares','E.M. Chico Mendes','CMEI Vovó Maria','E.M. Nova Alegria','E.M. Boa Esperança','E.M. Campo Verde'
+];
+const GESTORES = ['Marta Nogueira','Cláudio Souza','Rita Fontes','Josefa Lima','Paulo Menezes','Elaine Castro','Hélio Barros','Sônia Prado','Aline Duarte','Roberto Alves','Dora Vasconcelos','Ivo Santana','Lúcia Farias','Gilberto Nunes','Célia Andrade','Marcos Teles'];
+const LOCS = ['Urbana','Urbana','Urbana','Urbana','Campo','Campo','Indígena'];
+const BAIRROS = ['Centro','Cidade Alta','Baianão','Cambolo','Trancoso',"Arraial d'Ajuda",'Coroa Vermelha','Vale Verde','Mundaí','Taperapuã','Juçara','Zona Rural','Nova Esperança','Pindorama','Mirante'];
+const NUCLEOS = ['Centro','Vila Jardim','Frei Calixto','Parque Ecológico','Trancoso',"Arraial d'Ajuda",'Cambolo / Fontana','Vila Parracho','Coroa Vermelha','Mundaí','Baianão','Taperapuã'];
+const ETAPAS_OPTS = ['Anos iniciais','Anos iniciais, Anos finais','Anos iniciais, Anos finais, EJA'];
+
+const ESCOLAS = NOMES.map((nome, i)=>{
+  const r = k => ((i*9301 + k*49297) % 233280) / 233280;
+  const cmei = nome.startsWith('CMEI');
+  const alunos = cmei ? 110 + Math.floor(r(1)*150) : 360 + Math.floor(r(1)*900);
+  const freq = Math.round((84 + r(2)*14.4)*10)/10;
+  const turmas = cmei ? 8 + Math.floor(r(3)*8) : 16 + Math.floor(r(3)*26);
+  const servidores = cmei ? 20 + Math.floor(r(4)*18) : 30 + Math.floor(r(4)*40);
+  const ocupacao = 84 + Math.floor(r(5)*26);
+  const ocorrencias = Math.floor(r(6)*12);
+  const vagas = Math.max(alunos, Math.round(alunos/(ocupacao/100)));
+  const salas = cmei ? 6 + Math.floor(r(7)*6) : 9 + Math.floor(r(7)*15);
+  const rotas = Math.floor(r(8)*8);
+  const direcao = 1, coord = cmei ? 1+Math.floor(r(9)*2) : 2+Math.floor(r(9)*2), sec = 1+Math.floor(r(10)*2);
+  const apoio = cmei ? 7+Math.floor(r(11)*6) : 4+Math.floor(r(11)*6);
+  const prof = Math.max(5, servidores - direcao - coord - sec - apoio);
+  return {
+    inep: String(31097401 + i), nome,
+    bairro: BAIRROS[Math.floor(r(12)*BAIRROS.length)],
+    localidade: LOCS[Math.floor(r(13)*LOCS.length)],
+    nucleo: NUCLEOS[Math.floor(r(19)*NUCLEOS.length)],
+    ativa: r(20) > 0.12,
+    freq, matriculas: alunos, turmas, servidores, ocupacao, ocorrencias,
+    alerta: freq < 88 || ocorrencias >= 8,
+    etapas: cmei ? 'Creche, Pré-escola' : ETAPAS_OPTS[Math.floor(r(14)*ETAPAS_OPTS.length)],
+    turnos: cmei ? 'Integral' : (r(15)>0.5 ? 'Manhã, Tarde' : 'Manhã, Tarde, Noite'),
+    salas, vagas,
+    cozinha: r(16)>0.2 ? 'Própria' : 'Terceirizada',
+    rotas,
+    gestor: GESTORES[Math.floor(r(17)*GESTORES.length)],
+    gestorDesde: 2015 + Math.floor(r(18)*11),
+    equipe: { direcao, coord, prof, sec, apoio },
+  };
+});
+const ESCOLA_NOME = {}; ESCOLAS.forEach(e=> ESCOLA_NOME[e.inep] = e.nome);
+const REDE_FREQ_MEDIA = 91.2, REDE_OCUP_MEDIA = 96;
+
+/* mesmo gerador de equipe da tela Servidores (nome + matrícula batem para o deep-link) */
+const FIRST = ['Ana','Bruno','Carla','Diego','Elaine','Fábio','Gisele','Hugo','Iara','João','Karla','Luís','Marta','Nara','Otávio','Paula','Rafael','Sônia','Tiago','Vera','Wesley','Yara','Cléber','Zélia','Marcos','Priscila','Anderson','Luciana','Fernanda','Roberto'];
+const LAST = ['Silva','Souza','Oliveira','Santos','Rocha','Fontes','Melo','Prado','Carvalho','Barros','Nunes','Alves','Farias','Menezes','Ribeiro','Gomes','Antunes','Castro','Duarte','Teles','Aquino','Vasconcelos','Andrade','Pinto'];
+function gerarEquipe(inep){
+  const nomeEsc = ESCOLA_NOME[inep] || ''; const cmei = nomeEsc.startsWith('CMEI');
+  const base = parseInt(inep.slice(-3)); const rr = k => ((base*9301 + k*49297) % 233280) / 233280;
+  const team = []; let idx = 0;
+  const add = (grupo, cargo) => { const nome = FIRST[Math.floor(rr(100+idx*3)*FIRST.length)]+' '+LAST[Math.floor(rr(101+idx*3)*LAST.length)]; team.push({ m: inep.slice(2)+pad2(idx), nome, cargo, grupo }); idx++; };
+  add('Direção','Diretor(a)');
+  const nc = cmei ? 1 : 2 + Math.floor(rr(1)*2); for(let i=0;i<nc;i++) add('Coordenação','Coordenador(a) pedagógico(a)');
+  const np = cmei ? 8 + Math.floor(rr(2)*8) : 16 + Math.floor(rr(2)*22); for(let i=0;i<np;i++) add('Professores','Professor(a)');
+  add('Secretaria','Secretário(a) escolar'); if(!cmei || rr(3)>0.4) add('Secretaria','Auxiliar de secretaria');
+  return team;
+}
+function turmasDe(e){
+  const cr = e.etapas.includes('Creche');
+  const pool = cr ? ['Berçário','Creche I','Creche II','Pré I','Pré II']
+    : (e.etapas.includes('Anos finais') ? ['1º ano','2º ano','3º ano','4º ano','5º ano','6º ano','7º ano','8º ano','9º ano']
+    : ['1º ano','2º ano','3º ano','4º ano','5º ano']);
+  const turnos = e.turnos.split(', ');
+  const out=[]; const n = Math.min(e.turmas, 12);
+  for(let i=0;i<n;i++){ const letra = String.fromCharCode(65 + Math.floor(i/pool.length)); out.push({ nome: pool[i%pool.length]+' '+letra, turno: turnos[i%turnos.length], alunos: 20 + ((i*7+e.salas)%16) }); }
+  return out;
+}
+
+/* ---------- LISTA ---------- */
+function verLista(){
+  document.getElementById('view').innerHTML = `
+    <div class="esc-toolbar">
+      <div class="section-title">Escolas da rede <span class="section-hint" id="escCount"></span></div>
+      <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="buscaEsc" placeholder="Buscar escola por nome, localidade, núcleo ou INEP" oninput="filtrarEscolas()" aria-label="Buscar escola" /></label>
+    </div>
+    <div class="filtros">
+      <label class="fsel">Modalidade <select id="fMod" onchange="filtrarEscolas()"><option value="">Todas</option><option>Urbana</option><option>Campo</option><option>Indígena</option></select></label>
+      <label class="fsel">Status <select id="fStatus" onchange="filtrarEscolas()"><option value="">Todos</option><option value="ativa">Apenas ativas</option><option value="inativa">Apenas inativas</option></select></label>
+      <button class="btn-redef" onclick="redefinir()">Redefinir buscas</button>
+    </div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>Escola</th><th>Status</th><th>Localidade</th><th>Núcleo</th><th>Alunos</th><th></th></tr></thead>
+      <tbody id="escBody"></tbody>
+    </table></div>`;
+  filtrarEscolas();
+  history.replaceState(null,'','turmas.html');
+}
+function linhaEscola(e){
+  return `<tr onclick="abrirPaginaEscola('${e.inep}')">
+    <td><div class="cell-name"><span class="esc-ic">${svgP('<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/>',18)}</span><div><b>${e.nome}</b><div class="esc-inep">Código INEP ${e.inep}</div></div></div></td>
+    <td>${e.ativa ? '<span class="st-ativa">Ativa</span>' : '<span class="st-inativa">Inativa</span>'}</td>
+    <td>${e.localidade}</td>
+    <td>${e.nucleo}</td>
+    <td>${fmt(e.matriculas)}</td>
+    <td style="text-align:right"><button class="eye" onclick="event.stopPropagation();abrirEscola('${e.inep}')" aria-label="Visualizar escola">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',18)}</button></td>
+  </tr>`;
+}
+function filtrarEscolas(){
+  const q = (document.getElementById('buscaEsc').value||'').toLowerCase().trim();
+  const mod = (document.getElementById('fMod')||{}).value || '';
+  const st = (document.getElementById('fStatus')||{}).value || '';
+  const lista = ESCOLAS.filter(e=>{
+    if(q && !(e.nome.toLowerCase().includes(q) || e.localidade.toLowerCase().includes(q) || e.nucleo.toLowerCase().includes(q) || e.inep.includes(q))) return false;
+    if(mod && e.localidade !== mod) return false;
+    if(st==='ativa' && !e.ativa) return false;
+    if(st==='inativa' && e.ativa) return false;
+    return true;
+  });
+  document.getElementById('escBody').innerHTML = lista.map(linhaEscola).join('') || `<tr><td colspan="6" class="muted" style="text-align:center;padding:26px;">Nenhuma escola encontrada.</td></tr>`;
+  const c = document.getElementById('escCount'); if(c) c.textContent = `· ${lista.length} de ${ESCOLAS.length}`;
+}
+function redefinir(){ document.getElementById('buscaEsc').value=''; document.getElementById('fMod').value=''; document.getElementById('fStatus').value=''; filtrarEscolas(); }
+
+/* ---------- PAINEL LATERAL (olho) ---------- */
+let lastFocus=null;
+function abrirEscola(inep){
+  const e = ESCOLAS.find(x=>x.inep===inep); if(!e) return;
+  lastFocus = document.activeElement;
+  const usuarios = e.equipe.direcao + e.equipe.coord + e.equipe.sec + e.equipe.prof;
+  const resp = Math.round(e.matriculas*0.72);
+  const emailEsc = slug(e.nome)+'@eprof.app';
+  const dirMail = slug(e.gestor).slice(0,14)+'@hotmail.com';
+  const stats = [
+    ['Alunos', e.matriculas, '#ED6939'], ['Professores', e.equipe.prof, '#12509A'], ['Usuários', usuarios, '#D6409F'],
+    ['Responsáveis', resp, '#3DC200'], ['Turmas', e.turmas, '#6B3FA0'], ['Vagas', e.vagas, '#F0B429'],
+  ];
+  const fields = [ ['Código INEP', e.inep, false], ['Localidade', e.localidade, false], ['Núcleo', e.nucleo, false], ['Contato', '—', true], ['E-mail', emailEsc, false] ];
+  const resumo = `
+    <div class="esc-head"><div class="eic">${svgP('<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/>',24)}</div>
+      <div><div class="esc-name" id="escName">${e.nome}</div><div class="esc-badges"><span class="eb-loc">${e.bairro}</span>${e.ativa?'<span class="eb-ativa">Ativa</span>':'<span class="st-inativa">Inativa</span>'}</div></div></div>
+    <div class="stat-grid">${stats.map(([l,v,c])=>`<div class="stat-card"><div class="stat-num" style="color:${c}">${fmt(v)}</div><div class="stat-lbl">${l}</div></div>`).join('')}</div>
+    ${fields.map(([k,v,em])=>`<div class="fcard"><div class="flabel">${k}</div><div class="fval${em?' empty':''}">${v}</div></div>`).join('')}
+    <div class="diretor-card"><div class="dav">${svgP('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',22)}</div>
+      <div><div class="dlbl">Diretor(a)</div><div class="dnome">${e.gestor}</div><div class="dmail">${dirMail}</div></div></div>`;
+
+  const turmas = turmasDe(e);
+  const turmasPane = turmas.map(t=>`
+    <div class="turma-card"><span class="turma-ic">${svgP('<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',20)}</span>
+      <div style="flex:1"><div class="turma-nome">${t.nome}</div><div class="turma-turno">${t.turno}</div></div>
+      <div class="turma-alunos"><b>${t.alunos}</b>aluno(s)</div></div>`).join('')
+    + (e.turmas>turmas.length?`<div class="section-hint" style="margin-top:8px;">Mostrando ${turmas.length} de ${e.turmas} turmas.</div>`:'');
+
+  const equipe = gerarEquipe(e.inep);
+  const BADGE = { 'Direção':'b-dir', 'Coordenação':'b-coord', 'Professores':'b-prof', 'Secretaria':'b-aux' };
+  const usuariosPane = equipe.map(u=>`
+    <div class="user-card"><span class="user-av">${svgP('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',20)}</span>
+      <div style="flex:1"><div class="user-nome">${u.nome}</div><div class="user-cpf">000.000.000-00</div></div>
+      <span class="badge ${BADGE[u.grupo]||'b-aux'}">${u.grupo==='Professores'?'Professor(a)':u.cargo}</span>
+      ${u.grupo==='Professores' ? `<a class="user-arrow" href="horario.html?escola=${e.inep}#${u.m}" title="Ver detalhes do professor">${svgP('<line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>',16)}</a>` : ''}
+    </div>`).join('') + `<a class="ver-todos" style="margin-top:10px" href="horario.html?escola=${e.inep}">Ver todos os servidores ${svgP('<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',15)}</a>`;
+
+  document.getElementById('escPanel').innerHTML = `
+    <div class="sp-topbar"><div class="sp-title"><span class="tic">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',18)}</span> Visualizar escola</div>
+      <button class="sp-close" onclick="fecharEscola()" aria-label="Fechar">${svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',16)}</button></div>
+    <div class="sp-tabs">
+      <button class="sp-tab active" onclick="escTab(this,'resumo')">Resumo</button>
+      <button class="sp-tab" onclick="escTab(this,'turmas')">Turmas</button>
+      <button class="sp-tab" onclick="escTab(this,'usuarios')">Usuários</button>
+    </div>
+    <div class="sp-body">
+      <div class="tabpane" data-pane="resumo">${resumo}</div>
+      <div class="tabpane" data-pane="turmas" hidden>${turmasPane}</div>
+      <div class="tabpane" data-pane="usuarios" hidden>${usuariosPane}</div>
+    </div>`;
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('escPanel').classList.add('open');
+  history.replaceState(null,'','turmas.html#'+inep);
+  document.getElementById('escPanel').focus();
+  document.addEventListener('keydown', escHandler);
+}
+function escTab(btn,name){
+  document.querySelectorAll('#escPanel .sp-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#escPanel .tabpane').forEach(p=>{ p.hidden = p.dataset.pane!==name; });
+}
+function escHandler(e){ if(e.key==='Escape') fecharEscola(); }
+function fecharEscola(){
+  document.getElementById('escPanel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.removeEventListener('keydown', escHandler);
+  history.replaceState(null,'','turmas.html');
+  if(lastFocus&&lastFocus.focus) lastFocus.focus();
+}
+
+/* ---------- PÁGINA (clique no nome) ---------- */
+function abrirPaginaEscola(inep){
+  const e = ESCOLAS.find(x=>x.inep===inep); if(!e) return;
+  history.replaceState(null,'','turmas.html#pagina-'+inep);
+  const RFM = REDE_FREQ_MEDIA, ROM = REDE_OCUP_MEDIA;
+  const dpFreq = (e.freq - RFM).toFixed(1).replace('.',',').replace('-','−');
+  const dpOcup = e.ocupacao - ROM;
+  const cells = [
+    ['Alunos', e.matriculas, 'matrículas ativas', 'roxo', '<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>', ''],
+    ['Turmas', e.turmas, 'turmas ativas', 'azul', '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>', ''],
+    ['Frequência', String(e.freq).replace('.',',')+'%', (e.freq>=RFM?'▲':'▼')+' '+dpFreq+' pp vs. rede', 'verde', '<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>', e.freq>=RFM?'up':'down'],
+    ['Servidores', e.servidores, 'lotados na unidade', 'laranja', '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/>', ''],
+    ['Ocupação', e.ocupacao+'%', (dpOcup>=0?'+':'−')+Math.abs(dpOcup)+' pp vs. rede', 'ambar', '<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/>', ''],
+    ['Ocorrências', e.ocorrencias, 'no período', 'vermelho', '<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>', ''],
+  ];
+  const kpi = `<div class="pg-kpi-row">${cells.map(([l,v,s,ic,p,cls])=>`<div class="pg-kpi"><div class="pg-kpi-l"><div class="pg-kpi-ic ic-${ic}">${svgP(p,21)}</div><div><div class="pg-kpi-lbl">${l}</div><div class="pg-kpi-sub ${cls}">${s}</div></div></div><div class="pg-kpi-val">${fmt(v)}</div></div>`).join('')}</div>`;
+  const cargos = [['Direção',e.equipe.direcao],['Coordenação',e.equipe.coord],['Professores',e.equipe.prof],['Secretaria',e.equipe.sec]];
+  const cargoCards = cargos.map(([l,n])=>`<a class="pg-cargo" href="horario.html?escola=${e.inep}&cargo=${encodeURIComponent(l)}"><div class="pg-cargo-num">${n}</div><div class="pg-cargo-lbl">${l}</div></a>`).join('');
+  const vagasLivres = Math.max(0, e.vagas - e.matriculas);
+  const turmasArr = turmasDe(e); const maxT = Math.max(...turmasArr.map(t=>t.alunos), 1);
+  const turnosArr = e.turnos.split(', ');
+  const perTurno = turnosArr.map((t,i)=> [t, Math.floor(vagasLivres/turnosArr.length) + (i===0 ? vagasLivres % turnosArr.length : 0)]);
+  const maxTurno = Math.max(...perTurno.map(x=>x[1]), 1);
+  const ficha = [['INEP',e.inep],['Localidade',e.localidade],['Núcleo',e.nucleo],['Turnos',e.turnos],['Vagas ofertadas',fmt(e.vagas)],['Gestor(a)',e.gestor],['Status',e.ativa?'Ativa':'Inativa']];
+  document.getElementById('view').innerHTML = `
+    <button class="pg-back" onclick="verLista()">${svgP('<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',15)} Todas as escolas</button>
+    <div class="pg-title">${e.nome}</div>
+    <div class="pg-sub">${e.localidade} · Núcleo ${e.nucleo} · INEP ${e.inep}</div>
+    <div class="pg-note">${svgP('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>',16)}<span>A variação dos indicadores compara com a <b>média da rede</b>, não com o período anterior.</span></div>
+    ${kpi}
+    <div class="pg-panel">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;"><div class="section-title">Equipe da escola</div><a class="ver-todos" href="horario.html?escola=${e.inep}">Ver todos os servidores →</a></div>
+      <div class="pg-cargo-grid">${cargoCards}</div>
+    </div>
+    <div class="pg-panel" style="margin-top:20px;">
+      <div class="vg-split">
+        <div><div class="section-title" style="margin-bottom:14px;">Vagas livres</div>
+          <div class="vg-big">${fmt(vagasLivres)}</div><div class="vg-sub2">disponíveis para novas matrículas</div>
+          <div class="vg-turno-title">Vagas livres por turno</div>
+          <div class="vg-turno">${perTurno.map(([t,n])=>`<div class="vg-tr"><span>${t}</span><span class="vg-tr-bar"><span style="width:${Math.round(n/maxTurno*100)}%"></span></span><b>${n}</b></div>`).join('')}</div>
+        </div>
+        <div><div class="section-title" style="margin-bottom:14px;">Alunos por turma</div>
+          <div class="apt-list">${turmasArr.map(t=>`<div class="apt-row"><span class="apt-nome">${t.nome} · ${t.turno}</span><span class="apt-bar"><span class="apt-fill" style="width:${Math.round(t.alunos/maxT*100)}%"></span></span><span class="apt-num">${t.alunos}</span></div>`).join('')}</div>
+        </div>
+      </div>
+    </div>
+    <div class="pg-panel" style="margin-top:20px;"><div class="section-title" style="margin-bottom:14px;">Ficha da unidade</div><div class="pg-ficha">${ficha.map(([k,v])=>`<div><span class="pg-fl">${k}</span><span class="pg-fv">${v}</span></div>`).join('')}</div></div>
+    <button class="pg-aulas-btn" onclick="verAulas('${e.inep}')">${svgP('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',18)} Visualizar aulas</button>`;
+}
+
+/* ---------- VISUALIZAR AULAS ---------- */
+function verAulas(inep){
+  const e = ESCOLAS.find(x=>x.inep===inep); if(!e) return;
+  history.replaceState(null,'','turmas.html#aulas-'+inep);
+  const discs = e.etapas.includes('Creche') ? ['Musicalização','Artes','Movimento','Natureza e Sociedade'] : ['Agroecologia','Arte','Educação Física','Diversidade Afro e Indígena','Matemática','Língua Portuguesa'];
+  const turmasList = turmasDe(e);
+  const nivel = e.etapas.includes('Anos finais') ? 'Fundamental II' : (e.etapas.includes('Creche') ? 'Educação Infantil' : 'Fundamental I');
+  const tints = ['verde','roxo','laranja','azul'];
+  const card = (a,i) => {
+    const chLbl = a.ch==='validada'?'Chamada validada':a.ch==='pendente'?'Chamada pendente':'Chamada indisponível';
+    return `<div class="aula-card t-${tints[i%tints.length]}">
+      <div class="aula-prof"><span class="aula-av">${svgP('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',16)}</span>${a.prof}</div>
+      <div class="aula-grid">
+        <div class="aula-i">${svgP('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>',13)} ${a.data}</div>
+        <div class="aula-i">${svgP('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',13)} ${a.hora}</div>
+        <div class="aula-i" style="grid-column:1/-1">${svgP('<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>',13)} ${a.disc}</div>
+        <div class="aula-i" style="grid-column:1/-1">${svgP('<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>',13)} ${a.turma}</div>
+        <div class="aula-i" style="grid-column:1/-1">${svgP('<path d="M22 10L12 5 2 10l10 5 10-5z"/>',13)} Multisseriada · ${nivel}</div>
+      </div>
+      <div class="aula-ch ch-${a.ch}">${chLbl}</div>
+    </div>`;
+  };
+  const mk = (n, base, ch) => Array.from({length:n}, (_,i)=>({ prof: i%3===2?'Professor(a) do Campo':'Secretário(a) do Campo', data: base, hora: pad2(7+i)+':00 – '+pad2(7+i)+':50', disc: discs[i%discs.length], turma: (turmasList[i%turmasList.length]||{nome:'Turma Única'}).nome, ch }));
+  const prox = mk(4, '12/08/2026', 'indisponivel');
+  const ant = mk(4, '07/08/2026', 'pendente'); if(ant[3]) ant[3].ch='validada';
+  document.getElementById('view').innerHTML = `
+    <button class="pg-back" onclick="abrirPaginaEscola('${inep}')">${svgP('<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',15)} Voltar à escola</button>
+    <div class="pg-title" style="margin-bottom:16px;">Aulas · ${e.nome}</div>
+    <div class="aulas-grid">
+      <div class="aulas-col"><div class="aulas-head">${svgP('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',18)} Aulas de hoje</div>
+        <div class="aulas-empty">${svgP('<path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/><line x1="15" y1="15" x2="9" y2="15"/>',40)}<div>Sem aulas hoje</div></div>
+      </div>
+      <div class="aulas-col"><div class="aulas-head">${svgP('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',18)} Próximas aulas</div>${prox.map(card).join('')}</div>
+      <div class="aulas-col"><div class="aulas-head">${svgP('<path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 106 5.3L3 8"/><polyline points="12 7 12 12 15 14"/>',18)} Aulas anteriores</div>${ant.map(card).join('')}</div>
+    </div>`;
+}
+
+verLista();
+const h = location.hash.slice(1);
+if(h.startsWith('aulas-')){ const ie=h.slice(6); if(ESCOLAS.some(e=>e.inep===ie)) verAulas(ie); }
+else if(h.startsWith('pagina-')){ const ie=h.slice(7); if(ESCOLAS.some(e=>e.inep===ie)) abrirPaginaEscola(ie); }
+else if(h && ESCOLAS.some(e=>e.inep===h)) abrirEscola(h);
+</script>
+
+</body>
+</html>

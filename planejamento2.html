@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Pedagógico — Rotinas</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; display: flex; height: 100vh; overflow: hidden; font-size: 13px; color: #333; }
+    .sidebar { display: flex; flex-direction: column; }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; }
+    .logo-img { width: 104px; height: auto; display: block; }
+    .nav { flex: 1 1 auto; }
+    .nav-item { display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background .15s; text-decoration: none; }
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .logout { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .logout svg { width: 16px; height: 16px; }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 12px; }
+    .user-info { text-align: right; }
+    .cal-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .ctx-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 7px 12px; font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--texto); }
+    .ctx-pill svg { width: 15px; height: 15px; color: var(--laranja); }
+    .ctx-pill select { border: none; background: none; font: inherit; color: inherit; cursor: pointer; outline: none; max-width: 240px; }
+    .stamp { font-size: 12.5px; color: var(--texto-suave); }
+
+    .view-wrap { flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--branco); }
+    .content { padding: 26px 34px; }
+    .section-title { font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--texto); }
+    .section-hint { font-size: 12px; color: var(--texto-suave); }
+    .data-note { display: flex; align-items: flex-start; gap: 10px; background: var(--azul-claro); border: 1px solid #C8DCF3; color: var(--azul); border-radius: var(--raio-sm); padding: 11px 14px; font-size: 12.5px; line-height: 1.5; margin-bottom: 22px; }
+    .data-note svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+    .panel { background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio); padding: 22px; }
+
+    .matrix { width: 100%; border-collapse: separate; border-spacing: 7px; }
+    .matrix th { font-family: var(--font-display); font-size: 12px; font-weight: 600; color: var(--texto-suave); padding: 4px; text-align: center; }
+    .matrix td.rot-name { text-align: left; font-size: 13px; color: var(--texto); font-weight: 500; padding-right: 14px; white-space: nowrap; }
+    .mcell { border-radius: 10px; padding: 13px 6px; text-align: center; font-family: var(--font-display); font-weight: 700; font-size: 15px; min-width: 84px; }
+    .mcell small { display: block; font-size: 10px; font-weight: 500; opacity: .8; margin-top: 2px; }
+    .m-quase { background: var(--verde-bg); color: #2E8B00; }
+    .m-faltam { background: #FDF3D9; color: var(--ambar-escuro); }
+    .m-baixo { background: #FDE9E9; color: var(--vermelho); }
+    .m-na { background: var(--bg); color: #9AA1AB; border: 1px dashed var(--borda); }
+    .m-sim { background: var(--verde-bg); color: #2E8B00; }
+    .m-nao { background: #FDE9E9; color: var(--vermelho); }
+    .chart-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 18px; }
+    .chart-legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--texto-suave); }
+    .chart-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+    .help-btn { position: fixed; bottom: 20px; right: 20px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+  </style>
+  <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="logo.png" alt="Rede Municipal" class="logo-img" />
+    <span class="portal-tag">Painel Pedagógico</span>
+  </div>
+  <nav class="nav">
+    <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
+    <a href="turmas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/></svg> Escolas</a>
+    <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Servidores</a>
+    <a href="ocorrencias.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Ocorrências</a>
+    <a href="planejamento2.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M9 10l2 2 4-4"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Rotinas</a>
+    <a href="calendario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendário</a>
+    <a href="comunicacao.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Comunicação</a>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Suporte</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 5.34L3.93 6.75M21 12h-2M5 12H3M19.07 19.07l-1.41-1.41M5.34 18.66l-1.41 1.41M12 19v2M12 3V1"/></svg> Configurações</div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sair da conta</div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <svg class="page-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M9 10l2 2 4-4"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <div><div class="topbar-title">Rotinas</div><div class="topbar-sub">Rede Municipal de Ensino · Porto Seguro/BA</div></div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-info"><div class="user-name">Ana Ribeiro</div><div class="user-role">Secretaria de Educação</div></div>
+      <div class="avatar">AR</div>
+    </div>
+  </div>
+
+  <div class="cal-header">
+    <span class="ctx-pill">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg>
+      <select id="fEscola" onchange="render()" aria-label="Escola"></select>
+    </span>
+    <span class="stamp">Semana de 03 a 07/08/2026 · dados de 06/08/2026</span>
+  </div>
+
+  <div class="view-wrap">
+    <div class="content" id="view"></div>
+  </div>
+</div>
+
+<div class="help-btn">?</div>
+
+<script>
+const TOTAL = 60;
+const DIAS = ['Seg','Ter','Qua','Qui','Sex'];
+const ESCOLAS = {
+  '31097401':'E.M. Cidade Alta','31097402':'E.M. Baianão','31097403':'E.M. Frei Calixto','31097404':'CMEI Estrela do Mar',
+  '31097405':"E.M. Arraial d'Ajuda",'31097406':'E.M. Trancoso','31097407':'E.M. Vera Cruz','31097408':'E.M. Pindorama'
+};
+const ROTINAS = [
+  { nome:'Registro de frequência', dias:[58,59,59,57,55] },
+  { nome:'Alimentação escolar',    dias:[54,56,52,55,50] },
+  { nome:'Registro de conteúdo',   dias:[46,42,48,44,38] },
+  { nome:'Transporte escolar',     dias:[36,35,33,34,28] },
+  { nome:'Reforço / apoio',        dias:[22, 0,20, 0,16] }, // 0 = não se aplica ao dia
+];
+
+(function(){
+  document.getElementById('fEscola').innerHTML =
+    `<option value="">Rede municipal (todas as escolas)</option>`+Object.entries(ESCOLAS).map(([i,n])=>`<option value="${i}">${n}</option>`).join('');
+})();
+
+function estado(n){
+  if(n<0) return { cls:'m-na', txt:'—', sub:'não se aplica' };
+  const p = n/TOTAL;
+  if(p>=0.9) return { cls:'m-quase', txt:n, sub:`de ${TOTAL}` };
+  if(p>=0.7) return { cls:'m-faltam', txt:n, sub:`de ${TOTAL}` };
+  return { cls:'m-baixo', txt:n, sub:`de ${TOTAL}` };
+}
+
+function render(){
+  const fe = document.getElementById('fEscola').value;
+  if(fe){
+    // por escola: registrado / não registrado por dia
+    const seed = parseInt(fe.slice(-3));
+    const reg = (ri,di) => {
+      const r = ROTINAS[ri].dias[di];
+      if(r===0) return -1; // não se aplica
+      return ((seed*7 + ri*13 + di*29) % 10) < (r/TOTAL*10) ? 1 : 0;
+    };
+    document.getElementById('view').innerHTML = `
+      ${nota(`Matriz de <b>${ESCOLAS[fe]}</b>: em quais dias cada rotina foi <b>registrada</b> — não o conteúdo do registro.`)}
+      <div class="panel"><div style="overflow-x:auto"><table class="matrix">
+        <thead><tr><th></th>${DIAS.map(d=>`<th>${d}</th>`).join('')}</tr></thead>
+        <tbody>${ROTINAS.map((r,ri)=>`<tr><td class="rot-name">${r.nome}</td>${DIAS.map((_,di)=>{
+          const v = reg(ri,di);
+          if(v===-1) return `<td><div class="mcell m-na">—<small>não se aplica</small></div></td>`;
+          return v ? `<td><div class="mcell m-sim">✓<small>registrado</small></div></td>` : `<td><div class="mcell m-nao">✕<small>não registrado</small></div></td>`;
+        }).join('')}</tr>`).join('')}</tbody>
+      </table></div>
+      <div class="chart-legend">
+        <span><i style="background:#D8F3CC"></i> Registrado</span>
+        <span><i style="background:#FDE9E9"></i> Não registrado</span>
+        <span><i style="background:#F4F6FA;border:1px dashed #E4E8EE"></i> Não se aplica ao dia</span>
+      </div></div>`;
+    return;
+  }
+  // rede: cobertura (nº de escolas que registraram)
+  document.getElementById('view').innerHTML = `
+    ${nota(`Cobertura de registro nas <b>${TOTAL} escolas</b> da rede. A pergunta é <b>quem registrou</b>, não o que foi registrado.`)}
+    <div class="panel"><div style="overflow-x:auto"><table class="matrix">
+      <thead><tr><th></th>${DIAS.map(d=>`<th>${d}</th>`).join('')}</tr></thead>
+      <tbody>${ROTINAS.map(r=>`<tr><td class="rot-name">${r.nome}</td>${r.dias.map(n=>{
+        const c = estado(n===0 ? -1 : n);
+        return `<td><div class="mcell ${c.cls}">${c.txt}<small>${c.sub}</small></div></td>`;
+      }).join('')}</tr>`).join('')}</tbody>
+    </table></div>
+    <div class="chart-legend">
+      <span><i style="background:#D8F3CC"></i> Quase todas (≥ 90%)</span>
+      <span><i style="background:#FDF3D9"></i> Faltam registros (70–90%)</span>
+      <span><i style="background:#FDE9E9"></i> Menos de 70%</span>
+      <span><i style="background:#F4F6FA;border:1px dashed #E4E8EE"></i> Não se aplica ao dia</span>
+    </div></div>`;
+}
+function nota(txt){ return `<div class="data-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span>${txt}</span></div>`; }
+
+render();
+</script>
+
+</body>
+</html>

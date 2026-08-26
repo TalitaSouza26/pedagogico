@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Pedagógico — Comunicação</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; display: flex; height: 100vh; overflow: hidden; font-size: 13px; color: #333; }
+    .sidebar { display: flex; flex-direction: column; }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; }
+    .logo-img { width: 104px; height: auto; display: block; }
+    .nav { flex: 1 1 auto; }
+    .nav-item { display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background .15s; text-decoration: none; }
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .logout { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .logout svg { width: 16px; height: 16px; }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 12px; }
+    .user-info { text-align: right; }
+    .view-wrap { flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--branco); }
+    .content { padding: 24px 34px 40px; }
+
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+    .fbtn { border: 1px solid var(--borda); background: var(--branco); border-radius: 20px; padding: 7px 15px; font-family: var(--font-display); font-size: 12.5px; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
+    .fbtn:hover { border-color: var(--azul); color: var(--azul); }
+    .fbtn.active { background: var(--azul); border-color: var(--azul); color: #fff; }
+    .new-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--laranja); border: none; border-radius: 10px; padding: 10px 18px; font-family: var(--font-display); font-size: 13.5px; font-weight: 600; color: #fff; cursor: pointer; }
+    .new-btn:hover { background: var(--laranja-escuro); }
+    .new-btn svg { width: 16px; height: 16px; }
+
+    .list { display: flex; flex-direction: column; gap: 14px; }
+    .msg { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 18px 20px; display: flex; gap: 16px; }
+    .msg.urgente { border-left: 4px solid var(--vermelho); }
+    .msg-ic { width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .msg-ic svg { width: 21px; height: 21px; }
+    .ic-rede { background: var(--azul-claro); color: var(--azul); }
+    .ic-escola { background: var(--laranja-bg); color: var(--laranja-escuro); }
+    .ic-pessoa { background: var(--verde-bg); color: #2E8B00; }
+    .msg-body { flex: 1; min-width: 0; }
+    .msg-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+    .msg-title { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--texto); }
+    .dest { border-radius: 20px; font-family: var(--font-display); font-weight: 600; font-size: 10.5px; padding: 3px 10px; text-transform: uppercase; letter-spacing: .03em; }
+    .dest-rede { background: var(--azul-claro); color: var(--azul); }
+    .dest-escola { background: var(--laranja-bg); color: var(--laranja-escuro); }
+    .dest-pessoa { background: var(--verde-bg); color: #2E8B00; }
+    .tag-urg { background: #FDE9E9; color: var(--vermelho); border-radius: 20px; font-family: var(--font-display); font-weight: 700; font-size: 10.5px; padding: 3px 10px; text-transform: uppercase; }
+    .msg-dest-txt { font-size: 12px; color: var(--texto-suave); margin-bottom: 8px; }
+    .msg-text { font-size: 13.5px; color: var(--texto); line-height: 1.55; }
+    .msg-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+    .msg-date { font-size: 12px; color: var(--texto-suave); display: flex; align-items: center; gap: 6px; }
+    .msg-date svg { width: 13px; height: 13px; }
+    .conf { display: flex; align-items: center; gap: 10px; min-width: 220px; }
+    .conf-track { height: 7px; border-radius: 4px; background: #EEF1F5; overflow: hidden; flex: 1; }
+    .conf-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--verde), #2E8B00); }
+    .conf-txt { font-size: 11.5px; color: var(--texto-suave); white-space: nowrap; }
+
+    .overlay { position: fixed; inset: 0; background: rgba(15,23,32,.5); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .overlay.open { opacity: 1; pointer-events: auto; }
+    .modal { background: var(--branco); border-radius: var(--raio); width: 560px; max-width: 100%; max-height: 92vh; overflow: hidden; display: flex; flex-direction: column; transform: translateY(12px) scale(.98); transition: transform .2s; box-shadow: 0 24px 60px rgba(15,23,32,.28); }
+    .overlay.open .modal { transform: none; }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--borda); background: var(--bg); }
+    .modal-head .t { font-family: var(--font-display); font-weight: 600; font-size: 16px; color: var(--texto); }
+    .modal-close { border: 1px solid var(--borda); background: var(--branco); border-radius: 8px; cursor: pointer; color: var(--texto-suave); padding: 7px; display: flex; }
+    .modal-close:hover { border-color: var(--azul); color: var(--azul); }
+    .modal-close svg { width: 16px; height: 16px; }
+    .modal-body { padding: 22px; overflow-y: auto; }
+    .fld { margin-bottom: 16px; }
+    .fld label { display: block; font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--texto); margin-bottom: 7px; }
+    .seg { display: flex; gap: 8px; }
+    .seg button { flex: 1; border: 1px solid var(--borda); background: var(--branco); border-radius: 10px; padding: 10px; font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
+    .seg button.active { border-color: var(--laranja); background: var(--laranja-bg); color: var(--laranja-escuro); }
+    .inp, select.inp, textarea.inp { width: 100%; border: 1px solid var(--borda); border-radius: 10px; padding: 10px 12px; font-family: var(--font-body); font-size: 13.5px; color: var(--texto); background: var(--branco); outline: none; }
+    .inp:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(18,80,154,.10); }
+    textarea.inp { resize: vertical; min-height: 96px; }
+    .chk { display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--texto); cursor: pointer; }
+    .chk input { width: 16px; height: 16px; accent-color: var(--vermelho); }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 22px; border-top: 1px solid var(--borda); background: var(--bg); }
+    .btn-ghost { border: 1px solid var(--borda); background: var(--branco); border-radius: 10px; padding: 10px 18px; font-family: var(--font-display); font-size: 13.5px; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
+    .btn-primary { border: none; background: var(--laranja); border-radius: 10px; padding: 10px 20px; font-family: var(--font-display); font-size: 13.5px; font-weight: 600; color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary:hover { background: var(--laranja-escuro); }
+    .btn-primary svg { width: 15px; height: 15px; }
+    .help-btn { position: fixed; bottom: 20px; right: 20px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+  </style>
+  <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="logo.png" alt="Rede Municipal" class="logo-img" />
+    <span class="portal-tag">Painel Pedagógico</span>
+  </div>
+  <nav class="nav">
+    <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
+    <a href="turmas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/></svg> Escolas</a>
+    <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg> Servidores</a>
+    <a href="ocorrencias.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Ocorrências</a>
+    <a href="calendario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendário</a>
+    <a href="comunicacao.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Comunicação</a>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Suporte</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 5.34L3.93 6.75M21 12h-2M5 12H3M19.07 19.07l-1.41-1.41M5.34 18.66l-1.41 1.41M12 19v2M12 3V1"/></svg> Configurações</div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sair da conta</div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <svg class="page-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <div><div class="topbar-title">Comunicação</div><div class="topbar-sub">Mensagens da Secretaria para a rede · Porto Seguro/BA</div></div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-info"><div class="user-name">Ana Ribeiro</div><div class="user-role">Secretaria de Educação</div></div>
+      <div class="avatar">AR</div>
+    </div>
+  </div>
+
+  <div class="view-wrap">
+    <div class="content">
+      <div class="toolbar">
+        <div class="filters">
+          <button class="fbtn active" data-f="" onclick="setFiltro(this,'')">Todas</button>
+          <button class="fbtn" data-f="rede" onclick="setFiltro(this,'rede')">Rede</button>
+          <button class="fbtn" data-f="escola" onclick="setFiltro(this,'escola')">Escola</button>
+          <button class="fbtn" data-f="pessoa" onclick="setFiltro(this,'pessoa')">Servidor</button>
+        </div>
+        <button class="new-btn" onclick="abrirNova()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nova mensagem</button>
+      </div>
+      <div class="list" id="list"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="if(event.target===this)fecharNova()">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle">
+    <div class="modal-head"><div class="t" id="mtitle">Nova mensagem</div>
+      <button class="modal-close" onclick="fecharNova()" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-body">
+      <div class="fld">
+        <label>Destinatário</label>
+        <div class="seg">
+          <button id="segEscola" class="active" onclick="setDestino('escola')">Escola inteira</button>
+          <button id="segPessoa" onclick="setDestino('pessoa')">Um servidor</button>
+        </div>
+      </div>
+      <div class="fld">
+        <label>Escola</label>
+        <select class="inp" id="fEscola" onchange="popularServidores()"></select>
+      </div>
+      <div class="fld" id="fldServidor" style="display:none">
+        <label>Servidor</label>
+        <select class="inp" id="fServidor"></select>
+      </div>
+      <div class="fld"><label>Título</label><input class="inp" id="fTitulo" placeholder="Ex.: Reunião pedagógica" /></div>
+      <div class="fld"><label>Mensagem</label><textarea class="inp" id="fMsg" placeholder="Escreva a mensagem..."></textarea></div>
+      <div class="fld"><label class="chk"><input type="checkbox" id="fUrg" /> Marcar como urgente</label></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="fecharNova()">Cancelar</button>
+      <button class="btn-primary" onclick="enviar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar</button>
+    </div>
+  </div>
+</div>
+<div class="help-btn">?</div>
+
+<script>
+const svgP = (p,c=21) => `<svg viewBox="0 0 24 24" width="${c}" height="${c}" fill="none" stroke="currentColor" stroke-width="2">${p}</svg>`;
+const NOMES_ESC = [
+'E.M. Cidade Alta','E.M. Baianão','E.M. Frei Calixto','CMEI Estrela do Mar',"E.M. Arraial d'Ajuda",'E.M. Trancoso','E.M. Vera Cruz','E.M. Pindorama','CMEI Primeiros Passos','E.M. Coroa Vermelha',
+'E.M. Caraíva','E.M. Vale do Jequitibá','E.M. Mundaí','E.M. Taperapuã','E.M. Cambolo','CMEI Girassol','E.M. Juçara','E.M. Mirante','E.M. Itaquena','E.M. Guaiú',
+'E.M. Nova Brasília','E.M. Parque Ecológico','CMEI Pequeno Príncipe','E.M. Fontana','E.M. Alto do Mercado','E.M. Gruta Azul','E.M. Ponta Grande','E.M. Rio da Prata','E.M. Vale Verde','CMEI Semente do Saber',
+'E.M. Monte Pascoal','E.M. Pataxó','E.M. Aldeia Jaqueira','E.M. Barra Velha','E.M. Corumbau','E.M. Km 40','E.M. Santo André','E.M. Santa Cruz','E.M. Outeiro','E.M. Recife de Fora',
+'CMEI Arco-Íris','E.M. Vila de Trancoso','E.M. Nova Aliança','E.M. José de Anchieta','E.M. Pero Vaz','E.M. Tancredo Neves','E.M. Paulo Freire','E.M. Anísio Teixeira','CMEI Mundo Encantado','E.M. Castro Alves',
+'E.M. Rui Barbosa','E.M. Cecília Meireles','E.M. Monteiro Lobato','E.M. Darcy Ribeiro','E.M. Zumbi dos Palmares','E.M. Chico Mendes','CMEI Vovó Maria','E.M. Nova Alegria','E.M. Boa Esperança','E.M. Campo Verde'
+];
+const FIRST = ['Ana','Bruno','Carla','Diego','Elaine','Fábio','Gisele','Hugo','Iara','João','Karla','Luís','Marta','Nara','Otávio','Paula','Rafael','Sônia','Tiago','Vera'];
+const LAST = ['Silva','Souza','Oliveira','Santos','Rocha','Fontes','Melo','Prado','Carvalho','Barros','Nunes','Alves','Farias','Menezes','Ribeiro'];
+const CARGOS = ['Diretor(a)','Coordenador(a) pedagógico(a)','Professor(a)','Professor(a)','Professor(a)','Secretário(a) escolar'];
+function servidoresDe(nomeEsc){
+  const base = NOMES_ESC.indexOf(nomeEsc)+3;
+  const rr = k => ((base*9301 + k*49297) % 233280)/233280;
+  const n = 6 + Math.floor(rr(1)*6);
+  return Array.from({length:n},(_,i)=>({ nome: FIRST[Math.floor(rr(i*2+2)*FIRST.length)]+' '+LAST[Math.floor(rr(i*2+3)*LAST.length)], cargo: CARGOS[Math.floor(rr(i*2+4)*CARGOS.length)] }));
+}
+
+let COMUNICADOS = [
+  { dest:'rede', destTxt:'Toda a rede municipal', titulo:'Recesso escolar de setembro', texto:'Informamos que o recesso letivo ocorrerá conforme o calendário oficial. As unidades devem organizar a reposição de aulas quando aplicável.', data:'25/08/2026', urgente:false, alvo:1070, conf:812 },
+  { dest:'escola', destTxt:'E.M. Cidade Alta', titulo:'Manutenção elétrica na quadra', texto:'A quadra poliesportiva ficará interditada nesta semana para manutenção elétrica. As aulas de Educação Física serão remanejadas.', data:'24/08/2026', urgente:true, alvo:38, conf:29 },
+  { dest:'rede', destTxt:'Toda a rede municipal', titulo:'Prazo para lançamento de notas', texto:'O lançamento das notas do 2º bimestre deve ser concluído até 18/08. Coordenadores, acompanhem os professores de suas unidades.', data:'20/08/2026', urgente:false, alvo:1070, conf:1004 },
+  { dest:'pessoa', destTxt:'Carla Menezes · E.M. Trancoso', titulo:'Solicitação de relatório', texto:'Prezada Carla, favor encaminhar o relatório de acompanhamento pedagógico da turma 5º ANO A até sexta-feira.', data:'19/08/2026', urgente:false, alvo:1, conf:1 },
+  { dest:'escola', destTxt:'E.M. Monte Pascoal', titulo:'Conselho de classe', texto:'O conselho de classe do 2º bimestre está confirmado para 28/08 às 14h. A participação de todos os professores é obrigatória.', data:'18/08/2026', urgente:false, alvo:42, conf:31 },
+];
+
+let filtro = '';
+function setFiltro(btn,f){ filtro=f; document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); render(); }
+
+function render(){
+  const lista = COMUNICADOS.filter(c=> !filtro || c.dest===filtro);
+  const ic = { rede:['ic-rede','<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/>'], escola:['ic-escola','<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/>'], pessoa:['ic-pessoa','<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>'] };
+  const destLbl = { rede:'Rede', escola:'Escola', pessoa:'Servidor' };
+  document.getElementById('list').innerHTML = lista.map(c=>{
+    const pct = Math.round(c.conf/c.alvo*100);
+    const unidade = c.dest==='pessoa' ? (c.conf?'Lida':'Não lida') : `${c.conf} de ${c.alvo} confirmaram leitura`;
+    return `<div class="msg ${c.urgente?'urgente':''}">
+      <div class="msg-ic ${ic[c.dest][0]}">${svgP(ic[c.dest][1])}</div>
+      <div class="msg-body">
+        <div class="msg-top">
+          <span class="msg-title">${c.titulo}</span>
+          <span class="dest dest-${c.dest}">${destLbl[c.dest]}</span>
+          ${c.urgente?'<span class="tag-urg">Urgente</span>':''}
+        </div>
+        <div class="msg-dest-txt">Para: ${c.destTxt}</div>
+        <div class="msg-text">${c.texto}</div>
+        <div class="msg-foot">
+          <span class="msg-date">${svgP('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>',13)} ${c.data}</span>
+          <span class="conf"><span class="conf-track"><span class="conf-fill" style="width:${pct}%"></span></span><span class="conf-txt">${unidade}</span></span>
+        </div>
+      </div>
+    </div>`;
+  }).join('') || `<div style="text-align:center;padding:40px;color:var(--texto-suave)">Nenhum comunicado neste filtro.</div>`;
+}
+
+(function(){ document.getElementById('fEscola').innerHTML = NOMES_ESC.map(n=>`<option>${n}</option>`).join(''); })();
+let destino = 'escola';
+function setDestino(d){
+  destino = d;
+  document.getElementById('segEscola').classList.toggle('active', d==='escola');
+  document.getElementById('segPessoa').classList.toggle('active', d==='pessoa');
+  document.getElementById('fldServidor').style.display = d==='pessoa' ? 'block' : 'none';
+  if(d==='pessoa') popularServidores();
+}
+function popularServidores(){
+  const esc = document.getElementById('fEscola').value;
+  const sv = servidoresDe(esc);
+  document.getElementById('fServidor').innerHTML = sv.map(s=>`<option>${s.nome} — ${s.cargo}</option>`).join('');
+}
+function abrirNova(){ document.getElementById('overlay').classList.add('open'); document.addEventListener('keydown',escH); }
+function fecharNova(){ document.getElementById('overlay').classList.remove('open'); document.removeEventListener('keydown',escH); }
+function escH(e){ if(e.key==='Escape') fecharNova(); }
+function enviar(){
+  const titulo = document.getElementById('fTitulo').value.trim() || '(sem título)';
+  const texto = document.getElementById('fMsg').value.trim() || '(sem conteúdo)';
+  const urgente = document.getElementById('fUrg').checked;
+  const esc = document.getElementById('fEscola').value;
+  let novo;
+  if(destino==='escola'){
+    const alvo = servidoresDe(esc).length;
+    novo = { dest:'escola', destTxt: esc, titulo, texto, data:'26/08/2026', urgente, alvo, conf:0 };
+  } else {
+    const serv = document.getElementById('fServidor').value.split(' — ')[0];
+    novo = { dest:'pessoa', destTxt:`${serv} · ${esc}`, titulo, texto, data:'26/08/2026', urgente, alvo:1, conf:0 };
+  }
+  COMUNICADOS.unshift(novo);
+  fecharNova();
+  document.getElementById('fTitulo').value=''; document.getElementById('fMsg').value=''; document.getElementById('fUrg').checked=false;
+  render();
+}
+
+render();
+</script>
+
+</body>
+</html>

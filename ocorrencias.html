@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Pedagógico — Ocorrências</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; display: flex; height: 100vh; overflow: hidden; font-size: 13px; color: #333; }
+    .sidebar { display: flex; flex-direction: column; }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; }
+    .logo-img { width: 104px; height: auto; display: block; }
+    .nav { flex: 1 1 auto; }
+    .nav-item { display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background .15s; text-decoration: none; }
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .logout { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .logout svg { width: 16px; height: 16px; }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 12px; }
+    .user-info { text-align: right; }
+    .view-wrap { flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--branco); }
+    .content { padding: 24px 34px 40px; }
+    .note { display: flex; align-items: flex-start; gap: 10px; background: var(--azul-claro); border: 1px solid #C8DCF3; border-radius: var(--raio-sm); padding: 12px 14px; font-size: 12.5px; color: var(--azul-escuro); margin-bottom: 20px; line-height: 1.5; }
+    .note svg { width: 17px; height: 17px; flex-shrink: 0; color: var(--azul); margin-top: 1px; }
+    .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 22px; }
+    @media (max-width: 900px){ .kpi-row { grid-template-columns: 1fr; } }
+    .kpi { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 18px 20px; display: flex; align-items: center; gap: 14px; }
+    .kpi-ic { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .kpi-ic svg { width: 22px; height: 22px; }
+    .kpi .val { font-family: var(--font-display); font-weight: 700; font-size: 26px; color: var(--texto); line-height: 1.1; }
+    .kpi .lbl { font-size: 12.5px; color: var(--texto-suave); margin-top: 2px; }
+    .card { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 20px 22px; margin-bottom: 22px; }
+    .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+    .card-title { font-family: var(--font-display); font-weight: 600; font-size: 16px; color: var(--texto); }
+    .card-hint { font-size: 12px; color: var(--texto-suave); }
+    .rank { display: flex; flex-direction: column; gap: 12px; }
+    .rank-row { display: grid; grid-template-columns: 26px 1fr 46px; align-items: center; gap: 12px; }
+    .rank-pos { font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--texto-suave); text-align: center; }
+    .rank-mid { min-width: 0; }
+    .rank-name { font-size: 13.5px; font-weight: 500; color: var(--texto); margin-bottom: 5px; display: flex; justify-content: space-between; gap: 10px; }
+    .rank-name .muted { color: var(--texto-suave); font-weight: 400; font-size: 12px; }
+    .rank-track { height: 9px; border-radius: 5px; background: #EEF1F5; overflow: hidden; }
+    .rank-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--laranja), var(--laranja-escuro)); }
+    .rank-count { font-family: var(--font-display); font-weight: 700; font-size: 16px; color: var(--laranja-escuro); text-align: right; }
+    .search { display: inline-flex; align-items: center; gap: 8px; background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 8px 12px; min-width: 260px; }
+    .search:focus-within { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(18,80,154,.10); }
+    .search input { border: none; outline: none; font-family: var(--font-display); font-size: 13.5px; width: 100%; color: var(--texto); background: none; }
+    .search svg { width: 15px; height: 15px; color: var(--texto-suave); }
+    .tbl { width: 100%; border-collapse: collapse; }
+    .tbl th { text-align: left; padding: 12px 14px; font-family: var(--font-display); font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); background: var(--bg); border-bottom: 1px solid var(--borda); white-space: nowrap; }
+    .tbl td { padding: 12px 14px; border-bottom: 1px solid var(--borda); font-size: 13px; color: var(--texto); vertical-align: middle; }
+    .tbl tbody tr:last-child td { border-bottom: none; }
+    .tbl tbody tr { cursor: pointer; }
+    .tbl tbody tr:hover td { background: var(--azul-claro); }
+    .cell-name { display: flex; align-items: center; gap: 11px; }
+    .row-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(160deg, var(--azul), var(--laranja)); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 11px; flex-shrink: 0; }
+    .muted { color: var(--texto-suave); }
+    .eye-btn { border: 1px solid var(--borda); background: var(--branco); border-radius: 8px; cursor: pointer; color: var(--laranja); padding: 6px; display: inline-flex; }
+    .eye-btn:hover { border-color: var(--laranja); background: var(--laranja-bg); }
+    .eye-btn svg { width: 16px; height: 16px; }
+    .tbl-wrap { border: 1px solid var(--borda); border-radius: var(--raio); overflow: hidden; }
+
+    .overlay { position: fixed; inset: 0; background: rgba(15,23,32,.5); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .overlay.open { opacity: 1; pointer-events: auto; }
+    .modal { background: var(--branco); border-radius: var(--raio); width: 560px; max-width: 100%; max-height: 92vh; overflow: hidden; display: flex; flex-direction: column; transform: translateY(12px) scale(.98); transition: transform .2s; box-shadow: 0 24px 60px rgba(15,23,32,.28); }
+    .overlay.open .modal { transform: none; }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--borda); background: var(--bg); }
+    .modal-head .t { font-family: var(--font-display); font-weight: 600; font-size: 16px; color: var(--texto); }
+    .modal-close { border: 1px solid var(--borda); background: var(--branco); border-radius: 8px; cursor: pointer; color: var(--texto-suave); padding: 7px; display: flex; }
+    .modal-close:hover { border-color: var(--azul); color: var(--azul); }
+    .modal-close svg { width: 16px; height: 16px; }
+    .modal-body { padding: 22px; overflow-y: auto; }
+    .mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+    @media (max-width: 520px){ .mgrid { grid-template-columns: 1fr; } }
+    .mfield .l { font-family: var(--font-display); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); margin-bottom: 5px; }
+    .mfield .v { font-size: 14px; color: var(--texto); font-weight: 500; }
+    .desc-box { border: 1px solid var(--borda); background: var(--bg); border-radius: var(--raio-sm); padding: 14px 16px; font-size: 13.5px; line-height: 1.6; color: var(--texto); }
+    .desc-lbl { font-family: var(--font-display); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); margin-bottom: 8px; }
+    .help-btn { position: fixed; bottom: 20px; right: 20px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+  </style>
+  <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="logo.png" alt="Rede Municipal" class="logo-img" />
+    <span class="portal-tag">Painel Pedagógico</span>
+  </div>
+  <nav class="nav">
+    <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
+    <a href="turmas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/></svg> Escolas</a>
+    <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg> Servidores</a>
+    <a href="ocorrencias.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Ocorrências</a>
+    <a href="calendario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendário</a>
+    <a href="comunicacao.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Comunicação</a>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Suporte</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 5.34L3.93 6.75M21 12h-2M5 12H3M19.07 19.07l-1.41-1.41M5.34 18.66l-1.41 1.41M12 19v2M12 3V1"/></svg> Configurações</div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sair da conta</div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <svg class="page-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div><div class="topbar-title">Ocorrências</div><div class="topbar-sub">Registros pedagógicos da rede · Porto Seguro/BA</div></div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-info"><div class="user-name">Ana Ribeiro</div><div class="user-role">Secretaria de Educação</div></div>
+      <div class="avatar">AR</div>
+    </div>
+  </div>
+
+  <div class="view-wrap">
+    <div class="content">
+      <div class="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>As ocorrências são registradas pelo professor(a) da turma e referem-se a situações ocorridas em sala de aula. Este painel é somente para acompanhamento pedagógico da Secretaria.</span>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-ic" style="background:var(--laranja-bg);color:var(--laranja-escuro)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><div class="val" id="kTotal">0</div><div class="lbl">Ocorrências no mês</div></div></div>
+        <div class="kpi"><div class="kpi-ic" style="background:var(--azul-claro);color:var(--azul)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg></div><div><div class="val" id="kEscolas">0</div><div class="lbl">Escolas com registro</div></div></div>
+        <div class="kpi"><div class="kpi-ic" style="background:var(--verde-bg);color:#2E8B00"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg></div><div><div class="val" id="kProf">0</div><div class="lbl">Professores registrantes</div></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">Escolas com mais ocorrências</div><div class="card-hint">No mês de agosto/2026</div></div>
+        <div class="rank" id="rank"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Últimas ocorrências</div>
+          <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="busca" placeholder="Buscar por envolvido, turma ou escola" oninput="renderTabela()" aria-label="Buscar" /></label>
+        </div>
+        <div class="tbl-wrap"><table class="tbl">
+          <thead><tr><th>Envolvido(s)</th><th>Escola</th><th>Turma</th><th>Data</th><th style="text-align:right;">Ver</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="if(event.target===this)fechar()">
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle"></div>
+</div>
+<div class="help-btn">?</div>
+
+<script>
+const iniciais = n => n.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+const svgP = (p,c=16) => `<svg viewBox="0 0 24 24" width="${c}" height="${c}" fill="none" stroke="currentColor" stroke-width="2">${p}</svg>`;
+const pad2 = n => String(n).padStart(2,'0');
+
+const NOMES_ESC = [
+'E.M. Cidade Alta','E.M. Baianão','E.M. Frei Calixto',"E.M. Arraial d'Ajuda",'E.M. Trancoso','E.M. Vera Cruz','E.M. Pindorama','E.M. Coroa Vermelha','E.M. Caraíva','E.M. Taperapuã',
+'E.M. Cambolo','E.M. Juçara','E.M. Mirante','E.M. Nova Brasília','E.M. Monte Pascoal','E.M. Pataxó','E.M. Barra Velha','E.M. Santo André','E.M. Santa Cruz','E.M. Paulo Freire',
+'E.M. Anísio Teixeira','E.M. Castro Alves','E.M. Rui Barbosa','E.M. Monteiro Lobato','E.M. Zumbi dos Palmares','E.M. Chico Mendes','E.M. Boa Esperança','E.M. Campo Verde'
+];
+const ALUNOS = ['Lucas','Mariana','Pedro','Beatriz','Gabriel','Letícia','Rafael','Júlia','Enzo','Sofia','Matheus','Helena','Davi','Valentina','Miguel','Laura','Arthur','Alice','Bernardo','Manuela','Théo','Cecília','Heitor','Isabela','Gustavo','Lorena','Felipe','Ana Clara','Vinícius','Yasmin'];
+const SOBREN = ['Silva','Souza','Oliveira','Santos','Rocha','Fontes','Melo','Prado','Nunes','Alves','Farias','Menezes','Ribeiro','Gomes','Castro','Duarte'];
+const PROF = ['Ana Ribeiro','Bruno Farias','Carla Menezes','Diego Prado','Elaine Gomes','Fábio Nunes','Gisele Alves','Hugo Castro','Iara Duarte','Marta Rocha','Otávio Melo','Paula Souza','Rafael Santos','Sônia Fontes'];
+const TURMAS = ['3º ANO A','4º ANO B','5º ANO A','6º ANO A','7º ANO B','8º ANO A','9º ANO A','2º ANO A'];
+const DISCS = ['Língua Portuguesa','Matemática','Ciências','História','Geografia','Educação Física','Arte','Ensino Religioso'];
+const TIPOS = [
+  { rot:'Conflito entre estudantes', texto: a=>`Durante a aula, ${a} envolveu-se em uma discussão que evoluiu para bate-boca com um colega. A situação foi contida pela professora e os responsáveis foram comunicados.` },
+  { rot:'Desrespeito ao professor', texto: a=>`O(a) estudante ${a} respondeu de forma desrespeitosa à orientação da professora e recusou-se a realizar a atividade proposta em sala.` },
+  { rot:'Briga em sala de aula', texto: a=>`Houve um princípio de briga envolvendo ${a} e outro estudante durante a troca de aulas. A coordenação foi acionada e ambos foram encaminhados à direção.` },
+  { rot:'Suspensão', texto: a=>`Após reincidência de comportamento inadequado em sala, ${a} recebeu suspensão de um dia letivo, conforme regimento escolar. Os responsáveis assinaram ciência.` },
+  { rot:'Uso indevido de celular', texto: a=>`O(a) estudante ${a} utilizou o celular durante a atividade avaliativa, contrariando as orientações. O aparelho foi recolhido e devolvido ao responsável.` },
+  { rot:'Saída de sala sem autorização', texto: a=>`${a} deixou a sala de aula sem autorização da professora durante a explicação do conteúdo, sendo posteriormente orientado(a) pela coordenação.` },
+];
+const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+const rr = k => ((k*9301 + 49297*(k%7+1)) % 233280) / 233280;
+let id = 0;
+const OCOR = [];
+for(let i=0;i<47;i++){
+  const escola = NOMES_ESC[Math.floor(rr(i*5+1)*NOMES_ESC.length)];
+  const aluno = ALUNOS[Math.floor(rr(i*5+2)*ALUNOS.length)] + ' ' + SOBREN[Math.floor(rr(i*5+3)*SOBREN.length)];
+  const tipo = TIPOS[Math.floor(rr(i*5+4)*TIPOS.length)];
+  const prof = PROF[Math.floor(rr(i*7+2)*PROF.length)];
+  const turma = TURMAS[Math.floor(rr(i*7+3)*TURMAS.length)];
+  const disc = DISCS[Math.floor(rr(i*7+4)*DISCS.length)];
+  const dia = 1 + Math.floor(rr(i*7+5)*25);
+  OCOR.push({ id:++id, escola, aluno, serie:turma, rot:tipo.rot, texto:tipo.texto(aluno), prof, turma, disc, dia, dataCurta:`${pad2(dia)}/08/2026`, dataLonga:`${dia} de agosto de 2026` });
+}
+OCOR.sort((a,b)=>b.dia-a.dia);
+
+document.getElementById('kTotal').textContent = OCOR.length;
+document.getElementById('kEscolas').textContent = new Set(OCOR.map(o=>o.escola)).size;
+document.getElementById('kProf').textContent = new Set(OCOR.map(o=>o.prof)).size;
+
+function renderRank(){
+  const cont = {}; OCOR.forEach(o=> cont[o.escola]=(cont[o.escola]||0)+1);
+  const arr = Object.entries(cont).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  const max = arr[0][1];
+  document.getElementById('rank').innerHTML = arr.map(([nome,n],i)=>`
+    <div class="rank-row">
+      <div class="rank-pos">${i+1}º</div>
+      <div class="rank-mid">
+        <div class="rank-name"><span>${nome}</span><span class="muted">${n} ocorrência${n>1?'s':''}</span></div>
+        <div class="rank-track"><div class="rank-fill" style="width:${Math.round(n/max*100)}%"></div></div>
+      </div>
+      <div class="rank-count">${n}</div>
+    </div>`).join('');
+}
+
+function renderTabela(){
+  const q = (document.getElementById('busca').value||'').toLowerCase();
+  const lista = OCOR.filter(o=> !q || o.aluno.toLowerCase().includes(q) || o.turma.toLowerCase().includes(q) || o.escola.toLowerCase().includes(q));
+  document.getElementById('tbody').innerHTML = lista.map(o=>`
+    <tr onclick="abrir(${o.id})">
+      <td><div class="cell-name"><span class="row-avatar">${iniciais(o.aluno)}</span><b>${o.aluno}</b></div></td>
+      <td class="muted">${o.escola}</td>
+      <td>${o.turma}</td>
+      <td class="muted">${o.dataCurta}</td>
+      <td style="text-align:right;"><button class="eye-btn" onclick="event.stopPropagation();abrir(${o.id})" aria-label="Ver ocorrência">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',16)}</button></td>
+    </tr>`).join('') || `<tr><td colspan="5" class="muted" style="text-align:center;padding:30px;">Nenhuma ocorrência encontrada.</td></tr>`;
+}
+
+function abrir(oid){
+  const o = OCOR.find(x=>x.id===oid); if(!o) return;
+  document.getElementById('modal').innerHTML = `
+    <div class="modal-head"><div class="t" id="mTitle">Visualizar ocorrência</div>
+      <button class="modal-close" onclick="fechar()" aria-label="Fechar">${svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',16)}</button></div>
+    <div class="modal-body">
+      <div class="mgrid">
+        <div class="mfield"><div class="l">Professor(a)</div><div class="v">${o.prof}</div></div>
+        <div class="mfield"><div class="l">Série / Turma</div><div class="v">${o.serie}</div></div>
+        <div class="mfield"><div class="l">Disciplina</div><div class="v">${o.disc}</div></div>
+        <div class="mfield"><div class="l">Data</div><div class="v">${o.dataLonga}</div></div>
+        <div class="mfield"><div class="l">Escola</div><div class="v">${o.escola}</div></div>
+        <div class="mfield"><div class="l">Envolvido(a)</div><div class="v">${o.aluno}</div></div>
+      </div>
+      <div class="desc-lbl">Sobre a ocorrência</div>
+      <div class="desc-box">${o.texto}</div>
+    </div>`;
+  document.getElementById('overlay').classList.add('open');
+  document.addEventListener('keydown', escHandler);
+}
+function escHandler(e){ if(e.key==='Escape') fechar(); }
+function fechar(){ document.getElementById('overlay').classList.remove('open'); document.removeEventListener('keydown', escHandler); }
+
+renderRank();
+renderTabela();
+</script>
+
+</body>
+</html>

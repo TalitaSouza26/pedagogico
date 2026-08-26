@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Pedagógico — Visão geral</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; display: flex; height: 100vh; overflow: hidden; font-size: 13px; color: #333; }
+    .sidebar { display: flex; flex-direction: column; }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; }
+    .logo-img { width: 104px; height: auto; display: block; }
+    .nav { flex: 1 1 auto; }
+    .nav-item { display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background .15s; text-decoration: none; }
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .logout { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .logout svg { width: 16px; height: 16px; }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 12px; }
+    .user-info { text-align: right; }
+    .cal-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .ctx-left { display: flex; align-items: center; gap: 10px; }
+    .ctx-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 7px 12px; font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--texto); }
+    .ctx-pill svg { width: 15px; height: 15px; color: var(--laranja); }
+    .ctx-pill select { border: none; background: none; font: inherit; color: inherit; cursor: pointer; outline: none; }
+    .sync-stamp { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--texto-suave); }
+    .sync-stamp .live { width: 8px; height: 8px; border-radius: 50%; background: var(--verde); flex-shrink: 0; }
+    .view-wrap { flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--branco); }
+    .content { padding: 26px 34px; }
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; margin: 4px 0 14px; gap: 12px; }
+    .section-title { font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--texto); }
+    .section-hint { font-size: 12px; color: var(--texto-suave); }
+
+    .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 22px; }
+    @media (max-width: 1180px){ .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 680px){ .kpi-row { grid-template-columns: 1fr; } }
+    .kpi-card { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .kpi-left { display: flex; align-items: center; gap: 13px; min-width: 0; }
+    .kpi-ic { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .kpi-ic svg { width: 21px; height: 21px; }
+    .kpi-label { font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--texto-suave); line-height: 1.3; }
+    .kpi-sub { font-size: 10.5px; color: #9AA1AB; margin-top: 2px; }
+    .kpi-value { font-family: var(--font-display); font-weight: 800; font-size: 30px; color: var(--laranja); line-height: 1; white-space: nowrap; }
+    .ic-azul { background: var(--azul-claro); color: var(--azul); }
+    .ic-roxo { background: #EFEAF7; color: #6B3FA0; }
+    .ic-verde { background: var(--verde-bg); color: #2E8B00; }
+    .ic-laranja { background: var(--laranja-bg); color: var(--laranja-escuro); }
+    .ic-ambar { background: #FDF3D9; color: var(--ambar-escuro); }
+
+    .panel { background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio); padding: 20px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 1000px){ .grid-2 { grid-template-columns: 1fr; } }
+
+    .vm { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+    @media (max-width: 760px){ .vm { grid-template-columns: 1fr; } }
+    .vm-block { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio-sm); padding: 16px 18px; }
+    .vm-label { font-family: var(--font-display); font-size: 12px; color: var(--texto-suave); display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .vm-num { font-family: var(--font-display); font-weight: 800; font-size: 30px; color: var(--azul); line-height: 1; transition: transform .18s ease; display: inline-block; }
+    .vm-num.orange { color: var(--laranja); }
+    .vm-num.verde { color: #2E8B00; }
+    .vm-sub { font-size: 11px; color: #9AA1AB; margin-top: 10px; }
+    .live-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--verde); flex-shrink: 0; box-shadow: 0 0 0 0 rgba(61,194,0,.5); animation: pulse 1.8s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(61,194,0,.5); } 70% { box-shadow: 0 0 0 8px rgba(61,194,0,0); } 100% { box-shadow: 0 0 0 0 rgba(61,194,0,0); } }
+    .occ-top { display: flex; justify-content: space-between; gap: 12px; font-size: 12.5px; color: var(--texto-suave); margin-bottom: 8px; flex-wrap: wrap; }
+    .occ-top b { color: var(--texto); font-family: var(--font-display); }
+    .occ-track { height: 10px; border-radius: 5px; background: #ECEFF4; overflow: hidden; }
+    .occ-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--laranja), var(--azul)); }
+
+    .donut-wrap { display: flex; align-items: center; gap: 26px; flex-wrap: wrap; }
+    .donut { position: relative; width: 190px; height: 190px; border-radius: 50%; flex-shrink: 0; }
+    .donut::after { content: ''; position: absolute; inset: 42px; background: var(--bg); border-radius: 50%; }
+    .donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; }
+    .donut-center .dc-lbl { font-size: 12px; color: var(--texto-suave); }
+    .donut-center .dc-val { font-family: var(--font-display); font-weight: 800; font-size: 28px; color: var(--texto); line-height: 1.1; }
+    .donut-legend { flex: 1; min-width: 200px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 22px; }
+    .dl-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+    .dl-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .dl-name { color: var(--texto-suave); }
+    .dl-num { margin-left: auto; font-family: var(--font-display); font-weight: 700; color: var(--texto); }
+
+    .help-btn { position: fixed; bottom: 20px; right: 20px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+  </style>
+  <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="logo.png" alt="Rede Municipal" class="logo-img" />
+    <span class="portal-tag">Painel Pedagógico</span>
+  </div>
+  <nav class="nav">
+    <a href="index.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
+    <a href="turmas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/></svg> Escolas</a>
+    <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Servidores</a>
+    <a href="ocorrencias.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Ocorrências</a>
+    <a href="calendario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendário</a>
+    <a href="comunicacao.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Comunicação</a>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Suporte</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 5.34L3.93 6.75M21 12h-2M5 12H3M19.07 19.07l-1.41-1.41M5.34 18.66l-1.41 1.41M12 19v2M12 3V1"/></svg> Configurações</div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sair da conta</div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <svg class="page-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <div><div class="topbar-title">Visão geral</div><div class="topbar-sub">Rede Municipal de Ensino · Porto Seguro/BA</div></div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-info"><div class="user-name">Ana Ribeiro</div><div class="user-role">Secretaria de Educação</div></div>
+      <div class="avatar">AR</div>
+    </div>
+  </div>
+
+  <div class="cal-header">
+    <div class="ctx-left">
+      <span class="ctx-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg> Rede municipal · todas as escolas</span>
+      <span class="ctx-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+        <select aria-label="Período"><option>2026 · 3º bimestre</option><option>2026 · 2º bimestre</option><option>2026 · 1º bimestre</option></select>
+      </span>
+    </div>
+    <span class="sync-stamp"><span class="live"></span> Dados de 06/08/2026</span>
+  </div>
+
+  <div class="view-wrap">
+    <div class="content">
+      <div class="kpi-row" id="kpiRow"></div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="section-head"><div class="section-title">Vagas e matrículas</div><div class="section-hint">Rede municipal</div></div>
+          <div class="vm">
+            <div class="vm-block"><div class="vm-label">Vagas ofertadas na rede</div><div class="vm-num" id="vagas">34.560</div><div class="vm-sub">nas 60 escolas do município</div></div>
+            <div class="vm-block"><div class="vm-label">Vagas disponíveis</div><div class="vm-num verde">3.080</div><div class="vm-sub">livres para matrícula</div></div>
+            <div class="vm-block"><div class="vm-label"><span class="live-dot"></span> Matrículas hoje · tempo real</div><div class="vm-num orange" id="hoje">15</div><div class="vm-sub">atualizado agora</div></div>
+          </div>
+          <div class="occ">
+            <div class="occ-top"><span>Ocupação da rede</span><span><b id="ativas">31.480</b> / 34.560 vagas · <b>91,1%</b></span></div>
+            <div class="occ-track"><div class="occ-fill" style="width:91.1%"></div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="section-head"><div class="section-title">Usuários por cargo</div><div class="section-hint">Com acesso ao sistema</div></div>
+          <div class="donut-wrap">
+            <div class="donut" id="donut"><div class="donut-center"><span class="dc-lbl">Usuários</span><span class="dc-val" id="donutTotal"></span></div></div>
+            <div class="donut-legend" id="donutLegend"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:20px;">
+        <div class="section-head"><div class="section-title">Frequência ao longo do ano</div><div class="section-hint">Meta da rede: 92%</div></div>
+        <div id="lineChart"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="help-btn">?</div>
+
+<script>
+const fmt = n => n.toLocaleString('pt-BR');
+const svgIc = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${p}</svg>`;
+const KPIS = [
+  { label:'Número de escolas', valor:'60', sub:'na rede municipal', ic:'azul', p:'<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/>' },
+  { label:'Alunos matriculados', valor:'31.480', sub:'matrículas ativas', ic:'roxo', p:'<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>' },
+  { label:'Frequência média', valor:'91,2%', sub:'meta 92%', ic:'verde', p:'<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>' },
+  { label:'Usuários', valor:'1.070', sub:'com acesso ao sistema', ic:'laranja', p:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/>' },
+  { label:'Ocorrências', valor:'47', sub:'registradas no período', ic:'ambar', p:'<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>' },
+  { label:'Responsáveis cadastrados', valor:'22.660', sub:'vinculados a alunos', ic:'roxo', p:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>' },
+];
+document.getElementById('kpiRow').innerHTML = KPIS.map(k=>`
+  <div class="kpi-card"><div class="kpi-left"><div class="kpi-ic ic-${k.ic}">${svgIc(k.p)}</div>
+    <div><div class="kpi-label">${k.label}</div><div class="kpi-sub">${k.sub}</div></div></div>
+    <div class="kpi-value">${k.valor}</div></div>`).join('');
+
+/* matrículas hoje (tempo real, simulado) */
+let hoje = 15; const elHoje = document.getElementById('hoje');
+setInterval(()=>{ if(Math.random()<0.55){ hoje++; elHoje.textContent = hoje; elHoje.style.transform='scale(1.08)'; setTimeout(()=>elHoje.style.transform='scale(1)',180); } }, 4000);
+
+/* usuários por cargo */
+const CARGOS = [
+  { nome:'Professores', n:812, cor:'#12509A' },
+  { nome:'Coordenadores', n:96, cor:'#ED6939' },
+  { nome:'Secretaria', n:74, cor:'#F0B429' },
+  { nome:'Vice-diretores', n:54, cor:'#6B3FA0' },
+  { nome:'Diretores', n:34, cor:'#D6409F' },
+];
+const totCargo = CARGOS.reduce((s,c)=>s+c.n,0);
+document.getElementById('donutTotal').textContent = fmt(totCargo);
+let acc = 0;
+const stops = CARGOS.map(c=>{ const a=acc/totCargo*100, b=(acc+c.n)/totCargo*100; acc+=c.n; return `${c.cor} ${a}% ${b}%`; }).join(', ');
+document.getElementById('donut').style.background = `conic-gradient(${stops})`;
+document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl-item"><span class="dl-dot" style="background:${c.cor}"></span><span class="dl-name">${c.nome}</span><span class="dl-num">${c.n}</span></div>`).join('');
+
+/* frequência ao longo do ano */
+(function(){
+  const SERIE=[88.9,89.4,90.1,90.6,90.4,91.0,90.8,91.2], META=92;
+  const w=880,h=210,pl=34,pr=16,pt=16,pb=28, min=82,max=96,rg=max-min;
+  const meses=['jan','fev','mar','abr','mai','jun','jul','ago'];
+  const x=i=>pl+(i/(SERIE.length-1))*(w-pl-pr), y=v=>pt+(1-(v-min)/rg)*(h-pt-pb);
+  const pts=SERIE.map((v,i)=>`${x(i)},${y(v)}`).join(' '), metaY=y(META);
+  const lastBelow=SERIE[SERIE.length-1]<META;
+  document.getElementById('lineChart').innerHTML=`
+  <svg viewBox="0 0 ${w} ${h}" width="100%" role="img" aria-label="Frequência mensal de ${SERIE[0]}% a ${SERIE[SERIE.length-1]}%, meta ${META}%.">
+    ${[86,90,94].map(g=>`<line x1="${pl}" y1="${y(g)}" x2="${w-pr}" y2="${y(g)}" stroke="#E4E8EE"/><text x="4" y="${y(g)+4}" font-size="10" fill="#9AA1AB" font-family="Inter,sans-serif">${g}%</text>`).join('')}
+    <line x1="${pl}" y1="${metaY}" x2="${w-pr}" y2="${metaY}" stroke="#ED6939" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="${w-pr}" y="${metaY-6}" font-size="10" fill="#ED6939" text-anchor="end" font-family="Inter,sans-serif">meta 92%</text>
+    <polyline points="${pts}" fill="none" stroke="#12509A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${SERIE.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="${i===SERIE.length-1?5:3}" fill="${i===SERIE.length-1&&lastBelow?'#ED6939':'#12509A'}"/>`).join('')}
+    ${meses.map((m,i)=>`<text x="${x(i)}" y="${h-8}" font-size="10" fill="#9AA1AB" text-anchor="middle" font-family="Inter,sans-serif">${m}</text>`).join('')}
+  </svg>`;
+})();
+</script>
+
+</body>
+</html>

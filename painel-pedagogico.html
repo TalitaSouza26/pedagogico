@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Pedagógico — Rede Municipal</title>
+
+  <!-- Estilos de LAYOUT (estrutura). O theme.css abaixo pinta por cima e
+       define os tokens (cores, fontes, raios) — igual ao eProf. -->
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif; /* sobrescrito pelo theme.css */
+      display: flex; height: 100vh; overflow: hidden;
+      font-size: 13px; color: #333;
+    }
+
+    /* ---- SIDEBAR (estrutura; skin vem do theme.css) ---- */
+    .sidebar { display: flex; flex-direction: column; }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; }
+    .nav { flex: 1 1 auto; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer; transition: background .15s;
+      user-select: none;
+    }
+    .nav-item svg { flex-shrink: 0; }
+    .nav-item.disabled { opacity: .45; pointer-events: none; }
+    .sidebar-bottom {}
+    .logout { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+
+    /* ---- MAIN / TOPBAR (estrutura) ---- */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; flex-shrink: 0;
+    }
+    .user-info { text-align: right; }
+
+    /* ---- barra secundária (reusa .cal-header do theme) ---- */
+    .cal-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+    /* ---- área de conteúdo rolável ---- */
+    .view-wrap { flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--branco); }
+    .content { padding: 26px 34px; }
+
+    /* =========================================================
+       COMPONENTES DO PAINEL — construídos com os tokens do eProf
+       ========================================================= */
+
+    /* --- controles da barra secundária --- */
+    .ctl {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--branco); border: 1px solid var(--borda);
+      border-radius: 10px; padding: 7px 12px;
+      font-family: var(--font-display); font-size: 13px; font-weight: 500;
+      color: var(--texto); cursor: pointer;
+    }
+    .ctl:hover { border-color: var(--azul); color: var(--azul); }
+    .ctl select { border: none; background: none; font: inherit; color: inherit; cursor: pointer; outline: none; }
+    .ctl svg { width: 15px; height: 15px; }
+    .ctl.ghost { color: var(--texto-suave); }
+    .ctl[disabled] { opacity: .5; pointer-events: none; }
+    .sync-stamp { font-size: 12px; color: var(--texto-suave); display: inline-flex; align-items: center; gap: 6px; }
+    .sync-stamp .live { width: 8px; height: 8px; border-radius: 50%; background: var(--verde); }
+
+    /* --- banner de dados parciais / sincronização --- */
+    .data-note {
+      display: flex; align-items: center; gap: 10px;
+      background: #FFF8F0; border: 1px solid #F3D9BE;
+      color: var(--ambar-escuro);
+      border-radius: var(--raio-sm); padding: 10px 14px;
+      font-size: 12.5px; margin-bottom: 20px;
+    }
+    .data-note svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .data-note.info { background: var(--azul-claro); border-color: #C8DCF3; color: var(--azul); }
+
+    /* --- título de seção --- */
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; margin: 6px 0 14px; }
+    .section-title { font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--texto); }
+    .section-sub { font-size: 12px; color: var(--texto-suave); }
+    .section-hint { font-size: 12px; color: var(--texto-suave); }
+
+    /* --- RÉGUA DE INDICADORES (faixa única com hairlines) --- */
+    .regua {
+      display: grid; grid-template-columns: repeat(6, 1fr);
+      background: var(--branco); border: 1px solid var(--borda);
+      border-radius: var(--raio); overflow: hidden; margin-bottom: 26px;
+    }
+    .regua-cell { padding: 16px 18px; border-left: 1px solid var(--borda); }
+    .regua-cell:first-child { border-left: none; }
+    .regua-label { font-family: var(--font-display); font-size: 12px; color: var(--texto-suave); margin-bottom: 8px; }
+    .regua-value { font-family: var(--font-display); font-weight: 800; font-size: 26px; color: var(--azul); line-height: 1; }
+    .regua-value.alerta { color: var(--laranja); }
+    .regua-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+    .regua-delta { font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; }
+    .delta-good { color: #2E8B00; }
+    .delta-bad { color: var(--vermelho); }
+    .delta-flat { color: var(--texto-suave); }
+    .regua-refdate { font-size: 10.5px; color: #9AA1AB; margin-top: 6px; }
+
+    /* --- painéis / cartões --- */
+    .panel { background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio); padding: 20px; }
+    .panel + .panel { margin-top: 20px; }
+    .panel-white { background: var(--branco); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-2.wide-first { grid-template-columns: 1.4fr 1fr; }
+    @media (max-width: 1100px){ .grid-2, .grid-2.wide-first { grid-template-columns: 1fr; } }
+
+    /* --- barras de frequência por escola (2 colunas) --- */
+    .freq-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 28px; }
+    @media (max-width: 900px){ .freq-cols { grid-template-columns: 1fr; } }
+    .freq-row {
+      display: grid; grid-template-columns: 1fr 46px; align-items: center; gap: 10px;
+      padding: 7px 8px; border-radius: 8px; cursor: pointer; border: 1px solid transparent;
+      background: none; width: 100%; text-align: left; font: inherit; color: inherit;
+    }
+    .freq-row:hover { background: var(--azul-claro); border-color: #D3E2F5; }
+    .freq-name { font-size: 12.5px; color: var(--texto); margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+    .freq-track { height: 8px; border-radius: 4px; background: #ECEFF4; overflow: hidden; }
+    .freq-bar { height: 100%; border-radius: 4px; }
+    .freq-val { font-family: var(--font-display); font-weight: 700; font-size: 13px; text-align: right; }
+    .band-verde { background: var(--verde); } .band-verde-t { color: #2E8B00; }
+    .band-azul  { background: var(--azul); }  .band-azul-t  { color: var(--azul); }
+    .band-ambar { background: var(--amarelo); } .band-ambar-t { color: var(--ambar-escuro); }
+    .band-vermelho { background: var(--vermelho); } .band-vermelho-t { color: var(--vermelho); }
+
+    /* --- barras verticais (etapa / ano) --- */
+    .vbars { display: flex; align-items: flex-end; gap: 14px; height: 180px; padding-top: 10px; }
+    .vbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 8px; }
+    .vbar { width: 100%; max-width: 46px; border-radius: 8px 8px 4px 4px; background: linear-gradient(180deg, var(--laranja), var(--laranja-escuro)); }
+    .vbar.blue { background: linear-gradient(180deg, var(--azul), var(--azul-escuro)); }
+    .vbar-num { font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--texto); }
+    .vbar-lbl { font-size: 11px; color: var(--texto-suave); text-align: center; line-height: 1.3; }
+
+    /* --- legenda --- */
+    .chart-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; }
+    .chart-legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--texto-suave); }
+    .chart-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+    /* --- contadores de cargo (dashboard escola) --- */
+    .cargo-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+    @media (max-width: 1100px){ .cargo-grid { grid-template-columns: repeat(3, 1fr); } }
+    .cargo-card {
+      background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio-sm);
+      padding: 16px; cursor: pointer; text-align: left; font: inherit;
+      transition: border-color .15s, box-shadow .15s, transform .15s;
+    }
+    .cargo-card:hover { border-color: var(--laranja); box-shadow: 0 4px 14px rgba(237,105,57,.14); transform: translateY(-1px); }
+    .cargo-num { font-family: var(--font-display); font-weight: 800; font-size: 28px; color: var(--azul); line-height: 1; }
+    .cargo-card.vaga .cargo-num { color: var(--laranja); }
+    .cargo-lbl { font-size: 12px; color: var(--texto-suave); margin-top: 8px; }
+
+    /* --- ficha da unidade --- */
+    .ficha { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px 20px; }
+    @media (max-width: 900px){ .ficha { grid-template-columns: repeat(2, 1fr); } }
+    .ficha-item .info-label { display: block; margin-bottom: 3px; }
+    .ficha-item .info-value { font-weight: 500; }
+
+    /* --- tabela genérica --- */
+    .tbl { width: 100%; border-collapse: collapse; }
+    .tbl th {
+      text-align: left; padding: 11px 12px; font-family: var(--font-display);
+      font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+      color: var(--texto-suave); background: var(--bg); border-bottom: 1px solid var(--borda);
+      cursor: pointer; white-space: nowrap;
+    }
+    .tbl th.no-sort { cursor: default; }
+    .tbl th .arrow { opacity: .4; font-size: 10px; }
+    .tbl td { padding: 12px; border-bottom: 1px solid var(--borda); font-size: 13px; color: var(--texto); vertical-align: middle; }
+    .tbl tbody tr { cursor: pointer; }
+    .tbl tbody tr:hover td { background: var(--azul-claro); }
+    .tbl-wrap { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); overflow: hidden; }
+    .row-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(160deg, var(--laranja), var(--azul)); color: #fff;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-weight: 700; font-size: 11px; flex-shrink: 0;
+    }
+    .cell-name { display: flex; align-items: center; gap: 10px; }
+    .cell-name b { font-weight: 600; }
+    .muted { color: var(--texto-suave); }
+
+    /* --- selos de situação / vínculo --- */
+    .badge { border-radius: 20px; font-family: var(--font-display); font-weight: 600; font-size: 11px; padding: 3px 10px; display: inline-block; white-space: nowrap; }
+    .b-exercicio { background: var(--verde-bg); color: #2E8B00; }
+    .b-licenca   { background: #FDF3D9; color: var(--ambar-escuro); }
+    .b-afastado  { background: #FDE9E9; color: var(--vermelho); }
+    .b-cedido    { background: var(--azul-claro); color: var(--azul); }
+    .b-efetivo   { background: var(--azul-claro); color: var(--azul); }
+    .b-contrato  { background: var(--laranja-bg); color: var(--laranja-escuro); }
+    .b-designado { background: #EFEAF7; color: #6B3FA0; }
+    .b-baixa { background: var(--verde-bg); color: #2E8B00; }
+    .b-media { background: #FDF3D9; color: var(--ambar-escuro); }
+    .b-alta  { background: #FDE9E9; color: var(--vermelho); }
+    .b-aberta { background: #FDE9E9; color: var(--vermelho); }
+    .b-analise { background: #FDF3D9; color: var(--ambar-escuro); }
+    .b-encerrada { background: var(--verde-bg); color: #2E8B00; }
+
+    /* --- toolbar de tabela (busca + paginação) --- */
+    .tbl-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .search {
+      display: inline-flex; align-items: center; gap: 8px; background: var(--branco);
+      border: 1px solid var(--borda); border-radius: 10px; padding: 8px 12px; min-width: 260px;
+    }
+    .search:focus-within { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(18,80,154,.10); }
+    .search input { border: none; outline: none; font-family: var(--font-display); font-size: 13.5px; width: 100%; color: var(--texto); background: none; }
+    .search svg { width: 15px; height: 15px; color: var(--texto-suave); }
+    .pager { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--texto-suave); }
+    .pager button {
+      border: 1px solid var(--borda); background: var(--branco); border-radius: 8px;
+      padding: 5px 10px; cursor: pointer; color: var(--texto-suave); font-size: 13px;
+    }
+    .pager button:hover:not(:disabled) { border-color: var(--azul); color: var(--azul); }
+    .pager button:disabled { opacity: .4; cursor: default; }
+
+    /* --- PAINEL LATERAL DO SERVIDOR --- */
+    .overlay { position: fixed; inset: 0; background: rgba(15,23,32,.45); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; }
+    .overlay.open { opacity: 1; pointer-events: auto; }
+    .servidor-panel {
+      position: fixed; top: 0; right: 0; height: 100vh; width: 486px; max-width: 92vw;
+      background: var(--branco); border-left: 1px solid var(--borda);
+      box-shadow: -8px 0 30px rgba(15,23,32,.12);
+      transform: translateX(100%); transition: transform .24s ease; z-index: 41;
+      display: flex; flex-direction: column;
+    }
+    .servidor-panel.open { transform: translateX(0); }
+    .sp-head { padding: 22px 24px 18px; border-bottom: 1px solid var(--borda); position: relative; }
+    .sp-close { position: absolute; top: 16px; right: 16px; border: none; background: none; cursor: pointer; color: var(--texto-suave); border-radius: 8px; padding: 6px; }
+    .sp-close:hover { background: var(--bg); color: var(--texto); }
+    .sp-avatar {
+      width: 60px; height: 60px; border-radius: 16px;
+      background: linear-gradient(160deg, var(--laranja), var(--azul)); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-weight: 800; font-size: 20px; margin-bottom: 14px;
+    }
+    .sp-name { font-family: var(--font-display); font-weight: 700; font-size: 20px; color: var(--texto); }
+    .sp-cargo { font-size: 13px; color: var(--texto-suave); margin-top: 2px; }
+    .sp-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .sp-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+    .sp-block { margin-bottom: 22px; }
+    .sp-block h4 { font-family: var(--font-display); font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--texto-suave); margin-bottom: 12px; }
+    .sp-kv { display: grid; grid-template-columns: 130px 1fr; gap: 8px 14px; font-size: 13px; }
+    .sp-kv .k { color: var(--texto-suave); }
+    .sp-kv .v { color: var(--texto); font-weight: 500; }
+    .sp-lot { background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio-sm); padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .sp-lot .nome { font-size: 13px; font-weight: 500; }
+    .sp-lot .ch { font-size: 12px; color: var(--texto-suave); }
+    .sp-foot { padding: 14px 24px; border-top: 1px solid var(--borda); font-size: 11.5px; color: var(--texto-suave); background: var(--bg); line-height: 1.5; }
+    .sp-foot svg { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; color: var(--texto-suave); }
+
+    /* --- matriz de rotinas --- */
+    .matrix { width: 100%; border-collapse: separate; border-spacing: 6px; }
+    .matrix th { font-family: var(--font-display); font-size: 12px; font-weight: 600; color: var(--texto-suave); padding: 4px; text-align: center; }
+    .matrix td.rot-name { text-align: left; font-size: 13px; color: var(--texto); font-weight: 500; padding-right: 12px; white-space: nowrap; }
+    .mcell {
+      border-radius: 10px; padding: 12px 6px; text-align: center; font-family: var(--font-display);
+      font-weight: 700; font-size: 15px; min-width: 76px; border: 1px solid transparent;
+    }
+    .mcell small { display: block; font-size: 10px; font-weight: 500; opacity: .85; margin-top: 2px; }
+    .m-quase { background: var(--verde-bg); color: #2E8B00; }
+    .m-faltam { background: #FDF3D9; color: var(--ambar-escuro); }
+    .m-baixo { background: #FDE9E9; color: var(--vermelho); }
+    .m-na { background: var(--bg); color: #9AA1AB; }
+    .m-sim { background: var(--verde-bg); color: #2E8B00; }
+    .m-nao { background: #FDE9E9; color: var(--vermelho); }
+
+    /* --- calendário --- */
+    .cal-month { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .cal-dow { text-align: center; font-family: var(--font-display); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); padding: 4px 0; }
+    .cal-day { background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; min-height: 96px; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+    .cal-day.out { background: var(--bg); opacity: .55; }
+    .cal-day.today { border-color: var(--laranja); background: var(--laranja-bg); }
+    .cal-daynum { font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--texto); }
+    .cal-ev { font-size: 10.5px; padding: 2px 6px; border-radius: 5px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cat-letivo { background: var(--azul); }
+    .cat-avaliacao { background: var(--vermelho); }
+    .cat-formacao { background: #6B3FA0; }
+    .cat-reuniao { background: var(--laranja); }
+    .cat-prazo { background: var(--ambar-escuro); }
+    .upnext { display: flex; flex-direction: column; gap: 10px; }
+    .upnext-item { display: flex; gap: 12px; align-items: flex-start; }
+    .upnext-date { width: 44px; text-align: center; flex-shrink: 0; }
+    .upnext-date .d { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--texto); }
+    .upnext-date .m { font-size: 10px; text-transform: uppercase; color: var(--texto-suave); }
+    .upnext-body .t { font-size: 13px; font-weight: 500; color: var(--texto); }
+    .upnext-body .s { font-size: 11.5px; color: var(--texto-suave); margin-top: 2px; }
+    .cat-pill { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+
+    /* --- comunicados --- */
+    .comm-item { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 16px 18px; margin-bottom: 12px; }
+    .comm-item.urgente { border-left: 4px solid var(--vermelho); }
+    .comm-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+    .comm-title { font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--texto); }
+    .comm-dest { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+    .dest-rede { background: var(--azul-claro); color: var(--azul); }
+    .dest-escola { background: var(--laranja-bg); color: var(--laranja-escuro); }
+    .dest-pessoa { background: #EFEAF7; color: #6B3FA0; }
+    .comm-body { font-size: 13px; color: var(--texto-suave); line-height: 1.55; margin-bottom: 12px; }
+    .comm-conf { display: flex; align-items: center; gap: 12px; }
+    .conf-track { flex: 1; height: 8px; background: #ECEFF4; border-radius: 4px; overflow: hidden; max-width: 320px; }
+    .conf-fill { height: 100%; background: var(--verde); border-radius: 4px; }
+    .conf-txt { font-size: 12px; color: var(--texto-suave); }
+    .comm-meta { font-size: 11.5px; color: #9AA1AB; }
+
+    /* --- estados --- */
+    .state-box { text-align: center; padding: 60px 20px; color: var(--texto-suave); }
+    .state-box svg { width: 44px; height: 44px; color: #C7CDD4; margin-bottom: 14px; }
+    .state-box h3 { font-family: var(--font-display); font-weight: 600; font-size: 16px; color: var(--texto); margin-bottom: 6px; }
+    .state-box p { font-size: 13px; max-width: 420px; margin: 0 auto 16px; }
+    .skel { background: linear-gradient(90deg, #EEF1F5 25%, #E3E7ED 37%, #EEF1F5 63%); background-size: 400% 100%; animation: shimmer 1.3s infinite; border-radius: 10px; }
+    @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+    .skel-regua { height: 110px; margin-bottom: 26px; }
+    .skel-line { height: 16px; margin-bottom: 12px; }
+
+    /* --- acessibilidade / foco --- */
+    a, button, [tabindex] { outline: none; }
+    a:focus-visible, button:focus-visible, [tabindex]:focus-visible, tr:focus-visible {
+      outline: 3px solid rgba(18,80,154,.45); outline-offset: 2px; border-radius: 8px;
+    }
+    .tbl tbody tr:focus-visible td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
+
+    /* --- impressão / PDF --- */
+    @media print {
+      .sidebar, .cal-header, .help-btn, .overlay, .servidor-panel, .no-print { display: none !important; }
+      body, .main, .view-wrap { overflow: visible !important; height: auto !important; display: block !important; }
+      .print-stamp { display: block !important; }
+    }
+    .print-stamp { display: none; padding: 8px 34px; font-size: 12px; color: var(--texto-suave); border-bottom: 1px solid var(--borda); }
+  </style>
+
+  <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+
+<!-- ===================== SIDEBAR ===================== -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="logo.png" alt="Rede Municipal de Ensino" class="logo-img" />
+    <span class="portal-tag">Painel Pedagógico</span>
+  </div>
+
+  <nav class="nav" id="nav">
+    <a class="nav-item" data-nav="rede" href="#/rede">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Visão geral
+    </a>
+    <a class="nav-item" data-nav="escolas" href="#/escolas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/></svg>
+      Escolas
+    </a>
+    <a class="nav-item" data-nav="equipe" href="#/equipe">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Equipe
+    </a>
+    <a class="nav-item" data-nav="ocorrencias" href="#/ocorrencias">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Ocorrências
+    </a>
+    <a class="nav-item" data-nav="rotinas" href="#/rotinas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M9 10l2 2 4-4"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Rotinas
+    </a>
+    <a class="nav-item" data-nav="calendario" href="#/calendario">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Calendário
+    </a>
+    <a class="nav-item" data-nav="comunicacao" href="#/comunicacao">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Comunicação
+    </a>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Suporte
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 5.34L3.93 6.75M21 12h-2M5 12H3M19.07 19.07l-1.41-1.41M5.34 18.66l-1.41 1.41M12 19v2M12 3V1"/></svg>
+      Configurações
+    </div>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="logout">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sair da conta
+    </div>
+  </div>
+</aside>
+
+<!-- ===================== MAIN ===================== -->
+<div class="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <svg class="page-icon" id="pageIcon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <div>
+        <div class="topbar-title" id="pageTitle">Visão geral</div>
+        <div class="topbar-sub" id="pageSub">Rede Municipal de Ensino · Porto Seguro/BA</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <label class="ctl ghost" title="Perfil de acesso (define o escopo dos dados)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <select id="perfilSel" aria-label="Perfil de acesso">
+          <option value="secretario">Secretário de Educação</option>
+          <option value="prefeito">Prefeito</option>
+          <option value="gestor">Gestor escolar</option>
+        </select>
+      </label>
+      <div class="user-info">
+        <div class="user-name" id="userName">Ana Ribeiro</div>
+        <div class="user-role" id="userRole">Secretaria de Educação</div>
+      </div>
+      <div class="avatar" id="userAvatar">AR</div>
+    </div>
+  </div>
+
+  <!-- BARRA SECUNDÁRIA (filtros + estado + exportar) -->
+  <div class="cal-header">
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <label class="ctl" id="escolaCtl" title="Selecionar escola">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg>
+        <select id="escolaSel" aria-label="Selecionar escola"></select>
+      </label>
+      <label class="ctl ghost" title="Período de referência">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+        <select id="periodoSel" aria-label="Período">
+          <option value="2026-b3">2026 · 3º bimestre</option>
+          <option value="2026-b2">2026 · 2º bimestre</option>
+          <option value="2026-b1">2026 · 1º bimestre</option>
+        </select>
+      </label>
+      <label class="ctl ghost" title="Estado da interface (demonstração)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <select id="estadoSel" aria-label="Estado da tela">
+          <option value="preenchido">Estado: preenchido</option>
+          <option value="carregando">Estado: carregando</option>
+          <option value="vazio">Estado: vazio</option>
+          <option value="erro">Estado: erro</option>
+          <option value="parcial">Estado: parcial</option>
+        </select>
+      </label>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <span class="sync-stamp"><span class="live"></span> Dados de 06/08/2026, 04h12</span>
+      <button class="ctl" onclick="window.print()" title="Exportar a tela atual em PDF">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Exportar PDF
+      </button>
+    </div>
+  </div>
+
+  <div class="print-stamp" id="printStamp"></div>
+
+  <!-- CONTEÚDO -->
+  <div class="view-wrap">
+    <div class="content" id="view"></div>
+  </div>
+</div>
+
+<!-- ===================== PAINEL LATERAL DO SERVIDOR ===================== -->
+<div class="overlay" id="overlay" onclick="fecharServidor()"></div>
+<aside class="servidor-panel" id="servidorPanel" role="dialog" aria-modal="true" aria-labelledby="spName" tabindex="-1"></aside>
+
+<div class="help-btn" title="Ajuda">?</div>
+
+<script>
+/* =========================================================================
+   PAINEL PEDAGÓGICO MUNICIPAL — mockup navegável (somente leitura)
+   Dados falsos. Reaproveita os tokens visuais do eProf (theme.css).
+   ========================================================================= */
+
+/* ---------- ícones auxiliares ---------- */
+const ICON = {
+  rede: '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  escolas: '<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/>',
+  equipe: '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/>',
+  ocorrencias: '<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  rotinas: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M9 10l2 2 4-4"/>',
+  calendario: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+  comunicacao: '<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>',
+  pin: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  users: '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>',
+  warn: '<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  lock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>',
+  inbox: '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/>',
+};
+const svg = (paths, size=16) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${paths}</svg>`;
+const iniciais = n => n.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+const fmt = n => n.toLocaleString('pt-BR');
+
+/* ===================== DADOS FALSOS ===================== */
+const REDE = {
+  municipio: 'Porto Seguro/BA',
+  totalEscolas: 34,
+  sincronizadas: 31,
+  refData: '06/08/2026',
+  indicadores: [
+    { label:'Escolas',              valor:'34',       delta:'0',      bom:'flat', spark:[34,34,34,33,34,34], nota:'31 sincronizadas' },
+    { label:'Alunos matriculados',  valor:'18.742',   delta:'+184',   bom:'sobe', spark:[18310,18402,18488,18560,18620,18742] },
+    { label:'Frequência média',     valor:'91,2%',    delta:'+0,6 pp',bom:'sobe', spark:[89.8,90.1,90.4,90.7,90.6,91.2] },
+    { label:'Servidores',           valor:'1.284',    delta:'+7',     bom:'sobe', spark:[1270,1272,1275,1278,1279,1284], nota:'matrícula distinta' },
+    { label:'Ocorrências abertas',  valor:'47',       delta:'-9',     bom:'desce',spark:[62,60,58,55,52,47] },
+    { label:'Escolas em alerta',    valor:'5',        delta:'+1',     bom:'desce',spark:[3,4,4,4,4,5], alerta:true },
+  ],
+};
+
+// escola.freq define a cor por faixa; escolas sem freq entraram fora do agregado
+const ESCOLAS = [
+  { inep:'31097401', nome:'E.M. Cidade Alta',        bairro:'Cidade Alta',     freq:95.4, matriculas:842, turmas:28, servidores:46, ocupacao:104, ocorrencias:3, alerta:false, sync:true,
+    etapas:['anos_iniciais','anos_finais'], turnos:['manha','tarde'], salas:16, vagas:810, cozinha:true, rotas:4, gestor:'Marta Nogueira', gestorDesde:2021, ultimaSync:'06/08/2026 04:11' },
+  { inep:'31097402', nome:'E.M. Baianão',            bairro:'Baianão',         freq:87.1, matriculas:1180, turmas:37, servidores:63, ocupacao:98, ocorrencias:11, alerta:true, sync:true,
+    etapas:['anos_iniciais','anos_finais','eja'], turnos:['manha','tarde','noite'], salas:22, vagas:1200, cozinha:true, rotas:6, gestor:'Cláudio Souza', gestorDesde:2019 },
+  { inep:'31097403', nome:'E.M. Frei Calixto',       bairro:'Centro',          freq:92.8, matriculas:610, turmas:20, servidores:31, ocupacao:88, ocorrencias:2, alerta:false, sync:true,
+    etapas:['anos_iniciais'], turnos:['manha','tarde'], salas:12, vagas:690, cozinha:true, rotas:2, gestor:'Rita Fontes', gestorDesde:2023 },
+  { inep:'31097404', nome:'CMEI Estrela do Mar',     bairro:'Nova Esperança',  freq:96.0, matriculas:210, turmas:12, servidores:34, ocupacao:100, ocorrencias:1, alerta:false, sync:true,
+    etapas:['creche','infantil'], turnos:['integral'], salas:8, vagas:210, cozinha:true, rotas:0, gestor:'Josefa Lima', gestorDesde:2022 },
+  { inep:'31097405', nome:"E.M. Arraial d'Ajuda",    bairro:"Arraial d'Ajuda", freq:90.3, matriculas:930, turmas:31, servidores:52, ocupacao:95, ocorrencias:6, alerta:false, sync:true,
+    etapas:['anos_iniciais','anos_finais'], turnos:['manha','tarde'], salas:18, vagas:980, cozinha:false, rotas:5, gestor:'Paulo Menezes', gestorDesde:2020 },
+  { inep:'31097406', nome:'E.M. Trancoso',           bairro:'Trancoso',        freq:83.4, matriculas:540, turmas:19, servidores:29, ocupacao:112, ocorrencias:9, alerta:true, sync:true,
+    etapas:['anos_iniciais','anos_finais'], turnos:['manha','tarde'], salas:9, vagas:480, cozinha:true, rotas:7, gestor:'Elaine Castro', gestorDesde:2024 },
+  { inep:'31097407', nome:'E.M. Vera Cruz',          bairro:'Vale Verde',      freq:89.6, matriculas:770, turmas:26, servidores:41, ocupacao:92, ocorrencias:4, alerta:false, sync:true,
+    etapas:['anos_iniciais','anos_finais'], turnos:['manha','tarde'], salas:15, vagas:840, cozinha:true, rotas:3, gestor:'Hélio Barros', gestorDesde:2018 },
+  { inep:'31097408', nome:'E.M. Pindorama',          bairro:'Pindorama',       freq:94.2, matriculas:688, turmas:22, servidores:37, ocupacao:90, ocorrencias:2, alerta:false, sync:true,
+    etapas:['anos_iniciais'], turnos:['manha','tarde'], salas:13, vagas:760, cozinha:true, rotas:2, gestor:'Sônia Prado', gestorDesde:2021 },
+  { inep:'31097409', nome:'CMEI Primeiros Passos',   bairro:'Cambolo',         freq:97.1, matriculas:186, turmas:10, servidores:28, ocupacao:100, ocorrencias:0, alerta:false, sync:true,
+    etapas:['creche','infantil'], turnos:['integral'], salas:7, vagas:186, cozinha:true, rotas:0, gestor:'Aline Duarte', gestorDesde:2023 },
+  { inep:'31097410', nome:'E.M. Coroa Vermelha',     bairro:'Coroa Vermelha',  freq:85.7, matriculas:1024, turmas:34, servidores:57, ocupacao:101, ocorrencias:8, alerta:true, sync:true,
+    etapas:['anos_iniciais','anos_finais','eja'], turnos:['manha','tarde','noite'], salas:20, vagas:1010, cozinha:true, rotas:5, gestor:'Roberto Alves', gestorDesde:2017 },
+  { inep:'31097411', nome:'E.M. Caraíva',            bairro:'Caraíva',         freq:null, matriculas:null, sync:false, gestor:'Dora Vasconcelos', gestorDesde:2022 },
+  { inep:'31097412', nome:'E.M. Vale do Jequitibá',  bairro:'Rural',           freq:null, matriculas:null, sync:false, gestor:'Ivo Santana', gestorDesde:2020 },
+];
+
+// servidores da E.M. Cidade Alta (31097401) — inclui multi-lotação
+const SERVIDORES = [
+  { matricula:'004501', nome:'Marta Nogueira',      cargo:'Diretora',                 grupo:'diretor',     vinculo:'efetivo',   carga:40, desde:2009, situacao:'exercicio',
+    formacao:{grad:'Pedagogia', inst:'UNEB', pos:'Gestão Escolar'}, disciplinas:[], lotacoes:[['31097401',40]] },
+  { matricula:'004518', nome:'Bruno Carvalho',      cargo:'Coordenador pedagógico',   grupo:'coordenador', vinculo:'efetivo',   carga:40, desde:2013, situacao:'exercicio',
+    formacao:{grad:'Pedagogia', inst:'UFBA', pos:'Psicopedagogia'}, disciplinas:[], lotacoes:[['31097401',40]] },
+  { matricula:'004523', nome:'Fernanda Rocha',      cargo:'Professora · Anos Iniciais',grupo:'professor',  vinculo:'efetivo',   carga:40, desde:2015, situacao:'exercicio',
+    formacao:{grad:'Pedagogia', inst:'UNEB'}, disciplinas:['Polivalente'], turmasTxt:'3º A, 4º B', lotacoes:[['31097401',40]] },
+  { matricula:'004530', nome:'Diego Fontana',       cargo:'Professor · Matemática',   grupo:'professor',   vinculo:'efetivo',   carga:20, desde:2016, situacao:'exercicio',
+    formacao:{grad:'Matemática', inst:'IFBA'}, disciplinas:['Matemática'], turmasTxt:'8º A, 9º A', lotacoes:[['31097401',20],['31097405',20]] },
+  { matricula:'004544', nome:'Priscila Antunes',    cargo:'Professora · Ciências',    grupo:'professor',   vinculo:'contrato',  carga:20, desde:2022, situacao:'exercicio',
+    formacao:{grad:'Ciências Biológicas', inst:'UNEB'}, disciplinas:['Ciências'], turmasTxt:'7º A, 7º B', lotacoes:[['31097401',20],['31097402',20]] },
+  { matricula:'004551', nome:'Anderson Melo',       cargo:'Professor · Ed. Física',   grupo:'professor',   vinculo:'designado', carga:20, desde:2024, situacao:'exercicio',
+    formacao:{grad:'Educação Física', inst:'FTC'}, disciplinas:['Educação Física'], turmasTxt:'6º ao 9º', lotacoes:[['31097401',20]] },
+  { matricula:'004560', nome:'Luciana Prado',       cargo:'Professora · Português',   grupo:'professor',   vinculo:'efetivo',   carga:40, desde:2011, situacao:'licenca', detalhe:'Licença maternidade',
+    formacao:{grad:'Letras', inst:'UFBA', pos:'Linguística Aplicada'}, disciplinas:['Língua Portuguesa'], turmasTxt:'8º A, 9º A', lotacoes:[['31097401',40]] },
+  { matricula:'004566', nome:'Marcos Vinícius',     cargo:'Professor · História',     grupo:'professor',   vinculo:'efetivo',   carga:20, desde:2014, situacao:'exercicio',
+    formacao:{grad:'História', inst:'UNEB'}, disciplinas:['História'], turmasTxt:'6º ao 9º', lotacoes:[['31097401',20]] },
+  { matricula:'004572', nome:'Tatiane Gomes',       cargo:'Professora · Geografia',   grupo:'professor',   vinculo:'contrato',  carga:20, desde:2023, situacao:'exercicio',
+    formacao:{grad:'Geografia', inst:'IFBA'}, disciplinas:['Geografia'], turmasTxt:'6º ao 9º', lotacoes:[['31097401',20]] },
+  { matricula:'004580', nome:'Rafael Aquino',       cargo:'Professor · Anos Iniciais',grupo:'professor',   vinculo:'efetivo',   carga:40, desde:2019, situacao:'afastado', detalhe:'Afastamento para tratamento de saúde',
+    formacao:{grad:'Pedagogia', inst:'UNEB'}, disciplinas:['Polivalente'], turmasTxt:'2º A', lotacoes:[['31097401',40]] },
+  { matricula:'004588', nome:'Cleide Barreto',      cargo:'Secretária escolar',       grupo:'secretario',  vinculo:'efetivo',   carga:40, desde:2008, situacao:'exercicio',
+    formacao:{grad:'Administração', inst:'FTC'}, disciplinas:[], lotacoes:[['31097401',40]] },
+  { matricula:'004590', nome:'Josué Ferreira',      cargo:'Auxiliar de secretaria',   grupo:'secretario',  vinculo:'contrato',  carga:30, desde:2021, situacao:'exercicio',
+    formacao:{grad:'Ensino Médio', inst:'—'}, disciplinas:[], lotacoes:[['31097401',30]] },
+  { matricula:'004601', nome:'Vera Lúcia dos Santos',cargo:'Merendeira',              grupo:'apoio',       vinculo:'efetivo',   carga:40, desde:2007, situacao:'exercicio',
+    formacao:{grad:'Ensino Fundamental', inst:'—'}, disciplinas:[], lotacoes:[['31097401',40]] },
+  { matricula:'004607', nome:'Antônio Ribeiro',     cargo:'Auxiliar de serviços gerais',grupo:'apoio',     vinculo:'efetivo',   carga:40, desde:2012, situacao:'cedido', detalhe:'Cedido à Secretaria de Educação',
+    formacao:{grad:'Ensino Médio', inst:'—'}, disciplinas:[], lotacoes:[['31097401',40]] },
+  { matricula:'004612', nome:'Sandra Menezes',      cargo:'Porteira',                 grupo:'apoio',       vinculo:'contrato',  carga:40, desde:2020, situacao:'exercicio',
+    formacao:{grad:'Ensino Médio', inst:'—'}, disciplinas:[], lotacoes:[['31097401',40]] },
+];
+const VAGAS_ABERTAS = [
+  { cargo:'Professor · Inglês', turmas:'6º ao 9º', desde:'22/07/2026' },
+  { cargo:'Professor · Arte',   turmas:'Anos Iniciais', desde:'30/07/2026' },
+];
+
+const OCORRENCIAS = [
+  { protocolo:'2026-0451', inep:'31097402', turma:'8º B', tipo:'infrequencia', gravidade:'alta',  situacao:'aberta',    data:'02/08/2026' },
+  { protocolo:'2026-0448', inep:'31097406', turma:'7º A', tipo:'estrutura',    gravidade:'alta',  situacao:'analise',   data:'01/08/2026' },
+  { protocolo:'2026-0442', inep:'31097410', turma:'9º A', tipo:'conflito',     gravidade:'media', situacao:'aberta',    data:'30/07/2026' },
+  { protocolo:'2026-0439', inep:'31097401', turma:'3º A', tipo:'transporte',   gravidade:'media', situacao:'aberta',    data:'29/07/2026' },
+  { protocolo:'2026-0435', inep:'31097402', turma:'6º C', tipo:'saude',        gravidade:'baixa', situacao:'encerrada', data:'27/07/2026' },
+  { protocolo:'2026-0431', inep:'31097405', turma:'4º B', tipo:'infrequencia', gravidade:'media', situacao:'analise',   data:'25/07/2026' },
+  { protocolo:'2026-0428', inep:'31097406', turma:'2º A', tipo:'estrutura',    gravidade:'baixa', situacao:'encerrada', data:'22/07/2026' },
+  { protocolo:'2026-0421', inep:'31097410', turma:'8º A', tipo:'infrequencia', gravidade:'alta',  situacao:'aberta',    data:'19/07/2026' },
+];
+const OCOR_TIPO_LBL = { infrequencia:'Infrequência', conflito:'Conflito', estrutura:'Estrutura', saude:'Saúde', transporte:'Transporte' };
+
+const ROTINAS = [
+  { nome:'Registro de frequência', dias:[30,31,31,30,29] },
+  { nome:'Alimentação escolar',    dias:[28,29,27,28,26] },
+  { nome:'Registro de conteúdo',   dias:[24,22,25,23,20] },
+  { nome:'Transporte escolar',     dias:[19,18,17,18,15] },
+  { nome:'Reforço / apoio',        dias:[12, 0,11, 0, 9] }, // 0 = não se aplica ao dia
+];
+const ROT_TOTAL = 31; // escolas sincronizadas
+
+const EVENTOS = [
+  { dia:5,  titulo:'Início 3º bimestre',        cat:'letivo',    alcance:'rede' },
+  { dia:8,  titulo:'Conselho de classe',        cat:'reuniao',   alcance:['31097401'] },
+  { dia:12, titulo:'Formação BNCC',             cat:'formacao',  alcance:'rede' },
+  { dia:14, titulo:'Prazo: diário de bordo',    cat:'prazo',     alcance:'rede' },
+  { dia:19, titulo:'Avaliação diagnóstica',     cat:'avaliacao', alcance:'rede' },
+  { dia:22, titulo:'Reunião de gestores',       cat:'reuniao',   alcance:'rede' },
+  { dia:26, titulo:'Simulado 9º ano',           cat:'avaliacao', alcance:['31097401','31097402'] },
+  { dia:29, titulo:'Formação: alfabetização',   cat:'formacao',  alcance:'rede' },
+];
+const CAT_LBL = { letivo:'Dia letivo', avaliacao:'Avaliação', formacao:'Formação', reuniao:'Reunião', prazo:'Prazo' };
+
+const COMUNICADOS = [
+  { titulo:'Calendário do 3º bimestre publicado', destino:'rede', urgente:false,
+    corpo:'Segue o calendário consolidado do 3º bimestre com datas de avaliação diagnóstica, formações e prazos de diário. Cada unidade deve confirmar a leitura.',
+    data:'05/08/2026', conf:28, total:31, unidade:'escolas' },
+  { titulo:'Interrupção no transporte — rota 7 (Trancoso)', destino:'escola', urgente:true,
+    corpo:'A rota 7 ficará suspensa nos dias 06 e 07/08 por manutenção. Orientar as famílias e registrar as faltas como justificadas.',
+    data:'05/08/2026', conf:24, total:29, unidade:'servidores' },
+  { titulo:'Convocação — formação de alfabetização', destino:'pessoa', urgente:false,
+    corpo:'Professora Fernanda Rocha, sua presença está confirmada na formação de alfabetização em 29/08. Confirme o recebimento.',
+    data:'04/08/2026', conf:1, total:1, unidade:'servidor' },
+  { titulo:'Atualização de merenda — cardápio agosto', destino:'rede', urgente:false,
+    corpo:'Novo cardápio da alimentação escolar válido a partir de 07/08. Merendeiras devem observar as fichas técnicas anexas no sistema de origem.',
+    data:'03/08/2026', conf:31, total:31, unidade:'escolas' },
+];
+
+/* ===================== ESTADO ===================== */
+const state = {
+  view: 'rede',
+  inep: null,          // escola selecionada (níveis 2/3)
+  matricula: null,     // servidor aberto no painel (nível 3)
+  cargoFiltro: null,   // filtro vindo dos contadores de cargo
+  perfil: 'secretario',
+  estado: 'preenchido',
+  ordem: { col:'nome', dir:1 },
+  busca: '',
+  pagina: 1,
+};
+const PERFIS = {
+  secretario: { nome:'Ana Ribeiro', role:'Secretaria de Educação', escopo:'rede' },
+  prefeito:   { nome:'Jorge Tavares', role:'Gabinete do Prefeito', escopo:'rede' },
+  gestor:     { nome:'Marta Nogueira', role:'Gestão · E.M. Cidade Alta', escopo:'escola', inep:'31097401' },
+};
+
+const escolaPorInep = i => ESCOLAS.find(e => e.inep === i);
+const banda = f => f>=94 ? 'verde' : f>=88 ? 'azul' : f>=84 ? 'ambar' : 'vermelho';
+
+/* ===================== COMPONENTES ===================== */
+function sparkline(pts, cor){
+  const w=64,h=22,min=Math.min(...pts),max=Math.max(...pts),rg=(max-min)||1;
+  const d=pts.map((p,i)=>`${(i/(pts.length-1))*w},${h-((p-min)/rg)*(h-4)-2}`).join(' ');
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><polyline points="${d}" fill="none" stroke="${cor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+function regua(cells){
+  return `<div class="regua" role="group" aria-label="Indicadores">`+cells.map(c=>{
+    const dcls = c.bom==='flat' ? 'delta-flat' : ((c.bom==='sobe') === !String(c.delta).startsWith('-')) ? 'delta-good' : 'delta-bad';
+    const arrow = String(c.delta).startsWith('-') ? '▼' : (c.delta==='0'||c.bom==='flat' ? '' : '▲');
+    const cor = c.alerta ? '#ED6939' : '#12509A';
+    return `<div class="regua-cell">
+      <div class="regua-label">${c.label}</div>
+      <div class="regua-value ${c.alerta?'alerta':''}">${c.valor}</div>
+      <div class="regua-foot">
+        <span class="regua-delta ${dcls}">${arrow} ${c.delta}</span>
+        ${c.spark?sparkline(c.spark,cor):''}
+      </div>
+      ${c.nota?`<div class="regua-refdate">${c.nota}</div>`:''}
+    </div>`;
+  }).join('')+`</div>`;
+}
+function dataNote(txt, tipo='warn'){
+  const ic = tipo==='info' ? ICON.pin : ICON.warn;
+  return `<div class="data-note ${tipo==='info'?'info':''}">${svg(ic,16)}<span>${txt}</span></div>`;
+}
+function sectionHead(t, sub){ return `<div class="section-head"><div class="section-title">${t}</div>${sub?`<div class="section-hint">${sub}</div>`:''}</div>`; }
+
+/* ===================== VIEWS ===================== */
+
+function viewRede(){
+  const sinc = ESCOLAS.filter(e=>e.sync);
+  const fora = REDE.totalEscolas - REDE.sincronizadas;
+  const ordenadas = [...sinc].filter(e=>e.freq!=null).sort((a,b)=>b.freq-a.freq);
+  const col1 = ordenadas.slice(0, Math.ceil(ordenadas.length/2));
+  const col2 = ordenadas.slice(Math.ceil(ordenadas.length/2));
+  const barRow = e => `<button class="freq-row" onclick="irEscola('${e.inep}')" aria-label="${e.nome}, frequência ${String(e.freq).replace('.',',')} por cento">
+      <div>
+        <div class="freq-name">${e.nome}${e.alerta?` <span class="badge b-alta" style="font-size:9px;padding:1px 7px;">alerta</span>`:''}</div>
+        <div class="freq-track"><div class="freq-bar band-${banda(e.freq)}" style="width:${e.freq}%"></div></div>
+      </div>
+      <div class="freq-val band-${banda(e.freq)}-t">${String(e.freq).replace('.',',')}%</div>
+    </button>`;
+
+  // matrículas por etapa (agregado fictício da rede)
+  const etapas = [['Creche',1240],['Pré-escola',2180],['Anos iniciais',7420],['Anos finais',6510],['EJA',1392]];
+  const maxE = Math.max(...etapas.map(e=>e[1]));
+  // frequência ao longo do ano
+  const serie = [88.9,89.4,90.1,90.6,90.4,91.0,90.8,91.2];
+  const meta = 92;
+
+  return `
+    ${fora>0 ? dataNote(`<b>${fora} de ${REDE.totalEscolas} escolas</b> não sincronizaram nas últimas 48h e ficaram fora dos agregados: E.M. Caraíva, E.M. Vale do Jequitibá e mais 1. Os números abaixo refletem ${REDE.sincronizadas} escolas.`) : ''}
+
+    ${regua(REDE.indicadores)}
+
+    <div class="grid-2 wide-first">
+      <div class="panel">
+        ${sectionHead('Frequência por escola', 'Ordenado da maior para a menor · clique para abrir')}
+        <div class="freq-cols">
+          <div>${col1.map(barRow).join('')}</div>
+          <div>${col2.map(barRow).join('')}</div>
+        </div>
+        <div class="chart-legend">
+          <span><i class="band-verde"></i> ≥ 94%</span>
+          <span><i class="band-azul"></i> 88–94%</span>
+          <span><i class="band-ambar"></i> 84–88%</span>
+          <span><i class="band-vermelho"></i> &lt; 84%</span>
+        </div>
+        <div class="regua-refdate" style="margin-top:12px;">${fora} escola(s) fora do cálculo por falta de sincronização.</div>
+      </div>
+
+      <div class="panel">
+        ${sectionHead('Matrículas por etapa')}
+        <div class="vbars">
+          ${etapas.map(([l,v])=>`<div class="vbar-col">
+            <div class="vbar-num">${fmt(v)}</div>
+            <div class="vbar" style="height:${Math.round(v/maxE*130)}px"></div>
+            <div class="vbar-lbl">${l}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:20px;">
+      ${sectionHead('Frequência ao longo do ano', 'Meta da rede: 92%')}
+      ${lineChart(serie, meta)}
+    </div>
+  `;
+}
+
+function lineChart(serie, meta){
+  const w=880,h=200,pl=36,pr=16,pt=16,pb=26;
+  const min=82,max=96,rg=max-min;
+  const x=i=>pl+(i/(serie.length-1))*(w-pl-pr);
+  const y=v=>pt+(1-(v-min)/rg)*(h-pt-pb);
+  const pts=serie.map((v,i)=>`${x(i)},${y(v)}`).join(' ');
+  const metaY=y(meta);
+  const meses=['jan','fev','mar','abr','mai','jun','jul','ago'];
+  const lastBelow = serie[serie.length-1] < meta;
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" role="img" aria-label="Frequência mensal de ${serie[0]}% a ${serie[serie.length-1]}%, meta ${meta}%.">
+    ${[86,90,94].map(g=>`<line x1="${pl}" y1="${y(g)}" x2="${w-pr}" y2="${y(g)}" stroke="#E4E8EE" stroke-width="1"/><text x="6" y="${y(g)+4}" font-size="10" fill="#9AA1AB" font-family="Inter,sans-serif">${g}%</text>`).join('')}
+    <line x1="${pl}" y1="${metaY}" x2="${w-pr}" y2="${metaY}" stroke="#ED6939" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="${w-pr}" y="${metaY-6}" font-size="10" fill="#ED6939" text-anchor="end" font-family="Inter,sans-serif">meta 92%</text>
+    <polyline points="${pts}" fill="none" stroke="#12509A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${serie.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="${i===serie.length-1?5:3}" fill="${i===serie.length-1?(lastBelow?'#ED6939':'#12509A'):'#12509A'}"/>`).join('')}
+    ${meses.map((m,i)=>`<text x="${x(i)}" y="${h-8}" font-size="10" fill="#9AA1AB" text-anchor="middle" font-family="Inter,sans-serif">${m}</text>`).join('')}
+  </svg>`;
+}
+
+function viewEscolas(){
+  return `
+    ${sectionHead('Escolas da rede', `${REDE.sincronizadas} de ${REDE.totalEscolas} sincronizadas`)}
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr>
+          <th class="no-sort">Escola</th><th class="no-sort">Bairro</th>
+          <th class="no-sort">Matrículas</th><th class="no-sort">Frequência</th>
+          <th class="no-sort">Ocorrências</th><th class="no-sort">Situação</th>
+        </tr></thead>
+        <tbody>
+          ${ESCOLAS.map(e=>`<tr tabindex="0" onclick="irEscola('${e.inep}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irEscola('${e.inep}')}">
+            <td><div class="cell-name"><span class="row-avatar">${iniciais(e.nome.replace(/^E\.M\.|^CMEI/,'').trim())}</span><b>${e.nome}</b></div></td>
+            <td class="muted">${e.bairro||'—'}</td>
+            <td>${e.sync?fmt(e.matriculas):'—'}</td>
+            <td>${e.sync?`<span class="band-${banda(e.freq)}-t" style="font-weight:700">${String(e.freq).replace('.',',')}%</span>`:'<span class="muted">—</span>'}</td>
+            <td>${e.sync?e.ocorrencias:'—'}</td>
+            <td>${!e.sync ? '<span class="badge b-media">não sincronizada</span>' : (e.alerta ? '<span class="badge b-alta">em alerta</span>' : '<span class="badge b-exercicio">normal</span>')}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="regua-refdate" style="margin-top:12px;">Escolas não sincronizadas não entram nos agregados da rede.</div>
+  `;
+}
+
+function viewEscola(){
+  const e = escolaPorInep(state.inep);
+  if(!e) return stateVazio('Selecione uma escola','Use o seletor de escola no topo para abrir o painel de uma unidade.');
+  if(!e.sync) return dataNote(`<b>${e.nome}</b> não sincroniza desde antes das últimas 48h. Não há indicadores para exibir. Última tentativa registrada pelo agregador falhou.`) + stateVazio('Sem dados sincronizados','Os dados desta escola não foram sincronizados. Verifique o sistema de origem com o responsável técnico.');
+
+  const media = REDE.indicadores[2].valor; // freq média rede
+  const dpFreq = (e.freq - 91.2).toFixed(1).replace('.',',');
+  const dpOcup = e.ocupacao - 96;
+  const cells = [
+    { label:'Alunos', valor:fmt(e.matriculas), delta:'vs. rede', bom:'flat' },
+    { label:'Turmas', valor:String(e.turmas), delta:'', bom:'flat' },
+    { label:'Frequência', valor:String(e.freq).replace('.',',')+'%', delta:(dpFreq>=0?'+':'')+dpFreq+' pp vs. rede', bom: e.freq>=91.2?'sobe':'desce', spark:null },
+    { label:'Servidores', valor:String(e.servidores), delta:'', bom:'flat' },
+    { label:'Ocupação', valor:e.ocupacao+'%', delta:(dpOcup>=0?'+':'')+dpOcup+' pp vs. rede', bom:'flat' },
+    { label:'Ocorrências abertas', valor:String(e.ocorrencias), delta:'', bom:'flat', alerta:e.ocorrencias>=8 },
+  ];
+  const equipe = SERVIDORES.filter(s=>s.lotacoes.some(l=>l[0]===e.inep));
+  const cont = g => equipe.filter(s=>s.grupo===g).length;
+  const cargos = [
+    ['diretor','Direção',cont('diretor')],
+    ['coordenador','Coordenação',cont('coordenador')],
+    ['professor','Professores',cont('professor')],
+    ['secretario','Secretaria',cont('secretario')],
+    ['apoio','Apoio',cont('apoio')],
+  ];
+  const anos = [['1º',96],['2º',102],['3º',110],['4º',98],['5º',104],['6º',88],['7º',82],['8º',76],['9º',86]].filter((_,i)=> e.etapas && (e.etapas.includes('anos_finais')||i<5));
+  const maxA = Math.max(...anos.map(a=>a[1]));
+
+  const ficha = [
+    ['INEP', e.inep],['Bairro', e.bairro],
+    ['Etapas', (e.etapas||[]).map(x=>({creche:'Creche',infantil:'Infantil',anos_iniciais:'Anos iniciais',anos_finais:'Anos finais',eja:'EJA'}[x])).join(', ')],
+    ['Turnos', (e.turnos||[]).map(x=>({manha:'Manhã',tarde:'Tarde',noite:'Noite',integral:'Integral'}[x])).join(', ')],
+    ['Salas de aula', e.salas],['Vagas ofertadas', fmt(e.vagas)],
+    ['Cozinha própria', e.cozinha?'Sim':'Não'],['Rotas de transporte', e.rotas],
+    ['Gestor(a)', e.gestor],['Gestor desde', e.gestorDesde],
+    ['Cozinha', e.cozinha?'Própria':'Terceirizada'],['Última sincronização', e.ultimaSync||'06/08/2026 04:11'],
+  ];
+
+  return `
+    ${dataNote(`Você está vendo <b>${e.nome}</b>. A variação dos indicadores compara com a <b>média da rede</b>, não com o período anterior.`,'info')}
+    ${regua(cells)}
+
+    <div class="panel">
+      ${sectionHead('Equipe da escola', 'Clique em um cargo para abrir a lista já filtrada')}
+      <div class="cargo-grid">
+        ${cargos.map(([g,l,n])=>`<button class="cargo-card" onclick="irEquipe('${e.inep}','${g}')">
+          <div class="cargo-num">${n}</div><div class="cargo-lbl">${l}</div>
+        </button>`).join('')}
+        <button class="cargo-card vaga" onclick="irEquipe('${e.inep}','vaga')">
+          <div class="cargo-num">${VAGAS_ABERTAS.length}</div><div class="cargo-lbl">Vagas abertas</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:20px;">
+      <div class="panel">
+        ${sectionHead('Alunos por ano')}
+        <div class="vbars">
+          ${anos.map(([l,v])=>`<div class="vbar-col"><div class="vbar-num">${v}</div><div class="vbar blue" style="height:${Math.round(v/maxA*130)}px"></div><div class="vbar-lbl">${l}</div></div>`).join('')}
+        </div>
+      </div>
+      <div class="panel">
+        ${sectionHead('Ficha da unidade')}
+        <div class="ficha">
+          ${ficha.map(([k,v])=>`<div class="ficha-item"><span class="info-label">${k}</span><span class="info-value">${v}</span></div>`).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function viewEquipe(){
+  const e = state.inep ? escolaPorInep(state.inep) : null;
+  if(!e){
+    return stateVazio('Escolha uma escola primeiro','A lista de equipe existe no nível da escola. Selecione uma unidade no seletor do topo para ver os servidores.');
+  }
+  let lista = SERVIDORES.filter(s=>s.lotacoes.some(l=>l[0]===e.inep));
+  // filtro por cargo (vindo dos contadores)
+  const filtroLbl = { diretor:'Direção', coordenador:'Coordenação', professor:'Professores', secretario:'Secretaria', apoio:'Apoio', vaga:'Vagas abertas' };
+  if(state.cargoFiltro && state.cargoFiltro!=='vaga') lista = lista.filter(s=>s.grupo===state.cargoFiltro);
+  // busca
+  if(state.busca) lista = lista.filter(s=>s.nome.toLowerCase().includes(state.busca.toLowerCase()) || s.matricula.includes(state.busca));
+  // ordenação
+  const {col,dir} = state.ordem;
+  lista = [...lista].sort((a,b)=>{
+    let va=a[col], vb=b[col];
+    if(col==='desde'||col==='carga'){ return (va-vb)*dir; }
+    return String(va).localeCompare(String(vb),'pt-BR')*dir;
+  });
+  // paginação (a partir de 50)
+  const porPag = 50;
+  const totalPag = Math.max(1, Math.ceil(lista.length/porPag));
+  const pag = Math.min(state.pagina, totalPag);
+  const slice = lista.slice((pag-1)*porPag, pag*porPag);
+
+  const cabFiltro = state.cargoFiltro ? ` · ${filtroLbl[state.cargoFiltro]}` : '';
+
+  if(state.cargoFiltro==='vaga'){
+    return `
+      ${sectionHead(`Vagas abertas — ${e.nome}`, 'Solicitações registradas no RH · turmas sem titular')}
+      <button class="ctl ghost" style="margin-bottom:14px;" onclick="irEquipe('${e.inep}',null)">${svg(ICON.equipe,15)} Ver todos os servidores</button>
+      <div class="tbl-wrap"><table class="tbl">
+        <thead><tr><th class="no-sort">Cargo</th><th class="no-sort">Turmas sem titular</th><th class="no-sort">Solicitada em</th></tr></thead>
+        <tbody>${VAGAS_ABERTAS.map(v=>`<tr style="cursor:default"><td><b>${v.cargo}</b></td><td class="muted">${v.turmas}</td><td class="muted">${v.desde}</td></tr>`).join('')}</tbody>
+      </table></div>`;
+  }
+
+  const th = (label,c) => `<th onclick="ordenar('${c}')">${label} <span class="arrow">${col===c?(dir>0?'▲':'▼'):'↕'}</span></th>`;
+
+  return `
+    ${sectionHead(`Equipe — ${e.nome}${cabFiltro}`, `${lista.length} servidor(es)`)}
+    <div class="tbl-toolbar">
+      <div style="display:flex; gap:10px; align-items:center;">
+        <label class="search">${svg('<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',15)}
+          <input type="text" placeholder="Buscar por nome ou matrícula" value="${state.busca}" oninput="buscar(this.value)" aria-label="Buscar servidor">
+        </label>
+        ${state.cargoFiltro?`<button class="ctl ghost" onclick="irEquipe('${e.inep}',null)">Limpar filtro ✕</button>`:''}
+      </div>
+      <div class="pager">
+        <span>${(pag-1)*porPag+1}–${Math.min(pag*porPag,lista.length)} de ${lista.length}</span>
+        <button ${pag<=1?'disabled':''} onclick="pagina(${pag-1})">‹</button>
+        <button ${pag>=totalPag?'disabled':''} onclick="pagina(${pag+1})">›</button>
+      </div>
+    </div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr>
+        ${th('Servidor','nome')}${th('Matrícula','matricula')}${th('Cargo','cargo')}
+        ${th('Vínculo','vinculo')}${th('Carga','carga')}${th('Desde','desde')}
+        <th class="no-sort">Situação</th>
+      </tr></thead>
+      <tbody>
+        ${slice.map(s=>{
+          const multi = s.lotacoes.length>1;
+          return `<tr tabindex="0" onclick="abrirServidor('${s.matricula}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirServidor('${s.matricula}')}">
+            <td><div class="cell-name"><span class="row-avatar">${iniciais(s.nome)}</span><b>${s.nome}</b></div></td>
+            <td class="muted">${s.matricula}</td>
+            <td>${s.cargo}${multi?` <span class="badge b-cedido" style="font-size:9px;padding:1px 7px;">${s.lotacoes.length} lotações</span>`:''}</td>
+            <td><span class="badge b-${s.vinculo}">${s.vinculo}</span></td>
+            <td>${s.carga}h</td>
+            <td class="muted">${s.desde}</td>
+            <td><span class="badge b-${s.situacao}">${({exercicio:'Em exercício',licenca:'Licença',afastado:'Afastado',cedido:'Cedido'})[s.situacao]}</span></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table></div>
+    <div class="regua-refdate" style="margin-top:12px;">${svg(ICON.lock,12)} Nenhum aluno é identificado neste painel. Origem: Folha/RH da prefeitura.</div>
+  `;
+}
+
+function viewOcorrencias(){
+  const escopo = state.perfil==='gestor' ? OCORRENCIAS.filter(o=>o.inep===PERFIS.gestor.inep) : OCORRENCIAS;
+  const porTipo = {};
+  escopo.forEach(o=> porTipo[o.tipo] = (porTipo[o.tipo]||0)+1);
+  const tipos = Object.keys(OCOR_TIPO_LBL);
+  const maxT = Math.max(1, ...tipos.map(t=>porTipo[t]||0));
+
+  return `
+    ${dataNote(`${svg(ICON.lock,15)} O menor nível de identificação permitido é a <b>turma</b>. Nenhum aluno é nomeado. Todo acesso é registrado em auditoria.`,'info')}
+    <div class="grid-2">
+      <div class="panel">
+        ${sectionHead('Ocorrências por tipo')}
+        <div class="vbars">
+          ${tipos.map(t=>`<div class="vbar-col"><div class="vbar-num">${porTipo[t]||0}</div><div class="vbar" style="height:${Math.round((porTipo[t]||0)/maxT*130)||4}px"></div><div class="vbar-lbl">${OCOR_TIPO_LBL[t]}</div></div>`).join('')}
+        </div>
+      </div>
+      <div class="panel">
+        ${sectionHead('Abertas × encerradas', 'Últimas semanas')}
+        ${lineDuplo()}
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:20px;">
+      ${sectionHead('Registros recentes', escopo.length+' ocorrência(s)')}
+      <div class="tbl-wrap"><table class="tbl">
+        <thead><tr><th class="no-sort">Protocolo</th><th class="no-sort">Escola</th><th class="no-sort">Turma</th><th class="no-sort">Tipo</th><th class="no-sort">Gravidade</th><th class="no-sort">Data</th><th class="no-sort">Situação</th></tr></thead>
+        <tbody>
+          ${escopo.map(o=>{ const e=escolaPorInep(o.inep); return `<tr style="cursor:default">
+            <td class="muted">${o.protocolo}</td>
+            <td>${e?e.nome:o.inep}</td>
+            <td>${o.turma}</td>
+            <td>${OCOR_TIPO_LBL[o.tipo]}</td>
+            <td><span class="badge b-${o.gravidade}">${o.gravidade}</span></td>
+            <td class="muted">${o.data}</td>
+            <td><span class="badge b-${o.situacao}">${o.situacao}</span></td>
+          </tr>`; }).join('')}
+        </tbody>
+      </table></div>
+    </div>`;
+}
+function lineDuplo(){
+  const w=420,h=180,pl=28,pr=12,pt=12,pb=24;
+  const ab=[9,8,10,7,6,5], en=[4,5,6,8,7,9];
+  const max=12,min=0,rg=max-min;
+  const x=i=>pl+(i/(ab.length-1))*(w-pl-pr), y=v=>pt+(1-(v-min)/rg)*(h-pt-pb);
+  const poly=a=>a.map((v,i)=>`${x(i)},${y(v)}`).join(' ');
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" role="img" aria-label="Aberturas caindo de 9 para 5; encerramentos subindo de 4 para 9.">
+    <polyline points="${poly(ab)}" fill="none" stroke="#E5484D" stroke-width="2.5"/>
+    <polyline points="${poly(en)}" fill="none" stroke="#3DC200" stroke-width="2.5"/>
+    ${ab.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="#E5484D"/>`).join('')}
+    ${en.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="#3DC200"/>`).join('')}
+  </svg>
+  <div class="chart-legend"><span><i style="background:#E5484D"></i> Abertas</span><span><i style="background:#3DC200"></i> Encerradas</span></div>`;
+}
+
+function viewRotinas(){
+  const dias=['Seg','Ter','Qua','Qui','Sex'];
+  const gestor = state.perfil==='gestor' || state.inep;
+  if(gestor){
+    const e = escolaPorInep(state.inep || PERFIS.gestor.inep);
+    // matriz registrado/não registrado (fictício) para a escola
+    const reg = [ [1,1,1,1,1],[1,1,0,1,1],[1,0,1,1,0],[0,1,1,0,1],[1,-1,1,-1,0] ];
+    return `
+      ${dataNote(`Matriz de <b>${e?e.nome:'escola'}</b>: mostra em quais dias cada rotina foi <b>registrada</b> — não o conteúdo do registro.`,'info')}
+      <div class="panel"><div style="overflow-x:auto"><table class="matrix">
+        <thead><tr><th></th>${dias.map(d=>`<th>${d}</th>`).join('')}</tr></thead>
+        <tbody>${ROTINAS.map((r,ri)=>`<tr><td class="rot-name">${r.nome}</td>${reg[ri].map(v=>{
+          if(v===-1) return `<td><div class="mcell m-na">—<small>não se aplica</small></div></td>`;
+          return v? `<td><div class="mcell m-sim">✓<small>registrado</small></div></td>` : `<td><div class="mcell m-nao">✕<small>não registrado</small></div></td>`;
+        }).join('')}</tr>`).join('')}</tbody>
+      </table></div>
+      <div class="chart-legend"><span><i style="background:#D8F3CC"></i> Registrado</span><span><i style="background:#FDE9E9"></i> Não registrado</span><span><i style="background:#F4F6FA"></i> Não se aplica</span></div>
+      </div>`;
+  }
+  const estadoCel = n => {
+    if(n<0) return {cls:'m-na', txt:'—', sub:'não se aplica'};
+    const p=n/ROT_TOTAL;
+    if(p>=0.9) return {cls:'m-quase', txt:n, sub:`de ${ROT_TOTAL}`};
+    if(p>=0.7) return {cls:'m-faltam', txt:n, sub:`de ${ROT_TOTAL}`};
+    return {cls:'m-baixo', txt:n, sub:`de ${ROT_TOTAL}`};
+  };
+  return `
+    ${dataNote(`Cobertura de registro nas <b>${ROT_TOTAL} escolas sincronizadas</b>. A pergunta é <b>quem registrou</b>, não o que foi registrado.`,'info')}
+    <div class="panel"><div style="overflow-x:auto"><table class="matrix">
+      <thead><tr><th></th>${dias.map(d=>`<th>${d}</th>`).join('')}</tr></thead>
+      <tbody>
+        ${ROTINAS.map(r=>`<tr><td class="rot-name">${r.nome}</td>${r.dias.map(n=>{
+          const c = estadoCel(n===0? -1 : n);
+          return `<td><div class="mcell ${c.cls}">${c.txt}<small>${c.sub}</small></div></td>`;
+        }).join('')}</tr>`).join('')}
+      </tbody>
+    </table></div>
+    <div class="chart-legend">
+      <span><i style="background:#D8F3CC"></i> Quase todas (≥90%)</span>
+      <span><i style="background:#FDF3D9"></i> Faltam registros (70–90%)</span>
+      <span><i style="background:#FDE9E9"></i> Menos de 70%</span>
+      <span><i style="background:#F4F6FA"></i> Não se aplica ao dia</span>
+    </div></div>`;
+}
+
+function viewCalendario(){
+  // agosto de 2026: 1 = sábado. Primeira semana começa no domingo.
+  const dow=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const primeiroDiaSemana = 6; // 01/08/2026 é sábado
+  const diasNoMes = 31, hoje = 7;
+  const escopoEv = ev => state.perfil==='gestor'
+      ? (ev.alcance==='rede' || (Array.isArray(ev.alcance)&&ev.alcance.includes(PERFIS.gestor.inep)))
+      : (state.inep ? (ev.alcance==='rede' || (Array.isArray(ev.alcance)&&ev.alcance.includes(state.inep))) : true);
+  const eventos = EVENTOS.filter(escopoEv);
+  const evDe = d => eventos.filter(e=>e.dia===d);
+
+  let celulas='';
+  for(let i=0;i<primeiroDiaSemana;i++) celulas+=`<div class="cal-day out"></div>`;
+  for(let d=1; d<=diasNoMes; d++){
+    const evs=evDe(d);
+    celulas+=`<div class="cal-day ${d===hoje?'today':''}">
+      <div class="cal-daynum">${d}</div>
+      ${evs.map(e=>`<div class="cal-ev cat-${e.cat}" title="${e.titulo}">${e.titulo}</div>`).join('')}
+    </div>`;
+  }
+  const prox=[...eventos].sort((a,b)=>a.dia-b.dia).filter(e=>e.dia>=hoje).slice(0,5);
+
+  return `
+    ${state.inep?dataNote(`Mostrando eventos de alcance <b>rede</b> ou de <b>${escolaPorInep(state.inep)?.nome}</b>.`,'info'):''}
+    <div class="grid-2 wide-first">
+      <div class="panel">
+        ${sectionHead('Agosto de 2026')}
+        <div class="cal-month">${dow.map(d=>`<div class="cal-dow">${d}</div>`).join('')}${celulas}</div>
+        <div class="chart-legend" style="margin-top:16px;">
+          ${Object.entries(CAT_LBL).map(([k,l])=>`<span><i class="cat-${k}"></i> ${l}</span>`).join('')}
+        </div>
+      </div>
+      <div class="panel">
+        ${sectionHead('Próximos compromissos')}
+        <div class="upnext">
+          ${prox.map(e=>`<div class="upnext-item">
+            <div class="upnext-date"><div class="d">${e.dia}</div><div class="m">ago</div></div>
+            <div class="upnext-body"><div class="t"><span class="cat-pill cat-${e.cat}"></span>${e.titulo}</div>
+            <div class="s">${CAT_LBL[e.cat]} · ${e.alcance==='rede'?'Toda a rede':'Unidades selecionadas'}</div></div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function viewComunicacao(){
+  const destLbl = { rede:'Toda a rede', escola:'Uma escola', pessoa:'Servidor específico' };
+  const destCls = { rede:'dest-rede', escola:'dest-escola', pessoa:'dest-pessoa' };
+  return `
+    ${dataNote('Este módulo é <b>somente leitura</b> neste painel. Comunicados são publicados pela Secretaria em interface própria. A confirmação de leitura é medida na unidade correta de cada destino.','info')}
+    ${sectionHead('Comunicados', 'Leitura confirmada por escola (rede) ou por servidor (escola/pessoa)')}
+    ${COMUNICADOS.map(c=>{
+      const pct=Math.round(c.conf/c.total*100);
+      return `<div class="comm-item ${c.urgente?'urgente':''}">
+        <div class="comm-top">
+          <div class="comm-title">${c.urgente?'🔴 ':''}${c.titulo}</div>
+          <span class="comm-dest ${destCls[c.destino]}">${destLbl[c.destino]}</span>
+        </div>
+        <div class="comm-body">${c.corpo}</div>
+        <div class="comm-conf">
+          <div class="conf-track"><div class="conf-fill" style="width:${pct}%"></div></div>
+          <span class="conf-txt"><b>${c.conf}/${c.total}</b> ${c.unidade} confirmaram (${pct}%)</span>
+        </div>
+        <div class="comm-meta" style="margin-top:8px;">Publicado em ${c.data}</div>
+      </div>`;
+    }).join('')}`;
+}
+
+/* ===================== ESTADOS GENÉRICOS ===================== */
+function stateCarregando(){
+  return `<div class="skel skel-regua"></div>
+    <div class="grid-2"><div class="panel">${'<div class="skel skel-line" style="width:'+[70,90,60,80,50].map(w=>w).join('%"></div><div class="skel skel-line" style="width:')+'%"></div>'}</div>
+    <div class="panel">${'<div class="skel skel-line" style="width:'+[80,60,90,70].map(w=>w).join('%"></div><div class="skel skel-line" style="width:')+'%"></div>'}</div></div>`;
+}
+function stateVazio(t,p){
+  return `<div class="state-box">${svg(ICON.inbox,44)}<h3>${t||'Nada por aqui'}</h3><p>${p||'Não há dados para o período e escopo selecionados.'}</p></div>`;
+}
+function stateErro(){
+  return `<div class="state-box">${svg(ICON.warn,44)}<h3>Não foi possível carregar</h3><p>Houve uma falha ao consultar o agregador de indicadores. Os dados de origem não foram alterados.</p><button class="ctl" onclick="render()">Tentar novamente</button></div>`;
+}
+
+/* ===================== PAINEL DO SERVIDOR ===================== */
+let lastFocus=null;
+function abrirServidor(matricula){
+  const s = SERVIDORES.find(x=>x.matricula===matricula);
+  if(!s) return;
+  state.matricula = matricula;
+  lastFocus = document.activeElement;
+  const situ = ({exercicio:'Em exercício',licenca:'Licença',afastado:'Afastado',cedido:'Cedido'})[s.situacao];
+  const escolaHead = escolaPorInep(s.lotacoes[0][0]);
+  const p = document.getElementById('servidorPanel');
+  p.innerHTML = `
+    <div class="sp-head">
+      <button class="sp-close" onclick="fecharServidor()" aria-label="Fechar painel">${svg('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',18)}</button>
+      <div class="sp-avatar">${iniciais(s.nome)}</div>
+      <div class="sp-name" id="spName">${s.nome}</div>
+      <div class="sp-cargo">${s.cargo} · ${escolaHead?escolaHead.nome:''}</div>
+      <div class="sp-tags">
+        <span class="badge b-${s.situacao}">${situ}${s.detalhe?' · '+s.detalhe:''}</span>
+        <span class="badge b-${s.vinculo}">${s.vinculo}</span>
+        <span class="badge b-cedido">${s.carga}h semanais</span>
+      </div>
+    </div>
+    <div class="sp-body">
+      <div class="sp-block"><h4>Vínculo</h4>
+        <div class="sp-kv">
+          <span class="k">Matrícula</span><span class="v">${s.matricula}</span>
+          <span class="k">Vínculo</span><span class="v" style="text-transform:capitalize">${s.vinculo}</span>
+          <span class="k">Carga horária</span><span class="v">${s.carga}h semanais</span>
+          <span class="k">Na rede desde</span><span class="v">${s.desde}</span>
+        </div>
+      </div>
+      <div class="sp-block"><h4>Atuação${s.lotacoes.length>1?' · '+s.lotacoes.length+' lotações':''}</h4>
+        ${s.lotacoes.map(([inep,ch])=>{ const e=escolaPorInep(inep); return `<div class="sp-lot"><span class="nome">${e?e.nome:inep}</span><span class="ch">${ch}h</span></div>`; }).join('')}
+        ${s.disciplinas.length?`<div class="sp-kv" style="margin-top:10px;"><span class="k">Disciplinas</span><span class="v">${s.disciplinas.join(', ')}</span>${s.turmasTxt?`<span class="k">Turmas</span><span class="v">${s.turmasTxt}</span>`:''}</div>`:''}
+      </div>
+      <div class="sp-block"><h4>Formação</h4>
+        <div class="sp-kv">
+          <span class="k">Graduação</span><span class="v">${s.formacao.grad}</span>
+          <span class="k">Instituição</span><span class="v">${s.formacao.inst}</span>
+          ${s.formacao.pos?`<span class="k">Pós-graduação</span><span class="v">${s.formacao.pos}</span>`:''}
+        </div>
+      </div>
+      <div class="sp-block"><h4>Situação funcional</h4>
+        <div class="sp-kv">
+          <span class="k">Situação</span><span class="v">${situ}</span>
+          ${s.detalhe?`<span class="k">Detalhe</span><span class="v">${s.detalhe}</span>`:''}
+        </div>
+      </div>
+    </div>
+    <div class="sp-foot">
+      ${svg(ICON.lock,14)} Este painel não exibe avaliação de desempenho, prontuário de saúde, processo administrativo, endereço, telefone, CPF ou dados bancários. Acesso registrado em auditoria.
+    </div>`;
+  document.getElementById('overlay').classList.add('open');
+  p.classList.add('open');
+  // reflete na URL (deep link)
+  const base = state.inep ? `#/escola/${state.inep}/equipe` : '#/equipe';
+  if(location.hash.split('?')[0] !== `${base}/${matricula}`) history.replaceState(null,'',`${base}/${matricula}`);
+  p.focus();
+  document.addEventListener('keydown', escFechar);
+}
+function escFechar(e){ if(e.key==='Escape') fecharServidor(); }
+function fecharServidor(){
+  const p=document.getElementById('servidorPanel');
+  p.classList.remove('open'); document.getElementById('overlay').classList.remove('open');
+  document.removeEventListener('keydown', escFechar);
+  state.matricula=null;
+  const base = state.inep ? `#/escola/${state.inep}/equipe` : '#/equipe';
+  if(location.hash.split('?')[0].includes('/equipe/')) history.replaceState(null,'',base);
+  if(lastFocus && lastFocus.focus) lastFocus.focus();
+}
+
+/* ===================== NAVEGAÇÃO ===================== */
+function irEscola(inep){ location.hash = `#/escola/${inep}`; }
+function irEquipe(inep, cargo){
+  state.cargoFiltro = cargo && cargo!=='null' ? cargo : null;
+  state.busca=''; state.pagina=1;
+  location.hash = `#/escola/${inep}/equipe`;
+}
+function ordenar(col){ if(state.ordem.col===col) state.ordem.dir*=-1; else state.ordem={col,dir:1}; render(); }
+function buscar(v){ state.busca=v; state.pagina=1; render(); const inp=document.querySelector('.search input'); render(); if(inp){} }
+function pagina(p){ state.pagina=p; render(); }
+
+const META = {
+  rede:        { t:'Visão geral',  sub:'Rede Municipal · Porto Seguro/BA', icon:ICON.rede },
+  escolas:     { t:'Escolas',      sub:'Todas as unidades da rede',        icon:ICON.escolas },
+  escola:      { t:'Escola',       sub:'',                                  icon:ICON.escolas },
+  equipe:      { t:'Equipe',       sub:'',                                  icon:ICON.equipe },
+  ocorrencias: { t:'Ocorrências',  sub:'Registros da rede · anonimizados', icon:ICON.ocorrencias },
+  rotinas:     { t:'Rotinas',      sub:'Cobertura de registro',            icon:ICON.rotinas },
+  calendario:  { t:'Calendário',   sub:'Eventos e compromissos',           icon:ICON.calendario },
+  comunicacao: { t:'Comunicação',  sub:'Comunicados · somente leitura',    icon:ICON.comunicacao },
+};
+
+function parseHash(){
+  const raw = (location.hash||'#/rede').slice(1);
+  const [path] = raw.split('?');
+  const parts = path.split('/').filter(Boolean); // ex.: ['escola','31097401','equipe','004530']
+  state.matricula=null;
+  if(parts[0]==='escola'){
+    state.inep = parts[1];
+    if(parts[2]==='equipe'){ state.view='equipe'; if(parts[3]) state.matricula=parts[3]; }
+    else state.view='escola';
+  } else {
+    state.view = parts[0] || 'rede';
+    if(state.view!=='equipe') { /* mantém inep para o seletor mas some conteúdo */ }
+    if(parts[0]==='equipe' && parts[1]) state.matricula=parts[1];
+  }
+}
+
+function render(){
+  parseHashSafe();
+  // perfil / escopo
+  aplicarPerfil();
+  // topbar
+  const key = state.view;
+  const m = META[key] || META.rede;
+  let title=m.t, sub=m.sub;
+  if(state.view==='escola'||state.view==='equipe'){
+    const e=escolaPorInep(state.inep);
+    if(e){ title = (state.view==='equipe'?'Equipe · ':'')+e.nome; sub = `${e.bairro||''} · INEP ${e.inep}`; }
+  }
+  document.getElementById('pageTitle').textContent=title;
+  document.getElementById('pageSub').textContent=sub||`Rede Municipal · Porto Seguro/BA`;
+  document.getElementById('pageIcon').innerHTML=m.icon;
+  document.getElementById('printStamp').textContent = `${title} — Rede Municipal de Ensino de Porto Seguro/BA · Dados de ${REDE.refData} · Exportado em 07/08/2026`;
+
+  // nav ativo
+  const navKey = (state.view==='escola'||state.view==='escolas') ? (state.view==='escola'?'escolas':'escolas') : state.view;
+  document.querySelectorAll('.nav-item[data-nav]').forEach(a=>{
+    a.classList.toggle('active', a.dataset.nav === (state.view==='escola'?'escolas':state.view));
+  });
+
+  // seletor de escola
+  syncEscolaSel();
+
+  // conteúdo
+  const el=document.getElementById('view');
+  if(state.estado==='carregando'){ el.innerHTML=stateCarregando(); return; }
+  if(state.estado==='erro'){ el.innerHTML=stateErro(); return; }
+  if(state.estado==='vazio'){ el.innerHTML=stateVazio(); return; }
+
+  let html='';
+  switch(state.view){
+    case 'rede': html=viewRede(); break;
+    case 'escolas': html=viewEscolas(); break;
+    case 'escola': html=viewEscola(); break;
+    case 'equipe': html=viewEquipe(); break;
+    case 'ocorrencias': html=viewOcorrencias(); break;
+    case 'rotinas': html=viewRotinas(); break;
+    case 'calendario': html=viewCalendario(); break;
+    case 'comunicacao': html=viewComunicacao(); break;
+    default: html=viewRede();
+  }
+  if(state.estado==='parcial'){
+    html = dataNote('<b>Dados parciais.</b> Nem todos os sistemas de origem responderam nesta carga (Folha/RH indisponível). O que chegou está exibido; o que falta está sinalizado.') + html;
+  }
+  el.innerHTML=html;
+
+  // reabrir painel do servidor a partir da URL (deep link)
+  if(state.matricula && document.querySelector('.tbl')){ abrirServidor(state.matricula); }
+  else if(state.matricula){ abrirServidor(state.matricula); }
+}
+
+function parseHashSafe(){ try{ parseHash(); }catch(e){ state.view='rede'; } }
+
+function syncEscolaSel(){
+  const sel=document.getElementById('escolaSel');
+  const opts = [`<option value="">Rede municipal (todas)</option>`]
+    .concat(ESCOLAS.map(e=>`<option value="${e.inep}" ${state.inep===e.inep?'selected':''}>${e.nome}${!e.sync?' (não sincronizada)':''}</option>`));
+  sel.innerHTML=opts.join('');
+  sel.value = (state.view==='escola'||state.view==='equipe') && state.inep ? state.inep : '';
+}
+
+function aplicarPerfil(){
+  const p=PERFIS[state.perfil];
+  document.getElementById('userName').textContent=p.nome;
+  document.getElementById('userRole').textContent=p.role;
+  document.getElementById('userAvatar').textContent=iniciais(p.nome);
+  const gestor = state.perfil==='gestor';
+  // gestor: trava na própria escola
+  document.getElementById('escolaCtl').toggleAttribute('disabled', gestor);
+  document.querySelector('[data-nav="rede"]').classList.toggle('disabled', gestor);
+  document.querySelector('[data-nav="escolas"]').classList.toggle('disabled', gestor);
+  if(gestor){
+    if(state.view==='rede'||state.view==='escolas'){ state.view='escola'; state.inep=PERFIS.gestor.inep; }
+    if(!state.inep) state.inep=PERFIS.gestor.inep;
+  }
+}
+
+/* ===================== EVENTOS ===================== */
+window.addEventListener('hashchange', render);
+document.getElementById('perfilSel').addEventListener('change', e=>{
+  state.perfil=e.target.value;
+  if(state.perfil==='gestor'){ location.hash=`#/escola/${PERFIS.gestor.inep}`; }
+  else { render(); }
+});
+document.getElementById('escolaSel').addEventListener('change', e=>{
+  if(e.target.value) location.hash=`#/escola/${e.target.value}`;
+  else location.hash='#/rede';
+});
+document.getElementById('periodoSel').addEventListener('change', render);
+document.getElementById('estadoSel').addEventListener('change', e=>{ state.estado=e.target.value; render(); });
+
+// preserva foco no campo de busca ao re-renderizar
+const _render = render;
+render = function(){ const active=document.activeElement; const wasSearch=active&&active.matches&&active.matches('.search input'); const pos=wasSearch?active.selectionStart:null; _render(); if(wasSearch){ const inp=document.querySelector('.search input'); if(inp){ inp.focus(); if(pos!=null) inp.setSelectionRange(pos,pos); } } };
+
+// start
+if(!location.hash) location.hash='#/rede';
+render();
+</script>
+
+</body>
+</html>

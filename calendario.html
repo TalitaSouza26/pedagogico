@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Pedagógico — Calendário</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; display: flex; height: 100vh; overflow: hidden; font-size: 13px; color: #333; }
+    .sidebar { display: flex; flex-direction: column; }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; }
+    .logo-img { width: 104px; height: auto; display: block; }
+    .nav { flex: 1 1 auto; }
+    .nav-item { display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background .15s; text-decoration: none; }
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .logout { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .logout svg { width: 16px; height: 16px; }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 12px; }
+    .user-info { text-align: right; }
+    .view-wrap { flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--branco); }
+    .content { padding: 24px 34px 40px; }
+
+    .hero { display: grid; grid-template-columns: 1fr 340px; gap: 18px; margin-bottom: 24px; }
+    @media (max-width: 980px){ .hero { grid-template-columns: 1fr; } }
+    .banner { background: linear-gradient(130deg, var(--azul), var(--azul-escuro)); border-radius: var(--raio); padding: 26px 28px; color: #fff; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; }
+    .banner::after { content:''; position:absolute; right:-40px; top:-40px; width:180px; height:180px; border-radius:50%; background:rgba(255,255,255,.08); }
+    .banner .eyebrow { font-family: var(--font-display); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; opacity: .85; }
+    .banner h1 { font-family: var(--font-display); font-weight: 700; font-size: 28px; margin: 8px 0 6px; line-height: 1.15; }
+    .banner p { font-size: 13.5px; opacity: .9; max-width: 460px; line-height: 1.5; }
+    .prox { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 20px; display: flex; flex-direction: column; }
+    .prox-lbl { font-family: var(--font-display); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); margin-bottom: 12px; }
+    .prox-body { display: flex; gap: 16px; align-items: flex-start; }
+    .prox-date { text-align: center; flex-shrink: 0; }
+    .prox-day { font-family: var(--font-display); font-weight: 800; font-size: 40px; line-height: 1; color: var(--azul); }
+    .prox-my { font-size: 11.5px; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .04em; margin-top: 3px; }
+    .prox-info { flex: 1; min-width: 0; }
+    .pill { display: inline-block; border-radius: 20px; font-family: var(--font-display); font-weight: 600; font-size: 11px; padding: 3px 11px; margin-bottom: 8px; }
+    .prox-title { font-family: var(--font-display); font-weight: 700; font-size: 16px; color: var(--texto); line-height: 1.3; }
+    .prox-meta { font-size: 12.5px; color: var(--texto-suave); margin-top: 8px; display: flex; flex-direction: column; gap: 5px; }
+    .prox-meta div { display: flex; align-items: center; gap: 7px; }
+    .prox-meta svg { width: 14px; height: 14px; color: var(--laranja); flex-shrink: 0; }
+
+    .cal-nav { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+    .cal-nav-left { display: flex; align-items: center; gap: 10px; }
+    .navbtn { width: 34px; height: 34px; border: 1px solid var(--borda); background: var(--branco); border-radius: 9px; cursor: pointer; color: var(--texto); display: flex; align-items: center; justify-content: center; }
+    .navbtn:hover { border-color: var(--azul); color: var(--azul); }
+    .navbtn svg { width: 16px; height: 16px; }
+    .cal-month { font-family: var(--font-display); font-weight: 700; font-size: 19px; color: var(--texto); min-width: 200px; text-transform: capitalize; }
+    .cal-nav-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .ctx-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 8px 12px; font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--texto); }
+    .ctx-pill svg { width: 15px; height: 15px; color: var(--laranja); }
+    .ctx-pill select { border: none; background: none; font: inherit; color: inherit; cursor: pointer; outline: none; max-width: 220px; }
+    .today-btn { background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 8px 14px; font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--texto); cursor: pointer; }
+    .today-btn:hover { border-color: var(--laranja); color: var(--laranja-escuro); }
+
+    .month-wrap { border: 1px solid var(--borda); border-radius: var(--raio); overflow: hidden; }
+    .month-head { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--bg); border-bottom: 1px solid var(--borda); }
+    .month-head div { padding: 11px 12px; font-family: var(--font-display); font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); text-align: left; }
+    .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+    .cell { min-height: 116px; border-right: 1px solid var(--borda); border-bottom: 1px solid var(--borda); padding: 8px 9px; display: flex; flex-direction: column; gap: 5px; background: var(--branco); }
+    .cell:nth-child(7n) { border-right: none; }
+    .cell.out { background: #FAFBFC; }
+    .cell.out .cell-num { color: #C7CDD4; }
+    .cell-num { font-family: var(--font-display); font-weight: 600; font-size: 13px; color: var(--texto); align-self: flex-start; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+    .cell.today .cell-num { background: var(--laranja); color: #fff; }
+    .ev { border-radius: 7px; padding: 4px 8px; font-size: 11px; font-weight: 600; line-height: 1.3; cursor: default; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid; }
+    .ev-reuniao { background: var(--azul-claro); color: var(--azul-escuro); border-color: var(--azul); }
+    .ev-formacao { background: var(--laranja-bg); color: var(--laranja-escuro); border-color: var(--laranja); }
+    .ev-prazo { background: #FDE9E9; color: var(--vermelho); border-color: var(--vermelho); }
+    .ev-evento { background: var(--verde-bg); color: #2E8B00; border-color: var(--verde); }
+    .ev-conselho { background: #EFEAF7; color: #6B3FA0; border-color: #6B3FA0; }
+    .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 16px; font-size: 12.5px; color: var(--texto-suave); }
+    .legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+    .help-btn { position: fixed; bottom: 20px; right: 20px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+  </style>
+  <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="logo.png" alt="Rede Municipal" class="logo-img" />
+    <span class="portal-tag">Painel Pedagógico</span>
+  </div>
+  <nav class="nav">
+    <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
+    <a href="turmas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/></svg> Escolas</a>
+    <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg> Servidores</a>
+    <a href="ocorrencias.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Ocorrências</a>
+    <a href="calendario.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendário</a>
+    <a href="comunicacao.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Comunicação</a>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Suporte</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 5.34L3.93 6.75M21 12h-2M5 12H3M19.07 19.07l-1.41-1.41M5.34 18.66l-1.41 1.41M12 19v2M12 3V1"/></svg> Configurações</div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sair da conta</div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <svg class="page-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <div><div class="topbar-title">Calendário</div><div class="topbar-sub">Agenda pedagógica da rede · Porto Seguro/BA</div></div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-info"><div class="user-name">Ana Ribeiro</div><div class="user-role">Secretaria de Educação</div></div>
+      <div class="avatar">AR</div>
+    </div>
+  </div>
+
+  <div class="view-wrap">
+    <div class="content">
+      <div class="hero">
+        <div class="banner">
+          <div class="eyebrow">Agenda de eventos escolares</div>
+          <h1>Calendário 2026</h1>
+          <p>Reuniões, formações, conselhos de classe e prazos pedagógicos da rede municipal reunidos em um só lugar.</p>
+        </div>
+        <div class="prox">
+          <div class="prox-lbl">Próximo compromisso</div>
+          <div class="prox-body" id="prox"></div>
+        </div>
+      </div>
+
+      <div class="cal-nav">
+        <div class="cal-nav-left">
+          <button class="navbtn" onclick="mudarMes(-1)" aria-label="Mês anterior">‹</button>
+          <div class="cal-month" id="mesLabel"></div>
+          <button class="navbtn" onclick="mudarMes(1)" aria-label="Próximo mês">›</button>
+        </div>
+        <div class="cal-nav-right">
+          <span class="ctx-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg>
+            <select id="escolaSel" onchange="render()"><option value="">Toda a rede</option></select></span>
+          <button class="today-btn" onclick="irHoje()">Ir para hoje</button>
+        </div>
+      </div>
+
+      <div class="month-wrap">
+        <div class="month-head"><div>Domingo</div><div>Segunda</div><div>Terça</div><div>Quarta</div><div>Quinta</div><div>Sexta</div><div>Sábado</div></div>
+        <div class="month-grid" id="grid"></div>
+      </div>
+
+      <div class="legend">
+        <span><i style="background:var(--azul)"></i> Reunião</span>
+        <span><i style="background:var(--laranja)"></i> Formação</span>
+        <span><i style="background:#6B3FA0"></i> Conselho de classe</span>
+        <span><i style="background:var(--verde)"></i> Evento</span>
+        <span><i style="background:var(--vermelho)"></i> Prazo</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="help-btn">?</div>
+
+<script>
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const HOJE = { y:2026, m:7, d:26 }; // agosto = índice 7
+let curY = HOJE.y, curM = HOJE.m;
+
+const ESCOLAS = ['E.M. Cidade Alta','E.M. Trancoso','E.M. Monte Pascoal','E.M. Paulo Freire','E.M. Anísio Teixeira','CMEI Girassol','E.M. Coroa Vermelha'];
+(function(){ document.getElementById('escolaSel').insertAdjacentHTML('beforeend', ESCOLAS.map(e=>`<option>${e}</option>`).join('')); })();
+
+// eventos: {y,m,d, cat, titulo, hora, local, escola(''=rede)}
+const EVENTOS = [
+  { y:2026,m:7,d:5,  cat:'reuniao',  titulo:'Reunião de diretores da rede', hora:'09:00', local:'Secretaria de Educação', escola:'' },
+  { y:2026,m:7,d:7,  cat:'conselho', titulo:'Conselho de classe — 2º bimestre', hora:'14:00', local:'E.M. Cidade Alta', escola:'E.M. Cidade Alta' },
+  { y:2026,m:7,d:12, cat:'formacao', titulo:'Formação continuada: alfabetização', hora:'08:30', local:'Centro de Formação Municipal', escola:'' },
+  { y:2026,m:7,d:14, cat:'evento',   titulo:'Mostra cultural', hora:'19:00', local:'E.M. Trancoso', escola:'E.M. Trancoso' },
+  { y:2026,m:7,d:18, cat:'prazo',    titulo:'Prazo: lançamento de notas', hora:'23:59', local:'Sistema eProf', escola:'' },
+  { y:2026,m:7,d:20, cat:'reuniao',  titulo:'Reunião de coordenadores pedagógicos', hora:'10:00', local:'Secretaria de Educação', escola:'' },
+  { y:2026,m:7,d:26, cat:'formacao', titulo:'Oficina de práticas em Matemática', hora:'13:30', local:'Centro de Formação Municipal', escola:'' },
+  { y:2026,m:7,d:28, cat:'conselho', titulo:'Conselho de classe — E.M. Monte Pascoal', hora:'14:00', local:'E.M. Monte Pascoal', escola:'E.M. Monte Pascoal' },
+  { y:2026,m:7,d:31, cat:'evento',   titulo:'Reunião com responsáveis', hora:'18:00', local:'E.M. Paulo Freire', escola:'E.M. Paulo Freire' },
+  { y:2026,m:8,d:7,  cat:'evento',   titulo:'Semana da Pátria', hora:'08:00', local:'Rede municipal', escola:'' },
+  { y:2026,m:8,d:10, cat:'formacao', titulo:'Formação: educação inclusiva', hora:'08:30', local:'Centro de Formação Municipal', escola:'' },
+  { y:2026,m:8,d:15, cat:'prazo',    titulo:'Prazo: relatórios pedagógicos', hora:'23:59', local:'Sistema eProf', escola:'' },
+];
+const CAT_LBL = { reuniao:'Reunião', formacao:'Formação', conselho:'Conselho de classe', evento:'Evento', prazo:'Prazo' };
+
+function render(){
+  document.getElementById('mesLabel').textContent = `${MESES[curM]} ${curY}`;
+  const escola = document.getElementById('escolaSel').value;
+  const evs = EVENTOS.filter(e=> !escola || e.escola==='' || e.escola===escola);
+  const first = new Date(Date.UTC(curY, curM, 1)).getUTCDay();
+  const daysInMonth = new Date(Date.UTC(curY, curM+1, 0)).getUTCDate();
+  const daysPrev = new Date(Date.UTC(curY, curM, 0)).getUTCDate();
+  let cells = [];
+  for(let i=first-1;i>=0;i--) cells.push({ d: daysPrev-i, out:true, ym:[curM===0?curY-1:curY, (curM+11)%12] });
+  for(let d=1;d<=daysInMonth;d++) cells.push({ d, out:false, ym:[curY,curM] });
+  while(cells.length % 7 !== 0) cells.push({ d: cells.length - (first+daysInMonth) + 1, out:true, ym:[curM===11?curY+1:curY,(curM+1)%12] });
+  document.getElementById('grid').innerHTML = cells.map(c=>{
+    const [yy,mm] = c.ym;
+    const isToday = !c.out && yy===HOJE.y && mm===HOJE.m && c.d===HOJE.d;
+    const dayEvs = c.out ? [] : evs.filter(e=>e.y===yy && e.m===mm && e.d===c.d);
+    return `<div class="cell ${c.out?'out':''} ${isToday?'today':''}">
+      <span class="cell-num">${c.d}</span>
+      ${dayEvs.map(e=>`<div class="ev ev-${e.cat}" title="${e.titulo} · ${e.hora} · ${e.local}">${e.hora} ${e.titulo}</div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+function renderProximo(){
+  const escola = document.getElementById('escolaSel')?.value || '';
+  const hojeVal = HOJE.y*10000 + HOJE.m*100 + HOJE.d;
+  const futuros = EVENTOS.filter(e=> (!escola || e.escola==='' || e.escola===escola) && (e.y*10000+e.m*100+e.d) >= hojeVal)
+                         .sort((a,b)=> (a.y*10000+a.m*100+a.d) - (b.y*10000+b.m*100+b.d));
+  const e = futuros[0];
+  const box = document.getElementById('prox');
+  if(!e){ box.innerHTML = `<div class="muted" style="color:var(--texto-suave)">Nenhum compromisso futuro.</div>`; return; }
+  const catColor = { reuniao:['var(--azul-claro)','var(--azul-escuro)'], formacao:['var(--laranja-bg)','var(--laranja-escuro)'], conselho:['#EFEAF7','#6B3FA0'], evento:['var(--verde-bg)','#2E8B00'], prazo:['#FDE9E9','var(--vermelho)'] }[e.cat];
+  box.innerHTML = `
+    <div class="prox-date"><div class="prox-day">${e.d}</div><div class="prox-my">${MESES[e.m].slice(0,3)} ${e.y}</div></div>
+    <div class="prox-info">
+      <span class="pill" style="background:${catColor[0]};color:${catColor[1]}">${CAT_LBL[e.cat]}</span>
+      <div class="prox-title">${e.titulo}</div>
+      <div class="prox-meta">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ${e.hora}</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> ${e.local}</div>
+      </div>
+    </div>`;
+}
+
+function mudarMes(delta){ curM += delta; if(curM<0){ curM=11; curY--; } if(curM>11){ curM=0; curY++; } render(); }
+function irHoje(){ curY=HOJE.y; curM=HOJE.m; render(); }
+
+render();
+renderProximo();
+</script>
+
+</body>
+</html>
