@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Pedagógico — Início</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; display: flex; height: 100vh; overflow: hidden; font-size: 13px; color: #333; }
+    .sidebar { display: flex; flex-direction: column; }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; }
+    .logo-img { width: 104px; height: auto; display: block; }
+    .nav { flex: 1 1 auto; }
+    .nav-item { display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background .15s; text-decoration: none; }
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .logout { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .logout svg { width: 16px; height: 16px; }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 12px; }
+    .user-info { text-align: right; }
+
+    /* STAGE */
+    .stage-wrap { flex: 1; overflow: hidden; position: relative; display: flex; flex-direction: column;
+      background:
+        radial-gradient(1100px 620px at 50% 34%, var(--azul-claro) 0%, rgba(234,241,250,0) 62%),
+        radial-gradient(760px 520px at 82% 82%, var(--laranja-bg) 0%, rgba(253,238,232,0) 60%),
+        var(--branco); }
+    .stage-top { text-align: center; padding: 22px 20px 0; position: relative; z-index: 6; }
+    .eyebrow { font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--azul); opacity: .8; }
+    .search { position: relative; max-width: 460px; margin: 14px auto 0; }
+    .search-box { display: flex; align-items: center; gap: 10px; background: var(--branco); border: 1px solid var(--borda); border-radius: 30px; padding: 12px 18px; box-shadow: 0 8px 24px rgba(18,80,154,.08); transition: border-color .15s, box-shadow .15s; }
+    .search-box:focus-within { border-color: var(--azul); box-shadow: 0 8px 28px rgba(18,80,154,.16); }
+    .search-box svg { width: 18px; height: 18px; color: var(--laranja); flex-shrink: 0; }
+    .search-box input { border: none; outline: none; background: none; font-family: var(--font-display); font-size: 14px; width: 100%; color: var(--texto); }
+    .results { position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: var(--branco); border: 1px solid var(--borda); border-radius: 14px; box-shadow: 0 18px 40px rgba(15,23,32,.16); overflow: hidden; z-index: 20; max-height: 320px; overflow-y: auto; }
+    .results[hidden] { display: none; }
+    .res-item { display: flex; align-items: center; gap: 11px; padding: 11px 16px; cursor: pointer; border-bottom: 1px solid var(--bg); }
+    .res-item:last-child { border-bottom: none; }
+    .res-item:hover, .res-item.active { background: var(--azul-claro); }
+    .res-ic { width: 30px; height: 30px; border-radius: 8px; background: var(--laranja-bg); color: var(--laranja-escuro); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .res-ic svg { width: 15px; height: 15px; }
+    .res-nome { font-family: var(--font-display); font-weight: 600; font-size: 13.5px; color: var(--texto); }
+    .res-sub { font-size: 11.5px; color: var(--texto-suave); }
+    .res-empty { padding: 16px; text-align: center; color: var(--texto-suave); font-size: 13px; }
+
+    .stage { position: relative; flex: 1; min-height: 0; }
+    /* órbitas */
+    .ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); border-radius: 50%; border: 1.5px dashed #D7DEE8; opacity: .8; pointer-events: none; }
+    .ring.r1 { width: 420px; height: 420px; }
+    .ring.r2 { width: 660px; height: 620px; }
+    .ring.r3 { width: 900px; height: 820px; border-color: #E4E9F0; }
+
+    /* bubo */
+    .bubo-wrap { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; z-index: 5; }
+    .bubo-stage { position: relative; display: inline-block; }
+    .bubo-stage::after { content: ''; position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%); width: 220px; height: 30px; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(18,80,154,.22), rgba(18,80,154,0) 70%); z-index: -1; animation: shadowPulse 4.5s ease-in-out infinite; }
+    @keyframes shadowPulse { 0%,100% { transform: translateX(-50%) scale(1); opacity: .9; } 50% { transform: translateX(-50%) scale(.86); opacity: .6; } }
+    .bubo { width: 440px; max-width: 46vw; height: auto; display: block; filter: drop-shadow(0 28px 30px rgba(18,80,154,.22)); animation: buboBob 4.5s ease-in-out infinite; }
+    @keyframes buboBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+    .bubble { display: inline-block; margin-bottom: -6px; background: var(--azul-claro); color: var(--azul-escuro); font-family: var(--font-display); font-weight: 700; font-size: 14px; padding: 9px 18px; border-radius: 20px; position: relative; z-index: 2; box-shadow: 0 8px 20px rgba(18,80,154,.14); animation: buboBob 4.5s ease-in-out infinite; }
+    .bubble::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 13px; height: 13px; background: var(--azul-claro); border-radius: 2px; }
+
+    /* cards flutuantes */
+    .school-card { position: absolute; width: 226px; background: var(--branco); border: 1px solid var(--borda); border-radius: 16px; padding: 14px 16px; box-shadow: 0 12px 30px rgba(15,23,32,.10); cursor: pointer; z-index: 4; transition: transform .45s cubic-bezier(.2,.7,.3,1), opacity .45s, box-shadow .2s; }
+    .school-card:hover { box-shadow: 0 18px 40px rgba(18,80,154,.20); border-color: #C8DCF3; z-index: 8; }
+    .school-card.swapping { opacity: 0; transform: scale(.9) translateY(6px) !important; }
+    .sc-ic { width: 34px; height: 34px; border-radius: 10px; background: var(--azul-claro); color: var(--azul); display: flex; align-items: center; justify-content: center; margin-bottom: 9px; }
+    .sc-ic svg { width: 18px; height: 18px; }
+    .sc-ic.cmei { background: var(--laranja-bg); color: var(--laranja-escuro); }
+    .sc-nome { font-family: var(--font-display); font-weight: 700; font-size: 14.5px; color: var(--azul-escuro); line-height: 1.25; margin-bottom: 4px; }
+    .sc-sub { font-size: 12px; color: var(--texto-suave); }
+    .sc-sub b { color: var(--texto); font-weight: 600; }
+    /* variações de cor dos cards */
+    .school-card.sc-blue { background: linear-gradient(150deg, var(--azul), var(--azul-escuro)); border-color: transparent; }
+    .school-card.sc-blue .sc-nome { color: #fff; }
+    .school-card.sc-blue .sc-sub { color: rgba(255,255,255,.82); }
+    .school-card.sc-blue .sc-sub b { color: #fff; }
+    .school-card.sc-blue .sc-ic, .school-card.sc-blue .sc-ic.cmei { background: rgba(255,255,255,.20); color: #fff; }
+    .school-card.sc-orange { background: linear-gradient(150deg, var(--laranja), var(--laranja-escuro)); border-color: transparent; }
+    .school-card.sc-orange .sc-nome { color: #fff; }
+    .school-card.sc-orange .sc-sub { color: rgba(255,255,255,.85); }
+    .school-card.sc-orange .sc-sub b { color: #fff; }
+    .school-card.sc-orange .sc-ic, .school-card.sc-orange .sc-ic.cmei { background: rgba(255,255,255,.22); color: #fff; }
+    /* posições + flutuação */
+    /* quadro central de largura fixa: mantém os cards simétricos e longe das bordas */
+    .orbit { position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); width: min(1180px, 94%); pointer-events: none; }
+    .orbit .school-card { pointer-events: auto; }
+    .p1 { top: 9%;  left: 0; }  .p2 { top: 9%;  right: 0; }
+    .p3 { top: 40%; left: 0; }  .p4 { top: 40%; right: 0; }
+    .p5 { top: 72%; left: 0; }  .p6 { top: 72%; right: 0; }
+    .f1 { animation: fl1 7s ease-in-out infinite; } .f2 { animation: fl2 8s ease-in-out infinite; }
+    .f3 { animation: fl3 6.5s ease-in-out infinite; } .f4 { animation: fl4 7.5s ease-in-out infinite; }
+    .f5 { animation: fl5 8.5s ease-in-out infinite; } .f6 { animation: fl6 7s ease-in-out infinite; }
+    @keyframes fl1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(10px,-14px)} }
+    @keyframes fl2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-12px,-10px)} }
+    @keyframes fl3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-8px,14px)} }
+    @keyframes fl4 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(12px,12px)} }
+    @keyframes fl5 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(14px,-8px)} }
+    @keyframes fl6 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-10px,10px)} }
+    .stage.paused .school-card, .stage.paused .bubo { animation-play-state: paused; }
+
+    .stage-foot { display: flex; align-items: center; justify-content: space-between; padding: 12px 26px; border-top: 1px solid var(--borda); background: rgba(255,255,255,.7); backdrop-filter: blur(4px); position: relative; z-index: 6; }
+    .foot-count { font-size: 13px; color: var(--texto-suave); }
+    .foot-count b { font-family: var(--font-display); font-weight: 800; color: var(--texto); }
+    .pause-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--branco); border: 1px solid var(--borda); border-radius: 22px; padding: 9px 18px; font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--texto); cursor: pointer; }
+    .pause-btn:hover { border-color: var(--azul); color: var(--azul); }
+    .pause-btn svg { width: 15px; height: 15px; }
+    @media (max-width: 720px){ .school-card { width: 180px; } .ring { display: none; } }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+  </style>
+  <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="logo.png" alt="Rede Municipal" class="logo-img" />
+    <span class="portal-tag">Painel Pedagógico</span>
+  </div>
+  <nav class="nav">
+    <a href="inicio.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg> Início</a>
+    <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
+    <a href="turmas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/></svg> Escolas</a>
+    <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg> Servidores</a>
+    <a href="ocorrencias.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Ocorrências</a>
+    <a href="calendario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendário</a>
+    <a href="comunicacao.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Comunicação</a>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Suporte</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 5.34L3.93 6.75M21 12h-2M5 12H3M19.07 19.07l-1.41-1.41M5.34 18.66l-1.41 1.41M12 19v2M12 3V1"/></svg> Configurações</div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sair da conta</div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <svg class="page-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg>
+      <div><div class="topbar-title">Início</div><div class="topbar-sub">Rede Municipal de Ensino · Porto Seguro/BA</div></div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-info"><div class="user-name">Ana Ribeiro</div><div class="user-role">Secretaria de Educação</div></div>
+      <div class="avatar">AR</div>
+    </div>
+  </div>
+
+  <div class="stage-wrap">
+    <div class="stage-top">
+      <div class="eyebrow">Sua rede de ensino</div>
+      <div class="search">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="busca" placeholder="Buscar uma escola pelo nome ou bairro…" autocomplete="off"
+                 oninput="buscar()" onkeydown="navResultados(event)" onfocus="buscar()" />
+        </div>
+        <div class="results" id="results" hidden></div>
+      </div>
+    </div>
+
+    <div class="stage" id="stage">
+      <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+      <div class="orbit">
+        <div class="school-card sc-white p1 f1" onclick="irCard(this)"></div>
+        <div class="school-card sc-blue p2 f2" onclick="irCard(this)"></div>
+        <div class="school-card sc-orange p3 f3" onclick="irCard(this)"></div>
+        <div class="school-card sc-white p4 f4" onclick="irCard(this)"></div>
+        <div class="school-card sc-orange p5 f5" onclick="irCard(this)"></div>
+        <div class="school-card sc-blue p6 f6" onclick="irCard(this)"></div>
+      </div>
+      <div class="bubo-wrap">
+        <div class="bubble">Olá, gestor(a)! 👋</div>
+        <div class="bubo-stage"><img src="bubo.png" alt="Bubo, o mascote do Painel Pedagógico" class="bubo" /></div>
+      </div>
+    </div>
+
+    <div class="stage-foot">
+      <div class="foot-count"><b id="count">0</b> escolas na sua rede</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const svgP = (p,c=16) => `<svg viewBox="0 0 24 24" width="${c}" height="${c}" fill="none" stroke="currentColor" stroke-width="2">${p}</svg>`;
+const ICON_ESC = '<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/>';
+
+/* mesmo gerador da tela Escolas — nomes, bairro e alunos batem 1:1 */
+const NOMES = [
+'E.M. Cidade Alta','E.M. Baianão','E.M. Frei Calixto','CMEI Estrela do Mar',"E.M. Arraial d'Ajuda",'E.M. Trancoso','E.M. Vera Cruz','E.M. Pindorama','CMEI Primeiros Passos','E.M. Coroa Vermelha',
+'E.M. Caraíva','E.M. Vale do Jequitibá','E.M. Mundaí','E.M. Taperapuã','E.M. Cambolo','CMEI Girassol','E.M. Juçara','E.M. Mirante','E.M. Itaquena','E.M. Guaiú',
+'E.M. Nova Brasília','E.M. Parque Ecológico','CMEI Pequeno Príncipe','E.M. Fontana','E.M. Alto do Mercado','E.M. Gruta Azul','E.M. Ponta Grande','E.M. Rio da Prata','E.M. Vale Verde','CMEI Semente do Saber',
+'E.M. Monte Pascoal','E.M. Pataxó','E.M. Aldeia Jaqueira','E.M. Barra Velha','E.M. Corumbau','E.M. Km 40','E.M. Santo André','E.M. Santa Cruz','E.M. Outeiro','E.M. Recife de Fora',
+'CMEI Arco-Íris','E.M. Vila de Trancoso','E.M. Nova Aliança','E.M. José de Anchieta','E.M. Pero Vaz','E.M. Tancredo Neves','E.M. Paulo Freire','E.M. Anísio Teixeira','CMEI Mundo Encantado','E.M. Castro Alves',
+'E.M. Rui Barbosa','E.M. Cecília Meireles','E.M. Monteiro Lobato','E.M. Darcy Ribeiro','E.M. Zumbi dos Palmares','E.M. Chico Mendes','CMEI Vovó Maria','E.M. Nova Alegria','E.M. Boa Esperança','E.M. Campo Verde'
+];
+const BAIRROS = ['Centro','Cidade Alta','Baianão','Cambolo','Trancoso',"Arraial d'Ajuda",'Coroa Vermelha','Vale Verde','Mundaí','Taperapuã','Juçara','Zona Rural','Nova Esperança','Pindorama','Mirante'];
+const ESCOLAS = NOMES.map((nome,i)=>{
+  const r = k => ((i*9301 + k*49297) % 233280) / 233280;
+  const cmei = nome.startsWith('CMEI');
+  const alunos = cmei ? 110 + Math.floor(r(1)*150) : 360 + Math.floor(r(1)*900);
+  return { inep: String(31097401+i), nome, cmei, bairro: BAIRROS[Math.floor(r(12)*BAIRROS.length)], alunos };
+});
+document.getElementById('count').textContent = ESCOLAS.length;
+
+/* ordem de rotação (embaralhada de forma determinística) */
+const ORDER = ESCOLAS.map((e,i)=>({e, k:(i*37+13)%ESCOLAS.length})).sort((a,b)=>a.k-b.k).map(o=>o.e);
+const cards = [...document.querySelectorAll('.school-card')];
+let ptr = 0;
+function preenche(card, esc){
+  card.dataset.inep = esc.inep;
+  card.innerHTML = `<div class="sc-ic ${esc.cmei?'cmei':''}">${svgP(ICON_ESC,18)}</div>
+    <div class="sc-nome">${esc.nome}</div>
+    <div class="sc-sub">${esc.bairro} · <b>${esc.alunos} alunos</b></div>`;
+}
+cards.forEach(c=>{ preenche(c, ORDER[ptr % ORDER.length]); ptr++; });
+
+function cicla(){
+  cards.forEach((c,i)=> setTimeout(()=>{
+    c.classList.add('swapping');
+    setTimeout(()=>{ preenche(c, ORDER[ptr % ORDER.length]); ptr++; c.classList.remove('swapping'); }, 430);
+  }, i*130));
+}
+let timer = setInterval(cicla, 4200);
+
+function irEscola(inep){ location.href = 'turmas.html#' + inep; }
+function irCard(card){ if(card.dataset.inep) irEscola(card.dataset.inep); }
+
+/* busca */
+let selIdx = -1, matches = [];
+function buscar(){
+  const q = document.getElementById('busca').value.trim().toLowerCase();
+  const box = document.getElementById('results');
+  if(!q){ box.hidden = true; matches = []; selIdx = -1; return; }
+  matches = ESCOLAS.filter(e=> e.nome.toLowerCase().includes(q) || e.bairro.toLowerCase().includes(q)).slice(0,8);
+  selIdx = -1;
+  if(!matches.length){ box.innerHTML = `<div class="res-empty">Nenhuma escola encontrada.</div>`; box.hidden = false; return; }
+  box.innerHTML = matches.map((e,i)=>`
+    <div class="res-item" data-i="${i}" onmousedown="event.preventDefault();irEscola('${e.inep}')">
+      <span class="res-ic ${e.cmei?'':''}">${svgP(ICON_ESC,15)}</span>
+      <div><div class="res-nome">${e.nome}</div><div class="res-sub">${e.bairro} · ${e.alunos} alunos</div></div>
+    </div>`).join('');
+  box.hidden = false;
+}
+function navResultados(ev){
+  const box = document.getElementById('results');
+  if(box.hidden || !matches.length){ if(ev.key==='Enter' && matches[0]) irEscola(matches[0].inep); return; }
+  if(ev.key==='ArrowDown'){ ev.preventDefault(); selIdx = Math.min(selIdx+1, matches.length-1); }
+  else if(ev.key==='ArrowUp'){ ev.preventDefault(); selIdx = Math.max(selIdx-1, 0); }
+  else if(ev.key==='Enter'){ ev.preventDefault(); const e = matches[selIdx>=0?selIdx:0]; if(e) irEscola(e.inep); return; }
+  else if(ev.key==='Escape'){ box.hidden = true; return; }
+  box.querySelectorAll('.res-item').forEach((el,i)=> el.classList.toggle('active', i===selIdx));
+}
+document.addEventListener('click', e=>{ if(!e.target.closest('.search')) document.getElementById('results').hidden = true; });
+</script>
+
+</body>
+</html>
