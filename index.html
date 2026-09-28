@@ -94,7 +94,7 @@
     <span class="portal-tag">Painel Pedagógico</span>
   </div>
   <nav class="nav">
-    <a href="inicio.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg> Início</a>
+    <a href="inicio2.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg> Início</a>
     <a href="index.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
     <a href="turmas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/></svg> Escolas</a>
     <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Servidores</a>
@@ -123,7 +123,7 @@
 
   <div class="cal-header">
     <div class="ctx-left">
-      <span class="ctx-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg> Rede municipal · todas as escolas</span>
+      <span class="ctx-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg> <span class="js-escopo">Rede municipal · todas as escolas</span></span>
       <span class="ctx-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
         <select aria-label="Período"><option>2026 · 3º bimestre</option><option>2026 · 2º bimestre</option><option>2026 · 1º bimestre</option></select>
       </span>
@@ -139,13 +139,13 @@
         <div class="panel">
           <div class="section-head"><div class="section-title">Vagas e matrículas</div><div class="section-hint">Rede municipal</div></div>
           <div class="vm">
-            <div class="vm-block"><div class="vm-label">Vagas ofertadas na rede</div><div class="vm-num" id="vagas">34.560</div><div class="vm-sub">nas 60 escolas do município</div></div>
-            <div class="vm-block"><div class="vm-label">Vagas disponíveis</div><div class="vm-num verde">3.080</div><div class="vm-sub">livres para matrícula</div></div>
+            <div class="vm-block"><div class="vm-label">Vagas ofertadas na rede</div><div class="vm-num" id="vagas">34.560</div><div class="vm-sub" id="vmSub">nas 60 escolas do município</div></div>
+            <div class="vm-block"><div class="vm-label">Vagas disponíveis</div><div class="vm-num verde" id="disp">3.080</div><div class="vm-sub">livres para matrícula</div></div>
             <div class="vm-block"><div class="vm-label"><span class="live-dot"></span> Matrículas hoje · tempo real</div><div class="vm-num orange" id="hoje">15</div><div class="vm-sub">atualizado agora</div></div>
           </div>
           <div class="occ">
-            <div class="occ-top"><span>Ocupação da rede</span><span><b id="ativas">31.480</b> / 34.560 vagas · <b>91,1%</b></span></div>
-            <div class="occ-track"><div class="occ-fill" style="width:91.1%"></div></div>
+            <div class="occ-top"><span>Ocupação da rede</span><span><b id="ativas">31.480</b> / <b id="vagasTot">34.560</b> vagas · <b id="ocupPct">91,1%</b></span></div>
+            <div class="occ-track"><div class="occ-fill" id="occFill" style="width:91.1%"></div></div>
           </div>
         </div>
         <div class="panel">
@@ -167,33 +167,58 @@
 
 <div class="help-btn">?</div>
 
+<script src="perfil.js"></script>
 <script>
 const fmt = n => n.toLocaleString('pt-BR');
 const svgIc = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${p}</svg>`;
+
+/* ---- dados recortados pelo perfil ativo ---- */
+const E = escolasEmEscopo();
+const nEsc = E.length;
+const totAlunos = E.reduce((s,e)=>s+e.matriculas,0);
+const totVagas = E.reduce((s,e)=>s+e.vagas,0);
+const dispVagas = Math.max(0, totVagas - totAlunos);
+const ocupPct = totVagas ? (totAlunos/totVagas*100) : 0;
+const freqMedia = nEsc ? E.reduce((s,e)=>s+e.freq,0)/nEsc : 0;
+const totOcor = E.reduce((s,e)=>s+e.ocorrencias,0);
+const totResp = E.reduce((s,e)=>s+e.responsaveis,0);
+const cg = E.reduce((a,e)=>{ a.prof+=e.equipe.prof; a.coord+=e.equipe.coord; a.sec+=e.equipe.sec; a.direcao+=e.equipe.direcao; return a; }, {prof:0,coord:0,sec:0,direcao:0});
+const totUsuarios = cg.prof+cg.coord+cg.sec+cg.direcao;
+const pct1 = v => (Math.round(v*10)/10).toString().replace('.',',')+'%';
+const subEsc = PERFIL.transversal ? 'na rede municipal' : 'no recorte do perfil';
+
 const KPIS = [
-  { label:'Número de escolas', valor:'60', sub:'na rede municipal', ic:'azul', p:'<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/>' },
-  { label:'Alunos matriculados', valor:'31.480', sub:'matrículas ativas', ic:'roxo', p:'<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>' },
-  { label:'Frequência média', valor:'91,2%', sub:'meta 92%', ic:'verde', p:'<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>' },
-  { label:'Usuários', valor:'1.070', sub:'com acesso ao sistema', ic:'laranja', p:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/>' },
-  { label:'Ocorrências', valor:'47', sub:'registradas no período', ic:'ambar', p:'<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>' },
-  { label:'Responsáveis cadastrados', valor:'22.660', sub:'vinculados a alunos', ic:'roxo', p:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>' },
+  { label:'Número de escolas', valor:fmt(nEsc), sub:subEsc, ic:'azul', p:'<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/>' },
+  { label:'Alunos matriculados', valor:fmt(totAlunos), sub:'matrículas ativas', ic:'roxo', p:'<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>' },
+  { label:'Frequência média', valor:pct1(freqMedia), sub:'meta 92%', ic:'verde', p:'<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>' },
+  { label:'Usuários', valor:fmt(totUsuarios), sub:'com acesso ao sistema', ic:'laranja', p:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/>' },
+  { label:'Ocorrências', valor:fmt(totOcor), sub:'registradas no período', ic:'ambar', p:'<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>' },
+  { label:'Responsáveis cadastrados', valor:fmt(totResp), sub:'vinculados a alunos', ic:'roxo', p:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>' },
 ];
 document.getElementById('kpiRow').innerHTML = KPIS.map(k=>`
   <div class="kpi-card"><div class="kpi-left"><div class="kpi-ic ic-${k.ic}">${svgIc(k.p)}</div>
     <div><div class="kpi-label">${k.label}</div><div class="kpi-sub">${k.sub}</div></div></div>
     <div class="kpi-value">${k.valor}</div></div>`).join('');
 
+/* vagas e ocupação */
+document.getElementById('vagas').textContent = fmt(totVagas);
+document.getElementById('vmSub').textContent = `nas ${nEsc} escola${nEsc!==1?'s':''} do recorte`;
+document.getElementById('disp').textContent = fmt(dispVagas);
+document.getElementById('ativas').textContent = fmt(totAlunos);
+document.getElementById('vagasTot').textContent = fmt(totVagas);
+document.getElementById('ocupPct').textContent = pct1(ocupPct);
+document.getElementById('occFill').style.width = Math.min(100,ocupPct).toFixed(1)+'%';
+
 /* matrículas hoje (tempo real, simulado) */
-let hoje = 15; const elHoje = document.getElementById('hoje');
+let hoje = Math.max(3, Math.round(nEsc/4)); const elHoje = document.getElementById('hoje'); elHoje.textContent = hoje;
 setInterval(()=>{ if(Math.random()<0.55){ hoje++; elHoje.textContent = hoje; elHoje.style.transform='scale(1.08)'; setTimeout(()=>elHoje.style.transform='scale(1)',180); } }, 4000);
 
-/* usuários por cargo */
+/* usuários por cargo (recorte) */
 const CARGOS = [
-  { nome:'Professores', n:812, cor:'#12509A' },
-  { nome:'Coordenadores', n:96, cor:'#ED6939' },
-  { nome:'Secretaria', n:74, cor:'#F0B429' },
-  { nome:'Vice-diretores', n:54, cor:'#6B3FA0' },
-  { nome:'Diretores', n:34, cor:'#D6409F' },
+  { nome:'Professores', n:cg.prof, cor:'#12509A' },
+  { nome:'Coordenadores', n:cg.coord, cor:'#ED6939' },
+  { nome:'Secretaria', n:cg.sec, cor:'#F0B429' },
+  { nome:'Diretores', n:cg.direcao, cor:'#6B3FA0' },
 ];
 const totCargo = CARGOS.reduce((s,c)=>s+c.n,0);
 document.getElementById('donutTotal').textContent = fmt(totCargo);
@@ -204,7 +229,9 @@ document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl
 
 /* frequência ao longo do ano */
 (function(){
-  const SERIE=[88.9,89.4,90.1,90.6,90.4,91.0,90.8,91.2], META=92;
+  const BASE=[88.9,89.4,90.1,90.6,90.4,91.0,90.8,91.2], META=92;
+  const dl = freqMedia - 91.2;
+  const SERIE = BASE.map(v=> Math.round((v+dl)*10)/10);
   const w=880,h=210,pl=34,pr=16,pt=16,pb=28, min=82,max=96,rg=max-min;
   const meses=['jan','fev','mar','abr','mai','jun','jul','ago'];
   const x=i=>pl+(i/(SERIE.length-1))*(w-pl-pr), y=v=>pt+(1-(v-min)/rg)*(h-pt-pb);

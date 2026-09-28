@@ -97,7 +97,7 @@
     <span class="portal-tag">Painel Pedagógico</span>
   </div>
   <nav class="nav">
-    <a href="inicio.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg> Início</a>
+    <a href="inicio2.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg> Início</a>
     <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
     <a href="turmas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/></svg> Escolas</a>
     <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg> Servidores</a>
@@ -173,6 +173,7 @@
 </div>
 <div class="help-btn">?</div>
 
+<script src="perfil.js"></script>
 <script>
 const svgP = (p,c=21) => `<svg viewBox="0 0 24 24" width="${c}" height="${c}" fill="none" stroke="currentColor" stroke-width="2">${p}</svg>`;
 const NOMES_ESC = [
@@ -204,8 +205,13 @@ let COMUNICADOS = [
 let filtro = '';
 function setFiltro(btn,f){ filtro=f; document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); render(); }
 
+function comEscopo(c){
+  if(c.dest==='rede' || !window.PERFIL) return true;
+  const esc = c.dest==='pessoa' ? c.destTxt.split('·').pop().trim() : c.destTxt;
+  return PERFIL.emEscopoNome(esc);
+}
 function render(){
-  const lista = COMUNICADOS.filter(c=> !filtro || c.dest===filtro);
+  const lista = COMUNICADOS.filter(c=> comEscopo(c) && (!filtro || c.dest===filtro));
   const ic = { rede:['ic-rede','<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/>'], escola:['ic-escola','<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/>'], pessoa:['ic-pessoa','<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>'] };
   const destLbl = { rede:'Rede', escola:'Escola', pessoa:'Servidor' };
   document.getElementById('list').innerHTML = lista.map(c=>{
@@ -230,7 +236,7 @@ function render(){
   }).join('') || `<div style="text-align:center;padding:40px;color:var(--texto-suave)">Nenhum comunicado neste filtro.</div>`;
 }
 
-(function(){ document.getElementById('fEscola').innerHTML = NOMES_ESC.map(n=>`<option>${n}</option>`).join(''); })();
+(function(){ const opts = NOMES_ESC.filter(n=> !window.PERFIL || PERFIL.emEscopoNome(n)); document.getElementById('fEscola').innerHTML = opts.map(n=>`<option>${n}</option>`).join(''); })();
 let destino = 'escola';
 function setDestino(d){
   destino = d;

@@ -92,7 +92,7 @@
     <span class="portal-tag">Painel Pedagógico</span>
   </div>
   <nav class="nav">
-    <a href="inicio.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg> Início</a>
+    <a href="inicio2.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg> Início</a>
     <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
     <a href="turmas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/></svg> Escolas</a>
     <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg> Servidores</a>
@@ -157,6 +157,7 @@
 </div>
 <div class="help-btn">?</div>
 
+<script src="perfil.js"></script>
 <script>
 const iniciais = n => n.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase();
 const svgP = (p,c=16) => `<svg viewBox="0 0 24 24" width="${c}" height="${c}" fill="none" stroke="currentColor" stroke-width="2">${p}</svg>`;
@@ -197,13 +198,17 @@ for(let i=0;i<47;i++){
 }
 OCOR.sort((a,b)=>b.dia-a.dia);
 
-document.getElementById('kTotal').textContent = OCOR.length;
-document.getElementById('kEscolas').textContent = new Set(OCOR.map(o=>o.escola)).size;
-document.getElementById('kProf').textContent = new Set(OCOR.map(o=>o.prof)).size;
+/* recorte pelo perfil ativo (perfil.js) */
+const VIS = OCOR.filter(o=> !window.PERFIL || PERFIL.emEscopoNome(o.escola));
+
+document.getElementById('kTotal').textContent = VIS.length;
+document.getElementById('kEscolas').textContent = new Set(VIS.map(o=>o.escola)).size;
+document.getElementById('kProf').textContent = new Set(VIS.map(o=>o.prof)).size;
 
 function renderRank(){
-  const cont = {}; OCOR.forEach(o=> cont[o.escola]=(cont[o.escola]||0)+1);
+  const cont = {}; VIS.forEach(o=> cont[o.escola]=(cont[o.escola]||0)+1);
   const arr = Object.entries(cont).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  if(!arr.length){ document.getElementById('rank').innerHTML = `<div class="muted" style="padding:8px 2px;">Nenhuma ocorrência no recorte atual.</div>`; return; }
   const max = arr[0][1];
   document.getElementById('rank').innerHTML = arr.map(([nome,n],i)=>`
     <div class="rank-row">
@@ -218,7 +223,7 @@ function renderRank(){
 
 function renderTabela(){
   const q = (document.getElementById('busca').value||'').toLowerCase();
-  const lista = OCOR.filter(o=> !q || o.aluno.toLowerCase().includes(q) || o.turma.toLowerCase().includes(q) || o.escola.toLowerCase().includes(q));
+  const lista = VIS.filter(o=> !q || o.aluno.toLowerCase().includes(q) || o.turma.toLowerCase().includes(q) || o.escola.toLowerCase().includes(q));
   document.getElementById('tbody').innerHTML = lista.map(o=>`
     <tr onclick="abrir(${o.id})">
       <td><div class="cell-name"><span class="row-avatar">${iniciais(o.aluno)}</span><b>${o.aluno}</b></div></td>

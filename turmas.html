@@ -194,7 +194,7 @@
     <span class="portal-tag">Painel Pedagógico</span>
   </div>
   <nav class="nav">
-    <a href="inicio.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg> Início</a>
+    <a href="inicio2.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg> Início</a>
     <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
     <a href="turmas.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/></svg> Escolas</a>
     <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Servidores</a>
@@ -222,7 +222,7 @@
   </div>
 
   <div class="cal-header">
-    <span class="ctx-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg> Rede municipal · todas as escolas</span>
+    <span class="ctx-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg> <span class="js-escopo">Rede municipal · todas as escolas</span></span>
     <span class="stamp">Dados de 06/08/2026</span>
   </div>
 
@@ -235,6 +235,7 @@
 <aside class="sp" id="escPanel" role="dialog" aria-modal="true" aria-labelledby="escName" tabindex="-1"></aside>
 <div class="help-btn">?</div>
 
+<script src="perfil.js"></script>
 <script>
 const fmt = n => (n==null ? '—' : n.toLocaleString('pt-BR'));
 const iniciais = n => n.replace(/^E\.M\.|^CMEI/,'').trim().split(/\s+/).slice(0,2).map(p=>p[0]).join('').toUpperCase();
@@ -352,7 +353,8 @@ function filtrarEscolas(){
   const q = (document.getElementById('buscaEsc').value||'').toLowerCase().trim();
   const mod = (document.getElementById('fMod')||{}).value || '';
   const st = (document.getElementById('fStatus')||{}).value || '';
-  const lista = ESCOLAS.filter(e=>{
+  const base = ESCOLAS.filter(e=> PERFIL.emEscopo(e));
+  const lista = base.filter(e=>{
     if(q && !(e.nome.toLowerCase().includes(q) || e.localidade.toLowerCase().includes(q) || e.nucleo.toLowerCase().includes(q) || e.inep.includes(q))) return false;
     if(mod && e.localidade !== mod) return false;
     if(st==='ativa' && !e.ativa) return false;
@@ -360,7 +362,7 @@ function filtrarEscolas(){
     return true;
   });
   document.getElementById('escBody').innerHTML = lista.map(linhaEscola).join('') || `<tr><td colspan="6" class="muted" style="text-align:center;padding:26px;">Nenhuma escola encontrada.</td></tr>`;
-  const c = document.getElementById('escCount'); if(c) c.textContent = `· ${lista.length} de ${ESCOLAS.length}`;
+  const c = document.getElementById('escCount'); if(c) c.textContent = `· ${lista.length} de ${base.length}`;
 }
 function redefinir(){ document.getElementById('buscaEsc').value=''; document.getElementById('fMod').value=''; document.getElementById('fStatus').value=''; filtrarEscolas(); }
 
