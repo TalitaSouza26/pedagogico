@@ -55,10 +55,11 @@
     .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--verde); margin-right: 5px; }
 
     /* bloco do bubo perguntando */
-    .ask { background: linear-gradient(130deg, var(--azul-claro) 0%, rgba(234,241,250,.25) 55%, var(--laranja-bg) 130%); border: 1px solid var(--borda); border-radius: var(--raio); padding: 26px 30px; display: flex; align-items: center; gap: 26px; position: relative; overflow: visible; }
+    .ask { background: linear-gradient(130deg, var(--azul-claro) 0%, rgba(234,241,250,.25) 55%, var(--laranja-bg) 130%); border: 1px solid var(--borda); border-radius: var(--raio); padding: 26px 30px; display: flex; align-items: center; justify-content: center; gap: 26px; position: relative; overflow: visible; }
     .ask-bubo { width: 300px; flex-shrink: 0; filter: drop-shadow(0 20px 26px rgba(18,80,154,.22)); align-self: flex-end; margin-bottom: -26px; }
     @media (max-width: 760px){ .ask { flex-direction: column; text-align: center; } .ask-bubo { align-self: center; margin-bottom: 0; width: 220px; } }
-    .ask-box { flex: 1; min-width: 0; }
+    .ask-box { flex: 0 1 560px; min-width: 0; text-align: center; }
+    .ask-search { margin: 0 auto; }
     .ask-eyebrow { font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--azul); opacity: .8; }
     .ask-q { font-family: var(--font-display); font-weight: 800; font-size: 26px; color: var(--texto); margin: 6px 0 16px; line-height: 1.2; }
     .ask-search { position: relative; max-width: 520px; }
