@@ -36,6 +36,16 @@
     .list { display: flex; flex-direction: column; gap: 14px; }
     .msg { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 18px 20px; display: flex; gap: 16px; }
     .msg.urgente { border-left: 4px solid var(--vermelho); }
+    .msg.unread { border-left: 4px solid var(--azul); }
+    .msg.unread .msg-title { font-weight: 800; }
+    .cx-tabs { display: flex; align-items: center; gap: 24px; border-bottom: 1px solid var(--borda); margin-bottom: 18px; }
+    .cx-tab { padding: 12px 2px; border: none; background: none; border-bottom: 3px solid transparent; margin-bottom: -1px; font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--texto-suave); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+    .cx-tab:hover { color: var(--texto); }
+    .cx-tab.active { color: var(--laranja); border-bottom-color: var(--laranja); }
+    .cx-badge { background: var(--laranja); color: #fff; font-size: 11px; font-weight: 700; border-radius: 20px; padding: 1px 8px; }
+    .cx-badge:empty { display: none; }
+    .cx-sub { font-size: 12.5px; color: var(--texto-suave); margin-bottom: 14px; }
+    .tag-new { background: var(--azul-claro); color: var(--azul); border-radius: 20px; font-family: var(--font-display); font-weight: 700; font-size: 10.5px; padding: 3px 10px; text-transform: uppercase; }
     .msg-ic { width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
     .msg-ic svg { width: 21px; height: 21px; }
     .ic-rede { background: var(--azul-claro); color: var(--azul); }
@@ -126,17 +136,29 @@
 
   <div class="view-wrap">
     <div class="content">
-      <div class="toolbar">
-        <div class="filters">
-          <button class="fbtn active" data-f="" onclick="setFiltro(this,'')">Todas</button>
-          <button class="fbtn" data-f="rede" onclick="setFiltro(this,'rede')">Rede</button>
-          <button class="fbtn" data-f="escola" onclick="setFiltro(this,'escola')">Escola</button>
-          <button class="fbtn" data-f="pessoa" onclick="setFiltro(this,'pessoa')">Servidor</button>
-        </div>
-        <button class="new-btn" onclick="abrirNova()">
+      <div class="cx-tabs">
+        <button class="cx-tab active" onclick="setCaixa(this,'entrada')">Caixa de entrada <span class="cx-badge" id="cxBadge"></span></button>
+        <button class="cx-tab" onclick="setCaixa(this,'enviadas')">Enviadas</button>
+        <button class="new-btn" style="margin-left:auto;" onclick="abrirNova()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nova mensagem</button>
       </div>
-      <div class="list" id="list"></div>
+
+      <div id="viewEntrada">
+        <div class="cx-sub">Mensagens recebidas de escolas e servidores da rede.</div>
+        <div class="list" id="listIn"></div>
+      </div>
+
+      <div id="viewEnviadas" hidden>
+        <div class="toolbar">
+          <div class="filters">
+            <button class="fbtn active" data-f="" onclick="setFiltro(this,'')">Todas</button>
+            <button class="fbtn" data-f="rede" onclick="setFiltro(this,'rede')">Rede</button>
+            <button class="fbtn" data-f="escola" onclick="setFiltro(this,'escola')">Escola</button>
+            <button class="fbtn" data-f="pessoa" onclick="setFiltro(this,'pessoa')">Servidor</button>
+          </div>
+        </div>
+        <div class="list" id="list"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -149,11 +171,12 @@
       <div class="fld">
         <label>Destinatário</label>
         <div class="seg">
+          <button id="segRede" onclick="setDestino('rede')">Rede inteira</button>
           <button id="segEscola" class="active" onclick="setDestino('escola')">Escola inteira</button>
           <button id="segPessoa" onclick="setDestino('pessoa')">Um servidor</button>
         </div>
       </div>
-      <div class="fld">
+      <div class="fld" id="fldEscola">
         <label>Escola</label>
         <select class="inp" id="fEscola" onchange="popularServidores()"></select>
       </div>
@@ -169,6 +192,13 @@
       <button class="btn-ghost" onclick="fecharNova()">Cancelar</button>
       <button class="btn-primary" onclick="enviar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar</button>
     </div>
+  </div>
+</div>
+<div class="overlay" id="msgOverlay" onclick="if(event.target===this)fecharMsg()">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="msgTitle">
+    <div class="modal-head"><div class="t" id="msgTitle">Mensagem</div>
+      <button class="modal-close" onclick="fecharMsg()" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-body" id="msgBody"></div>
   </div>
 </div>
 <div class="help-btn">?</div>
@@ -202,8 +232,72 @@ let COMUNICADOS = [
   { dest:'escola', destTxt:'E.M. Monte Pascoal', titulo:'Conselho de classe', texto:'O conselho de classe do 2º bimestre está confirmado para 28/08 às 14h. A participação de todos os professores é obrigatória.', data:'18/08/2026', urgente:false, alvo:42, conf:31 },
 ];
 
+let RECEBIDAS = [
+  { de:'Marta Nogueira', papel:'Diretora', escola:'E.M. Cidade Alta', titulo:'Relatório do 2º bimestre enviado', texto:'Boa tarde, segue o relatório de acompanhamento da turma 5º ANO A conforme solicitado pela Secretaria.', data:'26/08/2026', lida:false },
+  { de:'Cláudio Souza', papel:'Coordenador', escola:'E.M. Trancoso', titulo:'Solicitação de formação', texto:'Gostaríamos de solicitar uma formação continuada em alfabetização para os professores dos anos iniciais.', data:'25/08/2026', lida:false },
+  { de:'Rita Fontes', papel:'Diretora', escola:'CMEI Girassol', titulo:'Atraso na entrega da merenda', texto:'Comunicamos atraso na entrega da merenda escolar desta semana e solicitamos providências.', data:'24/08/2026', lida:true },
+  { de:'Paulo Menezes', papel:'Diretor', escola:'E.M. Monte Pascoal', titulo:'Confirmação — conselho de classe', texto:'Confirmamos a realização do conselho de classe em 28/08 às 14h, conforme comunicado da rede.', data:'23/08/2026', lida:true },
+  { de:'Sônia Prado', papel:'Coordenadora', escola:'E.M. Paulo Freire', titulo:'Dúvida sobre lançamento de notas', texto:'Alguns professores relataram dificuldade no lançamento das notas no sistema. Podem nos orientar?', data:'22/08/2026', lida:true },
+];
+
 let filtro = '';
 function setFiltro(btn,f){ filtro=f; document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); render(); }
+function setCaixa(btn,which){
+  document.querySelectorAll('.cx-tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+  document.getElementById('viewEntrada').hidden = which!=='entrada';
+  document.getElementById('viewEnviadas').hidden = which!=='enviadas';
+}
+function lerMsg(i){ if(RECEBIDAS[i]){ RECEBIDAS[i].lida = true; renderEntrada(); } }
+function abrirMsg(tipo, i){
+  let html = '';
+  if(tipo==='in'){
+    const m = RECEBIDAS[i]; if(!m) return;
+    m.lida = true; renderEntrada();
+    document.getElementById('msgTitle').textContent = m.titulo;
+    html = `
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><span class="dest dest-pessoa">Recebida</span></div>
+      <div style="font-size:13px;color:var(--texto);margin-bottom:4px;"><b>De:</b> ${m.de} · ${m.papel} · ${m.escola}</div>
+      <div style="font-size:12px;color:var(--texto-suave);margin-bottom:16px;">${m.data}</div>
+      <div style="font-size:14px;line-height:1.7;color:var(--texto);">${m.texto}</div>`;
+  } else {
+    const c = COMUNICADOS[i]; if(!c) return;
+    const destLbl = { rede:'Rede', escola:'Escola', pessoa:'Servidor' };
+    const pct = Math.round(c.conf/c.alvo*100);
+    const unidade = c.dest==='pessoa' ? (c.conf?'Mensagem lida':'Ainda não lida') : `${c.conf} de ${c.alvo} confirmaram leitura`;
+    document.getElementById('msgTitle').textContent = c.titulo;
+    html = `
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><span class="dest dest-${c.dest}">${destLbl[c.dest]}</span>${c.urgente?'<span class="tag-urg">Urgente</span>':''}</div>
+      <div style="font-size:13px;color:var(--texto);margin-bottom:4px;"><b>Para:</b> ${c.destTxt}</div>
+      <div style="font-size:12px;color:var(--texto-suave);margin-bottom:16px;">${c.data}</div>
+      <div style="font-size:14px;line-height:1.7;color:var(--texto);margin-bottom:18px;">${c.texto}</div>
+      <div class="conf" style="min-width:0;"><span class="conf-track" style="max-width:220px;"><span class="conf-fill" style="width:${pct}%"></span></span><span class="conf-txt">${unidade}</span></div>`;
+  }
+  document.getElementById('msgBody').innerHTML = html;
+  document.getElementById('msgOverlay').classList.add('open');
+  document.addEventListener('keydown', escMsg);
+}
+function fecharMsg(){ document.getElementById('msgOverlay').classList.remove('open'); document.removeEventListener('keydown', escMsg); }
+function escMsg(e){ if(e.key==='Escape') fecharMsg(); }
+function renderEntrada(){
+  const lista = RECEBIDAS.filter(m=> !window.PERFIL || PERFIL.emEscopoNome(m.escola));
+  document.getElementById('listIn').innerHTML = lista.map(m=>{
+    const i = RECEBIDAS.indexOf(m);
+    return `<div class="msg ${m.lida?'':'unread'}" style="cursor:pointer;" onclick="abrirMsg('in',${i})">
+      <div class="msg-ic ic-pessoa">${svgP('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>')}</div>
+      <div class="msg-body">
+        <div class="msg-top"><span class="msg-title">${m.titulo}</span>${m.lida?'':'<span class="tag-new">Nova</span>'}</div>
+        <div class="msg-dest-txt">De: ${m.de} · ${m.papel} · ${m.escola}</div>
+        <div class="msg-text">${m.texto}</div>
+        <div class="msg-foot">
+          <span class="msg-date">${svgP('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>',13)} ${m.data}</span>
+          <span class="conf-txt">${m.lida?'Lida':'Não lida'}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('') || `<div style="text-align:center;padding:40px;color:var(--texto-suave)">Nenhuma mensagem recebida.</div>`;
+  const b = document.getElementById('cxBadge'); const n = lista.filter(m=>!m.lida).length;
+  if(b) b.textContent = n ? n : '';
+}
 
 function comEscopo(c){
   if(c.dest==='rede' || !window.PERFIL) return true;
@@ -217,7 +311,7 @@ function render(){
   document.getElementById('list').innerHTML = lista.map(c=>{
     const pct = Math.round(c.conf/c.alvo*100);
     const unidade = c.dest==='pessoa' ? (c.conf?'Lida':'Não lida') : `${c.conf} de ${c.alvo} confirmaram leitura`;
-    return `<div class="msg ${c.urgente?'urgente':''}">
+    return `<div class="msg ${c.urgente?'urgente':''}" style="cursor:pointer;" onclick="abrirMsg('out',${COMUNICADOS.indexOf(c)})">
       <div class="msg-ic ${ic[c.dest][0]}">${svgP(ic[c.dest][1])}</div>
       <div class="msg-body">
         <div class="msg-top">
@@ -240,8 +334,10 @@ function render(){
 let destino = 'escola';
 function setDestino(d){
   destino = d;
+  document.getElementById('segRede').classList.toggle('active', d==='rede');
   document.getElementById('segEscola').classList.toggle('active', d==='escola');
   document.getElementById('segPessoa').classList.toggle('active', d==='pessoa');
+  document.getElementById('fldEscola').style.display = d==='rede' ? 'none' : 'block';
   document.getElementById('fldServidor').style.display = d==='pessoa' ? 'block' : 'none';
   if(d==='pessoa') popularServidores();
 }
@@ -259,7 +355,9 @@ function enviar(){
   const urgente = document.getElementById('fUrg').checked;
   const esc = document.getElementById('fEscola').value;
   let novo;
-  if(destino==='escola'){
+  if(destino==='rede'){
+    novo = { dest:'rede', destTxt:'Toda a rede municipal', titulo, texto, data:'26/08/2026', urgente, alvo:1070, conf:0 };
+  } else if(destino==='escola'){
     const alvo = servidoresDe(esc).length;
     novo = { dest:'escola', destTxt: esc, titulo, texto, data:'26/08/2026', urgente, alvo, conf:0 };
   } else {
@@ -273,6 +371,7 @@ function enviar(){
 }
 
 render();
+renderEntrada();
 </script>
 
 </body>
