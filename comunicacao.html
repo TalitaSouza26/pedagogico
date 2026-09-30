@@ -38,19 +38,34 @@
     .msg.urgente { border-left: 4px solid var(--vermelho); }
     .msg.unread { border-left: 4px solid var(--azul); }
     .msg.unread .msg-title { font-weight: 800; }
+    .msg { position: relative; }
+    .msg-del { position: absolute; top: 12px; right: 14px; border: none; background: none; cursor: pointer; color: #C7CDD4; padding: 4px; border-radius: 6px; }
+    .msg-del:hover { color: var(--vermelho); background: #FDE9E9; }
+    .msg-del svg { width: 16px; height: 16px; }
     .cx-tabs { display: flex; align-items: center; gap: 24px; border-bottom: 1px solid var(--borda); margin-bottom: 18px; }
     .cx-tab { padding: 12px 2px; border: none; background: none; border-bottom: 3px solid transparent; margin-bottom: -1px; font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--texto-suave); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
     .cx-tab:hover { color: var(--texto); }
     .cx-tab.active { color: var(--laranja); border-bottom-color: var(--laranja); }
     .cx-badge { background: var(--laranja); color: #fff; font-size: 11px; font-weight: 700; border-radius: 20px; padding: 1px 8px; }
     .cx-badge:empty { display: none; }
+    .cx-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .perfil-sel { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--texto); border: 1px solid var(--borda); border-radius: 10px; padding: 9px 32px 9px 13px; background-color: var(--branco); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23616161' stroke-width='2.2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; appearance: none; -webkit-appearance: none; }
+    .perfil-sel:hover { border-color: var(--azul); }
+    .perfil-sel:focus { outline: none; border-color: var(--azul); box-shadow: 0 0 0 3px var(--azul-claro); }
     .cx-sub { font-size: 12.5px; color: var(--texto-suave); margin-bottom: 14px; }
     .tag-new { background: var(--azul-claro); color: var(--azul); border-radius: 20px; font-family: var(--font-display); font-weight: 700; font-size: 10.5px; padding: 3px 10px; text-transform: uppercase; }
+    .msg-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 20px; margin: 4px 0 18px; padding-bottom: 16px; border-bottom: 1px solid var(--borda); }
+    .msg-meta > div { display: flex; flex-direction: column; min-width: 0; }
+    .msg-meta .mk { font-family: var(--font-display); font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); }
+    .msg-meta .mv { font-size: 13px; color: var(--texto); font-weight: 600; margin-top: 3px; }
+    .msg-detail-text { font-size: 14px; line-height: 1.75; color: var(--texto); }
     .msg-ic { width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
     .msg-ic svg { width: 21px; height: 21px; }
     .ic-rede { background: var(--azul-claro); color: var(--azul); }
     .ic-escola { background: var(--laranja-bg); color: var(--laranja-escuro); }
     .ic-pessoa { background: var(--verde-bg); color: #2E8B00; }
+    .ic-turma { background: #EFEAF7; color: #6B3FA0; }
+    .ic-sme { background: var(--azul-claro); color: var(--azul); }
     .msg-body { flex: 1; min-width: 0; }
     .msg-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
     .msg-title { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--texto); }
@@ -58,6 +73,8 @@
     .dest-rede { background: var(--azul-claro); color: var(--azul); }
     .dest-escola { background: var(--laranja-bg); color: var(--laranja-escuro); }
     .dest-pessoa { background: var(--verde-bg); color: #2E8B00; }
+    .dest-turma { background: #EFEAF7; color: #6B3FA0; }
+    .dest-sme { background: var(--azul-claro); color: var(--azul-escuro); }
     .tag-urg { background: #FDE9E9; color: var(--vermelho); border-radius: 20px; font-family: var(--font-display); font-weight: 700; font-size: 10.5px; padding: 3px 10px; text-transform: uppercase; }
     .msg-dest-txt { font-size: 12px; color: var(--texto-suave); margin-bottom: 8px; }
     .msg-text { font-size: 13.5px; color: var(--texto); line-height: 1.55; }
@@ -73,6 +90,11 @@
     .overlay.open { opacity: 1; pointer-events: auto; }
     .modal { background: var(--branco); border-radius: var(--raio); width: 560px; max-width: 100%; max-height: 92vh; overflow: hidden; display: flex; flex-direction: column; transform: translateY(12px) scale(.98); transition: transform .2s; box-shadow: 0 24px 60px rgba(15,23,32,.28); }
     .overlay.open .modal { transform: none; }
+    /* "Nova mensagem" e detalhe da mensagem como painel lateral (drawer) */
+    #overlay, #msgOverlay { align-items: stretch; justify-content: flex-end; padding: 0; }
+    #overlay .modal, #msgOverlay .modal { width: 460px; max-width: 96vw; height: 100vh; max-height: 100vh; border-radius: 0; transform: translateX(100%); transition: transform .26s cubic-bezier(.2,.75,.3,1); box-shadow: -10px 0 40px rgba(15,23,32,.22); }
+    #overlay.open .modal, #msgOverlay.open .modal { transform: translateX(0); }
+    #overlay .modal-body, #msgOverlay .modal-body { flex: 1; }
     .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--borda); background: var(--bg); }
     .modal-head .t { font-family: var(--font-display); font-weight: 600; font-size: 16px; color: var(--texto); }
     .modal-close { border: 1px solid var(--borda); background: var(--branco); border-radius: 8px; cursor: pointer; color: var(--texto-suave); padding: 7px; display: flex; }
@@ -139,8 +161,25 @@
       <div class="cx-tabs">
         <button class="cx-tab active" onclick="setCaixa(this,'entrada')">Caixa de entrada <span class="cx-badge" id="cxBadge"></span></button>
         <button class="cx-tab" onclick="setCaixa(this,'enviadas')">Enviadas</button>
-        <button class="new-btn" style="margin-left:auto;" onclick="abrirNova()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nova mensagem</button>
+        <div class="cx-actions">
+          <select class="perfil-sel" id="perfilSel" title="Enviar como" onchange="setPerfilAtivo(this.value)">
+            <optgroup label="Gestão escolar">
+              <option value="diretor">Diretor</option>
+              <option value="coordenador">Coordenador</option>
+              <option value="secretario">Secretário</option>
+              <option value="auxiliar">Auxiliar</option>
+            </optgroup>
+            <optgroup label="Servidor">
+              <option value="servidor">Servidor</option>
+            </optgroup>
+            <optgroup label="Secretaria / Sistema">
+              <option value="sme" selected>SME</option>
+              <option value="eprof">eProf</option>
+            </optgroup>
+          </select>
+          <button class="new-btn" onclick="abrirNova()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nova mensagem</button>
+        </div>
       </div>
 
       <div id="viewEntrada">
@@ -155,6 +194,8 @@
             <button class="fbtn" data-f="rede" onclick="setFiltro(this,'rede')">Rede</button>
             <button class="fbtn" data-f="escola" onclick="setFiltro(this,'escola')">Escola</button>
             <button class="fbtn" data-f="pessoa" onclick="setFiltro(this,'pessoa')">Servidor</button>
+            <button class="fbtn" data-f="turma" onclick="setFiltro(this,'turma')">Turma</button>
+            <button class="fbtn" data-f="sme" onclick="setFiltro(this,'sme')">SME</button>
           </div>
         </div>
         <div class="list" id="list"></div>
@@ -171,22 +212,38 @@
       <div class="fld">
         <label>Destinatário</label>
         <div class="seg">
-          <button id="segRede" onclick="setDestino('rede')">Rede inteira</button>
-          <button id="segEscola" class="active" onclick="setDestino('escola')">Escola inteira</button>
-          <button id="segPessoa" onclick="setDestino('pessoa')">Um servidor</button>
+          <button id="segEscola" class="active" onclick="setDestino('escola')">Escola</button>
+          <button id="segPessoa" onclick="setDestino('pessoa')">Servidor</button>
+          <button id="segTurma" onclick="setDestino('turma')">Turma</button>
+          <button id="segSme" onclick="setDestino('sme')">SME</button>
         </div>
       </div>
       <div class="fld" id="fldEscola">
         <label>Escola</label>
-        <select class="inp" id="fEscola" onchange="popularServidores()"></select>
+        <select class="inp" id="fEscola" onchange="onEscolaChange()"></select>
+      </div>
+      <div class="fld" id="fldTurno" style="display:none">
+        <label>Turno</label>
+        <select class="inp" id="fTurno" onchange="popularTurmas()"></select>
+      </div>
+      <div class="fld" id="fldTurma" style="display:none">
+        <label>Turma</label>
+        <select class="inp" id="fTurma"></select>
       </div>
       <div class="fld" id="fldServidor" style="display:none">
         <label>Servidor</label>
         <select class="inp" id="fServidor"></select>
       </div>
+      <div class="fld" id="fldSme" style="display:none">
+        <label>Destino na Secretaria</label>
+        <div class="seg" style="margin-bottom:12px;">
+          <button id="segSmeTodos" class="active" onclick="setSmeAlvo('todos')">Todo o órgão</button>
+          <button id="segSmePessoa" onclick="setSmeAlvo('pessoa')">Uma pessoa</button>
+        </div>
+        <select class="inp" id="fSmePessoa" style="display:none"></select>
+      </div>
       <div class="fld"><label>Título</label><input class="inp" id="fTitulo" placeholder="Ex.: Reunião pedagógica" /></div>
       <div class="fld"><label>Mensagem</label><textarea class="inp" id="fMsg" placeholder="Escreva a mensagem..."></textarea></div>
-      <div class="fld"><label class="chk"><input type="checkbox" id="fUrg" /> Marcar como urgente</label></div>
     </div>
     <div class="modal-foot">
       <button class="btn-ghost" onclick="fecharNova()">Cancelar</button>
@@ -199,6 +256,7 @@
     <div class="modal-head"><div class="t" id="msgTitle">Mensagem</div>
       <button class="modal-close" onclick="fecharMsg()" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body" id="msgBody"></div>
+    <div class="modal-foot" id="msgFoot"></div>
   </div>
 </div>
 <div class="help-btn">?</div>
@@ -248,7 +306,17 @@ function setCaixa(btn,which){
   document.getElementById('viewEnviadas').hidden = which!=='enviadas';
 }
 function lerMsg(i){ if(RECEBIDAS[i]){ RECEBIDAS[i].lida = true; renderEntrada(); } }
+let _msgAtual = null;
+function hsh(s){ let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; }
+function horaDe(s){ const h=hsh(s); return String(7+h%11).padStart(2,'0')+'h'+String(h%60).padStart(2,'0'); }
+const EU = (window.PERFIL ? PERFIL.nome : 'Ana Ribeiro');
+function apagarMsgIdx(tipo, i){
+  if(tipo==='in'){ RECEBIDAS.splice(i,1); renderEntrada(); }
+  else { COMUNICADOS.splice(i,1); render(); }
+}
+function apagarMsg(){ if(!_msgAtual) return; apagarMsgIdx(_msgAtual.tipo, _msgAtual.i); fecharMsg(); }
 function abrirMsg(tipo, i){
+  _msgAtual = { tipo, i };
   let html = '';
   if(tipo==='in'){
     const m = RECEBIDAS[i]; if(!m) return;
@@ -256,33 +324,53 @@ function abrirMsg(tipo, i){
     document.getElementById('msgTitle').textContent = m.titulo;
     html = `
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><span class="dest dest-pessoa">Recebida</span></div>
-      <div style="font-size:13px;color:var(--texto);margin-bottom:4px;"><b>De:</b> ${m.de} · ${m.papel} · ${m.escola}</div>
-      <div style="font-size:12px;color:var(--texto-suave);margin-bottom:16px;">${m.data}</div>
-      <div style="font-size:14px;line-height:1.7;color:var(--texto);">${m.texto}</div>`;
+      <div style="font-size:13px;color:var(--texto);margin-bottom:3px;"><b>De:</b> ${m.de} · ${m.papel} · ${m.escola}</div>
+      <div style="font-size:12px;color:var(--texto-suave);padding-bottom:16px;border-bottom:1px solid var(--borda);">Recebida em ${m.data} · ${horaDe(m.titulo+m.de)}</div>
+      <div class="msg-detail-text" style="margin-top:16px;">${m.texto}</div>`;
   } else {
     const c = COMUNICADOS[i]; if(!c) return;
-    const destLbl = { rede:'Rede', escola:'Escola', pessoa:'Servidor' };
+    const destLbl = { rede:'Rede municipal', escola:'Escola', pessoa:'Servidor', turma:'Turma', sme:'SME' };
     const pct = Math.round(c.conf/c.alvo*100);
-    const unidade = c.dest==='pessoa' ? (c.conf?'Mensagem lida':'Ainda não lida') : `${c.conf} de ${c.alvo} confirmaram leitura`;
+    const unidade = c.alvo<=1 ? (c.conf?'Mensagem lida':'Ainda não lida') : `${c.conf} de ${c.alvo} confirmaram leitura`;
     document.getElementById('msgTitle').textContent = c.titulo;
     html = `
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><span class="dest dest-${c.dest}">${destLbl[c.dest]}</span>${c.urgente?'<span class="tag-urg">Urgente</span>':''}</div>
-      <div style="font-size:13px;color:var(--texto);margin-bottom:4px;"><b>Para:</b> ${c.destTxt}</div>
-      <div style="font-size:12px;color:var(--texto-suave);margin-bottom:16px;">${c.data}</div>
-      <div style="font-size:14px;line-height:1.7;color:var(--texto);margin-bottom:18px;">${c.texto}</div>
+      <div style="font-size:13px;color:var(--texto);margin-bottom:3px;"><b>Para:</b> ${c.destTxt}</div>
+      <div style="font-size:12px;color:var(--texto-suave);padding-bottom:16px;border-bottom:1px solid var(--borda);">Enviada em ${c.data} · ${horaDe(c.titulo+c.destTxt)}</div>
+      <div class="msg-detail-text" style="margin:16px 0 18px;">${c.texto}</div>
       <div class="conf" style="min-width:0;"><span class="conf-track" style="max-width:220px;"><span class="conf-fill" style="width:${pct}%"></span></span><span class="conf-txt">${unidade}</span></div>`;
   }
   document.getElementById('msgBody').innerHTML = html;
+  const del = `<button class="btn-ghost" style="color:var(--vermelho);border-color:#F3C7C7;margin-right:auto;display:inline-flex;align-items:center;gap:7px;" onclick="apagarMsg()">${svgP('<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>',15)} Apagar</button>`;
+  const resp = tipo==='in' ? `<button class="btn-primary" onclick="responder(${i})">${svgP('<polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/>',15)} Responder</button>` : '';
+  document.getElementById('msgFoot').innerHTML = del + resp + `<button class="btn-ghost" onclick="fecharMsg()">Fechar</button>`;
   document.getElementById('msgOverlay').classList.add('open');
   document.addEventListener('keydown', escMsg);
 }
 function fecharMsg(){ document.getElementById('msgOverlay').classList.remove('open'); document.removeEventListener('keydown', escMsg); }
+function responder(i){
+  const m = RECEBIDAS[i]; if(!m) return;
+  fecharMsg();
+  abrirNova();
+  setDestino('pessoa');
+  const escSel = document.getElementById('fEscola');
+  if(![...escSel.options].some(o=>o.value===m.escola || o.textContent===m.escola)){ const o=document.createElement('option'); o.textContent=m.escola; escSel.appendChild(o); }
+  escSel.value = m.escola;
+  popularServidores();
+  const svSel = document.getElementById('fServidor');
+  const label = `${m.de} — ${m.papel}`;
+  if(![...svSel.options].some(o=>o.textContent===label)){ const o=document.createElement('option'); o.textContent=label; svSel.insertBefore(o, svSel.firstChild); }
+  svSel.value = label;
+  document.getElementById('fTitulo').value = 'Re: ' + m.titulo;
+  document.getElementById('fMsg').focus();
+}
 function escMsg(e){ if(e.key==='Escape') fecharMsg(); }
 function renderEntrada(){
   const lista = RECEBIDAS.filter(m=> !window.PERFIL || PERFIL.emEscopoNome(m.escola));
   document.getElementById('listIn').innerHTML = lista.map(m=>{
     const i = RECEBIDAS.indexOf(m);
     return `<div class="msg ${m.lida?'':'unread'}" style="cursor:pointer;" onclick="abrirMsg('in',${i})">
+      <button class="msg-del" title="Apagar" aria-label="Apagar" onclick="event.stopPropagation();apagarMsgIdx('in',${i})">${svgP('<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>',16)}</button>
       <div class="msg-ic ic-pessoa">${svgP('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>')}</div>
       <div class="msg-body">
         <div class="msg-top"><span class="msg-title">${m.titulo}</span>${m.lida?'':'<span class="tag-new">Nova</span>'}</div>
@@ -306,12 +394,19 @@ function comEscopo(c){
 }
 function render(){
   const lista = COMUNICADOS.filter(c=> comEscopo(c) && (!filtro || c.dest===filtro));
-  const ic = { rede:['ic-rede','<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/>'], escola:['ic-escola','<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/>'], pessoa:['ic-pessoa','<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>'] };
-  const destLbl = { rede:'Rede', escola:'Escola', pessoa:'Servidor' };
+  const ic = {
+    rede:['ic-rede','<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/>'],
+    escola:['ic-escola','<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/>'],
+    pessoa:['ic-pessoa','<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>'],
+    turma:['ic-turma','<rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>'],
+    sme:['ic-sme','<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 12h6M9 16h6"/>'],
+  };
+  const destLbl = { rede:'Rede', escola:'Escola', pessoa:'Servidor', turma:'Turma', sme:'SME' };
   document.getElementById('list').innerHTML = lista.map(c=>{
     const pct = Math.round(c.conf/c.alvo*100);
-    const unidade = c.dest==='pessoa' ? (c.conf?'Lida':'Não lida') : `${c.conf} de ${c.alvo} confirmaram leitura`;
+    const unidade = c.alvo<=1 ? (c.conf?'Lida':'Não lida') : `${c.conf} de ${c.alvo} confirmaram leitura`;
     return `<div class="msg ${c.urgente?'urgente':''}" style="cursor:pointer;" onclick="abrirMsg('out',${COMUNICADOS.indexOf(c)})">
+      <button class="msg-del" title="Apagar" aria-label="Apagar" onclick="event.stopPropagation();apagarMsgIdx('out',${COMUNICADOS.indexOf(c)})">${svgP('<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>',16)}</button>
       <div class="msg-ic ${ic[c.dest][0]}">${svgP(ic[c.dest][1])}</div>
       <div class="msg-body">
         <div class="msg-top">
@@ -332,41 +427,96 @@ function render(){
 
 (function(){ const opts = NOMES_ESC.filter(n=> !window.PERFIL || PERFIL.emEscopoNome(n)); document.getElementById('fEscola').innerHTML = opts.map(n=>`<option>${n}</option>`).join(''); })();
 let destino = 'escola';
+// Equipe da Secretaria (SME) para envio a uma pessoa específica
+const SME_PESSOAS = [
+  'Ana Ribeiro — Secretária de Educação',
+  'Marcos Lima — Coordenação Pedagógica',
+  'Juliana Alves — Educação Infantil',
+  'Paulo Reis — Ensino Fundamental',
+  'Fernanda Dias — Alimentação Escolar',
+  'Rita Nunes — Recursos Humanos',
+  'Carlos Menezes — Transporte Escolar',
+];
+(function(){ const s=document.getElementById('fSmePessoa'); if(s) s.innerHTML = SME_PESSOAS.map(p=>`<option>${p}</option>`).join(''); })();
+let smeAlvo = 'todos';
+function setSmeAlvo(v){
+  smeAlvo = v;
+  document.getElementById('segSmeTodos').classList.toggle('active', v==='todos');
+  document.getElementById('segSmePessoa').classList.toggle('active', v==='pessoa');
+  document.getElementById('fSmePessoa').style.display = v==='pessoa' ? 'block' : 'none';
+}
+// Perfil de quem envia -> destinos permitidos
+const PERFIS_ENVIO = {
+  diretor:     { destinos:['escola','pessoa','turma','sme'] },
+  coordenador: { destinos:['escola','pessoa','turma','sme'] },
+  secretario:  { destinos:['escola','pessoa','turma','sme'] },
+  auxiliar:    { destinos:['escola','pessoa','turma','sme'] },
+  servidor:    { destinos:['turma','sme'] },
+  sme:         { destinos:['escola','pessoa','sme'] },
+  eprof:       { destinos:['escola','pessoa','sme'] },
+};
+let perfilEnvio = 'sme';
+function setPerfilAtivo(v){ perfilEnvio = v; aplicarDestinosPermitidos(); }
+function aplicarDestinosPermitidos(){
+  const permit = (PERFIS_ENVIO[perfilEnvio] || PERFIS_ENVIO.sme).destinos;
+  const map = { escola:'segEscola', pessoa:'segPessoa', turma:'segTurma', sme:'segSme' };
+  Object.entries(map).forEach(([d,id])=>{ const b=document.getElementById(id); if(b) b.style.display = permit.includes(d) ? '' : 'none'; });
+  if(!permit.includes(destino)) setDestino(permit[0]);
+}
 function setDestino(d){
   destino = d;
-  document.getElementById('segRede').classList.toggle('active', d==='rede');
   document.getElementById('segEscola').classList.toggle('active', d==='escola');
   document.getElementById('segPessoa').classList.toggle('active', d==='pessoa');
-  document.getElementById('fldEscola').style.display = d==='rede' ? 'none' : 'block';
+  document.getElementById('segTurma').classList.toggle('active', d==='turma');
+  document.getElementById('segSme').classList.toggle('active', d==='sme');
+  document.getElementById('fldEscola').style.display = d==='sme' ? 'none' : 'block';
   document.getElementById('fldServidor').style.display = d==='pessoa' ? 'block' : 'none';
+  document.getElementById('fldTurno').style.display = d==='turma' ? 'block' : 'none';
+  document.getElementById('fldTurma').style.display = d==='turma' ? 'block' : 'none';
+  document.getElementById('fldSme').style.display = d==='sme' ? 'block' : 'none';
   if(d==='pessoa') popularServidores();
+  if(d==='turma'){ popularTurnos(); popularTurmas(); }
 }
+function onEscolaChange(){ if(destino==='pessoa') popularServidores(); else if(destino==='turma'){ popularTurnos(); popularTurmas(); } }
 function popularServidores(){
   const esc = document.getElementById('fEscola').value;
   const sv = servidoresDe(esc);
   document.getElementById('fServidor').innerHTML = sv.map(s=>`<option>${s.nome} — ${s.cargo}</option>`).join('');
 }
-function abrirNova(){ document.getElementById('overlay').classList.add('open'); document.addEventListener('keydown',escH); }
+function turnosDe(esc){ return esc.startsWith('CMEI') ? ['Integral'] : ['Matutino','Vespertino']; }
+function turmasPool(esc){ return esc.startsWith('CMEI') ? ['Berçário','Creche I','Creche II','Pré I','Pré II'] : ['1º ano A','2º ano A','3º ano A','4º ano A','5º ano A','6º ano A','7º ano A','8º ano A','9º ano A']; }
+function popularTurnos(){ const esc = document.getElementById('fEscola').value; document.getElementById('fTurno').innerHTML = turnosDe(esc).map(t=>`<option>${t}</option>`).join(''); }
+function popularTurmas(){ const esc = document.getElementById('fEscola').value; document.getElementById('fTurma').innerHTML = turmasPool(esc).map(t=>`<option>${t}</option>`).join(''); }
+function abrirNova(){ aplicarDestinosPermitidos(); document.getElementById('overlay').classList.add('open'); document.addEventListener('keydown',escH); }
 function fecharNova(){ document.getElementById('overlay').classList.remove('open'); document.removeEventListener('keydown',escH); }
 function escH(e){ if(e.key==='Escape') fecharNova(); }
 function enviar(){
   const titulo = document.getElementById('fTitulo').value.trim() || '(sem título)';
   const texto = document.getElementById('fMsg').value.trim() || '(sem conteúdo)';
-  const urgente = document.getElementById('fUrg').checked;
+  const urgente = false;
   const esc = document.getElementById('fEscola').value;
   let novo;
-  if(destino==='rede'){
-    novo = { dest:'rede', destTxt:'Toda a rede municipal', titulo, texto, data:'26/08/2026', urgente, alvo:1070, conf:0 };
-  } else if(destino==='escola'){
+  if(destino==='escola'){
     const alvo = servidoresDe(esc).length;
     novo = { dest:'escola', destTxt: esc, titulo, texto, data:'26/08/2026', urgente, alvo, conf:0 };
-  } else {
+  } else if(destino==='pessoa'){
     const serv = document.getElementById('fServidor').value.split(' — ')[0];
     novo = { dest:'pessoa', destTxt:`${serv} · ${esc}`, titulo, texto, data:'26/08/2026', urgente, alvo:1, conf:0 };
+  } else if(destino==='turma'){
+    const turno = document.getElementById('fTurno').value;
+    const turma = document.getElementById('fTurma').value;
+    novo = { dest:'turma', destTxt:`${turma} · ${turno} · ${esc}`, titulo, texto, data:'26/08/2026', urgente, alvo:28, conf:0 };
+  } else {
+    if(smeAlvo==='pessoa'){
+      const p = document.getElementById('fSmePessoa').value.split(' — ')[0];
+      novo = { dest:'sme', destTxt:`${p} · Secretaria Municipal de Educação`, titulo, texto, data:'26/08/2026', urgente, alvo:1, conf:0 };
+    } else {
+      novo = { dest:'sme', destTxt:'Secretaria Municipal de Educação (todo o órgão)', titulo, texto, data:'26/08/2026', urgente, alvo:SME_PESSOAS.length, conf:0 };
+    }
   }
   COMUNICADOS.unshift(novo);
   fecharNova();
-  document.getElementById('fTitulo').value=''; document.getElementById('fMsg').value=''; document.getElementById('fUrg').checked=false;
+  document.getElementById('fTitulo').value=''; document.getElementById('fMsg').value='';
   render();
 }
 
