@@ -15,7 +15,7 @@
     { id: 'subsecretaria',nome: 'Cláudia Ramos',      cargo: 'Subsecretária do Litoral Sul',        grupo: 'Administrativo', escopo: 'rede' },
     { id: 'gestor',       nome: 'Paulo Menezes',      cargo: 'Gestor do Contrato',                  grupo: 'Administrativo', escopo: 'rede' },
     // Equipe pedagógica
-    { id: 'supervisor',   nome: 'Ana Ribeiro',        cargo: 'Supervisor(a) Pedagógico(a)',              grupo: 'Pedagógico', escopo: 'rede' },
+    { id: 'supervisor',   nome: 'Ana Ribeiro',        cargo: 'Coordenador',                              grupo: 'Pedagógico', escopo: 'rede' },
     { id: 'infantil',     nome: 'Rita Fontes',        cargo: 'Coordenação da Educação Infantil',         grupo: 'Pedagógico', escopo: 'etapa', etapa: 'Infantil' },
     { id: 'fund1',        nome: 'Josefa Lima',        cargo: 'Coordenação do Ensino Fundamental I',      grupo: 'Pedagógico', escopo: 'etapa', etapa: 'Fund I' },
     { id: 'fund2',        nome: 'Hélio Barros',       cargo: 'Coordenação do Ensino Fundamental II',     grupo: 'Pedagógico', escopo: 'etapa', etapa: 'Fund II' },
