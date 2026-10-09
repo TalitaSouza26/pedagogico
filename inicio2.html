@@ -368,7 +368,7 @@ function buboSet(up){ const el = document.getElementById('heroBubo'); if(el) el.
     { v:pct1(freqMedia), l:'Frequência média', s:'presença dos alunos', c:'azul', p:iFreq },
     { v:fmt(ocor), l:'Ocorrências no período', s:'registros pedagógicos', c:'ambar', p:'<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>' },
     { v:fmt(turmas), l:'Turmas', s:'na rede', c:'laranja', p:'<rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>' },
-    { v:fmt(professores), l:'Professores', s:'em sala de aula', c:'roxo', p:iUsers },
+    { v:fmt(usuarios), l:'Servidores', s:'na rede municipal', c:'roxo', p:iUsers },
   ];
   document.getElementById('heroInner').insertAdjacentHTML('beforeend', K.map((k,i)=>`
     <div class="hero-card h${i+1}"><div class="kcard-l"><div class="kic ic-${k.c}">${svgP(k.p,21)}</div>
