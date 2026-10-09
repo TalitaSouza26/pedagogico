@@ -45,6 +45,11 @@
     .msg-arch { position: absolute; top: 12px; right: 14px; border: none; background: none; cursor: pointer; color: #9AA4B0; padding: 4px; border-radius: 6px; }
     .msg-arch:hover { color: var(--azul); background: var(--azul-claro); }
     .msg-arch svg { width: 16px; height: 16px; }
+    .msg-acts { position: absolute; top: 12px; right: 14px; display: flex; gap: 2px; }
+    .msg-actbtn { border: none; background: none; cursor: pointer; color: #9AA4B0; padding: 4px; border-radius: 6px; display: flex; }
+    .msg-actbtn svg { width: 16px; height: 16px; }
+    .msg-actbtn:hover { color: var(--azul); background: var(--azul-claro); }
+    .msg-actbtn.danger:hover { color: var(--vermelho); background: #FDE9E9; }
     .cx-tabs { display: flex; align-items: center; flex-wrap: wrap; row-gap: 8px; gap: 20px; border-bottom: 1px solid var(--borda); margin-bottom: 18px; }
     .cx-tab { padding: 12px 2px; border: none; background: none; border-bottom: 3px solid transparent; margin-bottom: -1px; font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--texto-suave); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
     .cx-tab:hover { color: var(--texto); }
@@ -69,6 +74,8 @@
     .ic-pessoa { background: var(--verde-bg); color: #2E8B00; }
     .ic-turma { background: #EFEAF7; color: #6B3FA0; }
     .ic-sme { background: var(--azul-claro); color: var(--azul); }
+    .ic-eprof { background: var(--laranja-bg); color: var(--laranja-escuro); }
+    .dest-eprof { background: var(--laranja-bg); color: var(--laranja-escuro); }
     .msg-body { flex: 1; min-width: 0; }
     .msg-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
     .msg-title { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--texto); }
@@ -195,8 +202,10 @@
     <div class="content">
       <div class="cx-tabs">
         <button class="cx-tab active" onclick="setCaixa(this,'entrada')">Caixa de entrada <span class="cx-badge" id="cxBadge"></span></button>
+        <button class="cx-tab" onclick="setCaixa(this,'comunicados')">Comunicados <span class="cx-badge" id="comBadge"></span></button>
         <button class="cx-tab" onclick="setCaixa(this,'enviadas')">Enviadas</button>
         <button class="cx-tab" onclick="setCaixa(this,'arquivados')">Arquivados <span class="cx-badge" id="arqBadge"></span></button>
+        <button class="cx-tab" onclick="setCaixa(this,'lixeira')">Lixeira <span class="cx-badge" id="lixBadge"></span></button>
         <div class="cx-actions">
           <select class="perfil-sel" id="perfilSel" title="Enviar como" onchange="setPerfilAtivo(this.value)">
             <optgroup label="Gestão escolar">
@@ -223,6 +232,11 @@
         <div class="list" id="listIn"></div>
       </div>
 
+      <div id="viewComunicados" hidden>
+        <div class="cx-sub">Comunicados e novidades do eProf.</div>
+        <div class="list" id="listCom"></div>
+      </div>
+
       <div id="viewEnviadas" hidden>
         <div class="toolbar">
           <div class="filters">
@@ -240,6 +254,11 @@
       <div id="viewArquivados" hidden>
         <div class="cx-sub">Mensagens da caixa de entrada que você arquivou. Nada é excluído.</div>
         <div class="list" id="listArq"></div>
+      </div>
+
+      <div id="viewLixeira" hidden>
+        <div class="cx-sub">Mensagens movidas para a lixeira. Você pode restaurá-las para a caixa de entrada.</div>
+        <div class="list" id="listLix"></div>
       </div>
     </div>
   </div>
@@ -357,25 +376,59 @@ let RECEBIDAS = [
   { de:'Sônia Prado', papel:'Coordenadora', escola:'E.M. Paulo Freire', titulo:'Dúvida sobre lançamento de notas', texto:'Alguns professores relataram dificuldade no lançamento das notas no sistema. Podem nos orientar?', data:'22/08/2026', lida:true },
 ];
 
+// Comunicados oficiais do eProf (novidades / avisos da plataforma) — somente leitura
+let EPROF_COMUNICADOS = [
+  { titulo:'Novidade: anexos nas mensagens', texto:'Agora você pode enviar e abrir anexos diretamente nas mensagens do painel. Ao escrever uma nova mensagem, use o botão "Anexar arquivo". Documentos e imagens abrem em pré-visualização, sem precisar baixar.', data:'29/09/2026', lida:false },
+  { titulo:'Manutenção programada', texto:'O eProf passará por manutenção no dia 05/10, das 22h às 23h. Durante esse período o acesso pode ficar instável. Agradecemos a compreensão.', data:'26/09/2026', lida:false },
+  { titulo:'Dica: acompanhe a frequência de acesso', texto:'No painel de cada escola você encontra a frequência média de acesso à plataforma. Use esse indicador para apoiar as unidades com menor adesão à plataforma.', data:'20/09/2026', lida:true },
+  { titulo:'Atualização do calendário letivo', texto:'O calendário letivo de 2026 foi atualizado no sistema. Confira o material em anexo e repasse às suas unidades.', data:'15/09/2026', lida:true, anexos:[{nome:'Calendário letivo 2026.pdf', tipo:'pdf', tamanho:'174 KB'}] },
+];
+const IC_EPROF = '<path d="M3 11l18-5v12L3 14z"/><path d="M11.6 16.8a3 3 0 11-5.8-1.6"/>';
+function renderComunicados(){
+  const el = document.getElementById('listCom'); if(!el) return;
+  el.innerHTML = EPROF_COMUNICADOS.map((m,i)=>`<div class="msg ${m.lida?'':'unread'}" style="cursor:pointer;" onclick="abrirMsg('eprof',${i})">
+      <div class="msg-ic ic-eprof">${svgP(IC_EPROF,21)}</div>
+      <div class="msg-body">
+        <div class="msg-top"><span class="msg-title">${m.titulo}</span>${m.lida?'':'<span class="tag-new">Nova</span>'}${m.anexos&&m.anexos.length?`<span class="msg-clip">${svgP('<path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>',13)} ${m.anexos.length}</span>`:''}</div>
+        <div class="msg-dest-txt">De: <b>eProf</b> · Comunicado oficial</div>
+        <div class="msg-text">${m.texto}</div>
+        <div class="msg-foot">
+          <span class="msg-date">${svgP('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>',13)} ${m.data}</span>
+          <span class="conf-txt">${m.lida?'Lida':'Não lida'}</span>
+        </div>
+      </div>
+    </div>`).join('') || `<div style="text-align:center;padding:40px;color:var(--texto-suave)">Nenhum comunicado do eProf.</div>`;
+  const b = document.getElementById('comBadge'); const n = EPROF_COMUNICADOS.filter(m=>!m.lida).length;
+  if(b) b.textContent = n ? n : '';
+}
 let filtro = '';
 function setFiltro(btn,f){ filtro=f; document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); render(); }
 function setCaixa(btn,which){
   document.querySelectorAll('.cx-tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
   document.getElementById('viewEntrada').hidden = which!=='entrada';
+  document.getElementById('viewComunicados').hidden = which!=='comunicados';
   document.getElementById('viewEnviadas').hidden = which!=='enviadas';
   document.getElementById('viewArquivados').hidden = which!=='arquivados';
+  document.getElementById('viewLixeira').hidden = which!=='lixeira';
   if(which==='arquivados') renderArquivados();
+  if(which==='comunicados') renderComunicados();
+  if(which==='lixeira') renderLixeira();
 }
 function lerMsg(i){ if(RECEBIDAS[i]){ RECEBIDAS[i].lida = true; renderEntrada(); } }
 let _msgAtual = null;
 function hsh(s){ let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; }
 function horaDe(s){ const h=hsh(s); return String(7+h%11).padStart(2,'0')+'h'+String(h%60).padStart(2,'0'); }
 const EU = (window.PERFIL ? PERFIL.nome : 'Ana Ribeiro');
-// Mensagens não são excluídas — apenas arquivadas (só as da caixa de entrada)
-function arquivarMsgIdx(i){ if(RECEBIDAS[i]){ RECEBIDAS[i].arquivada = true; renderEntrada(); renderArquivados(); } }
-function desarquivarMsgIdx(i){ if(RECEBIDAS[i]){ RECEBIDAS[i].arquivada = false; renderEntrada(); renderArquivados(); } }
+// Mensagens não são excluídas de verdade — vão para Arquivados ou Lixeira (recuperável)
+function reRenderCaixas(){ renderEntrada(); renderArquivados(); renderLixeira(); }
+function arquivarMsgIdx(i){ if(RECEBIDAS[i]){ RECEBIDAS[i].arquivada = true; RECEBIDAS[i].naLixeira = false; reRenderCaixas(); } }
+function desarquivarMsgIdx(i){ if(RECEBIDAS[i]){ RECEBIDAS[i].arquivada = false; reRenderCaixas(); } }
+function moverLixeiraIdx(i){ if(RECEBIDAS[i]){ RECEBIDAS[i].naLixeira = true; RECEBIDAS[i].arquivada = false; reRenderCaixas(); } }
+function restaurarIdx(i){ if(RECEBIDAS[i]){ RECEBIDAS[i].naLixeira = false; reRenderCaixas(); } }
 function arquivarMsg(){ if(!_msgAtual) return; arquivarMsgIdx(_msgAtual.i); fecharMsg(); }
 function desarquivarMsg(){ if(!_msgAtual) return; desarquivarMsgIdx(_msgAtual.i); fecharMsg(); }
+function moverLixeiraMsg(){ if(!_msgAtual) return; moverLixeiraIdx(_msgAtual.i); fecharMsg(); }
+function restaurarMsg(){ if(!_msgAtual) return; restaurarIdx(_msgAtual.i); fecharMsg(); }
 function abrirMsg(tipo, i){
   _msgAtual = { tipo, i };
   let html = '';
@@ -387,6 +440,16 @@ function abrirMsg(tipo, i){
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><span class="dest dest-pessoa">Recebida</span></div>
       <div style="font-size:13px;color:var(--texto);margin-bottom:3px;">De: <b>${m.papel}</b> · ${m.de} · ${m.escola}</div>
       <div style="font-size:12px;color:var(--texto-suave);padding-bottom:16px;border-bottom:1px solid var(--borda);">Recebida em ${m.data} · ${horaDe(m.titulo+m.de)}</div>
+      <div class="msg-detail-text" style="margin-top:16px;">${m.texto}</div>
+      ${anexosHTML(m.anexos)}`;
+  } else if(tipo==='eprof'){
+    const m = EPROF_COMUNICADOS[i]; if(!m) return;
+    m.lida = true; renderComunicados();
+    document.getElementById('msgTitle').textContent = m.titulo;
+    html = `
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><span class="dest dest-eprof">eProf</span></div>
+      <div style="font-size:13px;color:var(--texto);margin-bottom:3px;">De: <b>eProf</b> · Comunicado oficial</div>
+      <div style="font-size:12px;color:var(--texto-suave);padding-bottom:16px;border-bottom:1px solid var(--borda);">Recebido em ${m.data} · ${horaDe(m.titulo+'eprof')}</div>
       <div class="msg-detail-text" style="margin-top:16px;">${m.texto}</div>
       ${anexosHTML(m.anexos)}`;
   } else {
@@ -404,16 +467,24 @@ function abrirMsg(tipo, i){
       ${anexosHTML(c.anexos)}`;
   }
   document.getElementById('msgBody').innerHTML = html;
-  // Só a caixa de entrada pode arquivar/desarquivar; enviadas não têm ação (nada é excluído)
-  let arq = '';
+  // Mensagens da caixa de entrada: arquivar / mover p/ lixeira / responder. Na lixeira: restaurar. (Enviadas e eProf: só leitura)
+  const bAzul = 'display:inline-flex;align-items:center;gap:7px;color:var(--azul);border-color:#BFD3EC;';
+  const bVerm = 'display:inline-flex;align-items:center;gap:7px;color:var(--vermelho);border-color:#F3C7C7;';
+  let acoes = '', resp = '';
   if(tipo==='in'){
     const m = RECEBIDAS[i];
-    arq = m && m.arquivada
-      ? `<button class="btn-ghost" style="margin-right:auto;display:inline-flex;align-items:center;gap:7px;color:var(--azul);border-color:#BFD3EC;" onclick="desarquivarMsg()">${svgP(IC_DESARQUIVAR,15)} Desarquivar</button>`
-      : `<button class="btn-ghost" style="margin-right:auto;display:inline-flex;align-items:center;gap:7px;color:var(--azul);border-color:#BFD3EC;" onclick="arquivarMsg()">${svgP(IC_ARQUIVAR,15)} Arquivar</button>`;
+    if(m && m.naLixeira){
+      acoes = `<button class="btn-ghost" style="margin-right:auto;${bAzul}" onclick="restaurarMsg()">${svgP(IC_RESTAURAR,15)} Restaurar</button>`;
+    } else {
+      const arq = (m && m.arquivada)
+        ? `<button class="btn-ghost" style="${bAzul}" onclick="desarquivarMsg()">${svgP(IC_DESARQUIVAR,15)} Desarquivar</button>`
+        : `<button class="btn-ghost" style="${bAzul}" onclick="arquivarMsg()">${svgP(IC_ARQUIVAR,15)} Arquivar</button>`;
+      const lix = `<button class="btn-ghost" style="${bVerm}" onclick="moverLixeiraMsg()">${svgP(IC_LIXEIRA,15)} Lixeira</button>`;
+      acoes = `<span style="margin-right:auto;display:inline-flex;gap:8px;">${arq}${lix}</span>`;
+      resp = `<button class="btn-primary" onclick="responder(${i})">${svgP('<polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/>',15)} Responder</button>`;
+    }
   }
-  const resp = tipo==='in' ? `<button class="btn-primary" onclick="responder(${i})">${svgP('<polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/>',15)} Responder</button>` : '';
-  document.getElementById('msgFoot').innerHTML = arq + resp + `<button class="btn-ghost" onclick="fecharMsg()">Fechar</button>`;
+  document.getElementById('msgFoot').innerHTML = acoes + resp + `<button class="btn-ghost" onclick="fecharMsg()">Fechar</button>`;
   document.getElementById('msgOverlay').classList.add('open');
   document.addEventListener('keydown', escMsg);
 }
@@ -437,12 +508,20 @@ function responder(i){
 function escMsg(e){ if(e.key==='Escape') fecharMsg(); }
 const IC_ARQUIVAR = '<rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v10a1 1 0 001 1h14a1 1 0 001-1V9"/><path d="M9 13h6"/>';
 const IC_DESARQUIVAR = '<rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v10a1 1 0 001 1h14a1 1 0 001-1V9"/><path d="M12 18v-5"/><path d="M9.5 15.5 12 13l2.5 2.5"/>';
-function cardRecebida(m, i, arquivada){
-  const acao = arquivada
-    ? `<button class="msg-arch" title="Desarquivar" aria-label="Desarquivar" onclick="event.stopPropagation();desarquivarMsgIdx(${i})">${svgP(IC_DESARQUIVAR,16)}</button>`
-    : `<button class="msg-arch" title="Arquivar" aria-label="Arquivar" onclick="event.stopPropagation();arquivarMsgIdx(${i})">${svgP(IC_ARQUIVAR,16)}</button>`;
+const IC_LIXEIRA = '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>';
+const IC_RESTAURAR = '<polyline points="1 4 1 10 7 10"/><path d="M3.5 15a9 9 0 102.1-9.4L1 10"/>';
+function btnAct(icon, title, onclick, danger){ return `<button class="msg-actbtn ${danger?'danger':''}" title="${title}" aria-label="${title}" onclick="event.stopPropagation();${onclick}">${svgP(icon,16)}</button>`; }
+function cardRecebida(m, i, modo){
+  let acoes;
+  if(modo==='lixeira'){
+    acoes = btnAct(IC_RESTAURAR,'Restaurar',`restaurarIdx(${i})`);
+  } else if(modo==='arquivados'){
+    acoes = btnAct(IC_DESARQUIVAR,'Desarquivar',`desarquivarMsgIdx(${i})`) + btnAct(IC_LIXEIRA,'Mover para a lixeira',`moverLixeiraIdx(${i})`,true);
+  } else {
+    acoes = btnAct(IC_ARQUIVAR,'Arquivar',`arquivarMsgIdx(${i})`) + btnAct(IC_LIXEIRA,'Mover para a lixeira',`moverLixeiraIdx(${i})`,true);
+  }
   return `<div class="msg ${m.lida?'':'unread'}" style="cursor:pointer;" onclick="abrirMsg('in',${i})">
-      ${acao}
+      <div class="msg-acts">${acoes}</div>
       <div class="msg-ic ic-pessoa">${svgP('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>')}</div>
       <div class="msg-body">
         <div class="msg-top"><span class="msg-title">${m.titulo}</span>${m.lida?'':'<span class="tag-new">Nova</span>'}${m.anexos&&m.anexos.length?`<span class="msg-clip">${svgP('<path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>',13)} ${m.anexos.length}</span>`:''}</div>
@@ -455,19 +534,27 @@ function cardRecebida(m, i, arquivada){
       </div>
     </div>`;
 }
+function noEscopo(m){ return !window.PERFIL || PERFIL.emEscopoNome(m.escola); }
 function renderEntrada(){
-  const lista = RECEBIDAS.filter(m=> (!window.PERFIL || PERFIL.emEscopoNome(m.escola)) && !m.arquivada);
-  document.getElementById('listIn').innerHTML = lista.map(m=> cardRecebida(m, RECEBIDAS.indexOf(m), false)).join('')
+  const lista = RECEBIDAS.filter(m=> noEscopo(m) && !m.arquivada && !m.naLixeira);
+  document.getElementById('listIn').innerHTML = lista.map(m=> cardRecebida(m, RECEBIDAS.indexOf(m), 'entrada')).join('')
     || `<div style="text-align:center;padding:40px;color:var(--texto-suave)">Nenhuma mensagem na caixa de entrada.</div>`;
   const b = document.getElementById('cxBadge'); const n = lista.filter(m=>!m.lida).length;
   if(b) b.textContent = n ? n : '';
 }
 function renderArquivados(){
-  const lista = RECEBIDAS.filter(m=> (!window.PERFIL || PERFIL.emEscopoNome(m.escola)) && m.arquivada);
+  const lista = RECEBIDAS.filter(m=> noEscopo(m) && m.arquivada && !m.naLixeira);
   const el = document.getElementById('listArq');
-  if(el) el.innerHTML = lista.map(m=> cardRecebida(m, RECEBIDAS.indexOf(m), true)).join('')
+  if(el) el.innerHTML = lista.map(m=> cardRecebida(m, RECEBIDAS.indexOf(m), 'arquivados')).join('')
     || `<div style="text-align:center;padding:40px;color:var(--texto-suave)">Nenhuma mensagem arquivada.</div>`;
   const b = document.getElementById('arqBadge'); if(b) b.textContent = lista.length ? lista.length : '';
+}
+function renderLixeira(){
+  const lista = RECEBIDAS.filter(m=> noEscopo(m) && m.naLixeira);
+  const el = document.getElementById('listLix');
+  if(el) el.innerHTML = lista.map(m=> cardRecebida(m, RECEBIDAS.indexOf(m), 'lixeira')).join('')
+    || `<div style="text-align:center;padding:40px;color:var(--texto-suave)">A lixeira está vazia.</div>`;
+  const b = document.getElementById('lixBadge'); if(b) b.textContent = lista.length ? lista.length : '';
 }
 
 function comEscopo(c){
@@ -509,16 +596,15 @@ function render(){
 
 (function(){ const opts = NOMES_ESC.filter(n=> !window.PERFIL || PERFIL.emEscopoNome(n)); document.getElementById('fEscola').innerHTML = opts.map(n=>`<option>${n}</option>`).join(''); })();
 let destino = 'escola';
-// Equipe da Secretaria (SME) para envio a uma pessoa específica
-const SME_PESSOAS = [
-  'Ana Ribeiro — Secretária de Educação',
-  'Marcos Lima — Coordenação Pedagógica',
-  'Juliana Alves — Educação Infantil',
-  'Paulo Reis — Ensino Fundamental',
-  'Fernanda Dias — Alimentação Escolar',
-  'Rita Nunes — Recursos Humanos',
-  'Carlos Menezes — Transporte Escolar',
-];
+// Equipe da Secretaria (SME) para envio a uma pessoa específica — perfis do documento (perfil.js)
+const SME_PESSOAS = (window.PERFIS && window.PERFIS.length)
+  ? window.PERFIS.map(p => `${p.nome} — ${p.cargo}`)
+  : [
+      'Ana Ribeiro — Secretário(a) Municipal de Educação',
+      'Marina Teles — Secretária Municipal Adjunta',
+      'Cláudia Ramos — Subsecretária do Litoral Sul',
+      'Paulo Menezes — Gestor do Contrato',
+    ];
 (function(){ const s=document.getElementById('fSmePessoa'); if(s) s.innerHTML = SME_PESSOAS.map(p=>`<option>${p}</option>`).join(''); })();
 let smeAlvo = 'todos';
 function setSmeAlvo(v){
@@ -675,6 +761,7 @@ function enviar(){
 
 render();
 renderEntrada();
+renderComunicados();
 </script>
 
 </body>

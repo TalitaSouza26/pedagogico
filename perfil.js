@@ -172,6 +172,7 @@
     escopo: ativo.escopo, etapa: ativo.etapa, modalidade: ativo.modalidade,
     emEscopo, emEscopoNome, escopoLabel, transversal: (ativo.escopo === 'rede' || ativo.escopo === 'especial'),
   };
+  window.PERFIS = PERFIS.map(p => ({ id: p.id, nome: p.nome, cargo: p.cargo, grupo: p.grupo }));
   window.REDE = REDE;
   window.REDE_NOME = REDE_NOME;
   window.gerarEquipe = gerarEquipe;
