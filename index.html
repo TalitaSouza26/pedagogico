@@ -7,6 +7,13 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; display: flex; height: 100vh; overflow: hidden; font-size: 13px; color: #333; }
+    /* modo "bare": usado quando a Visão geral é embutida (iframe) no Início — mostra só o conteúdo */
+    body.bare { display: block; height: auto; overflow: visible; background: var(--branco); }
+    body.bare .sidebar, body.bare .topbar, body.bare .cal-header { display: none !important; }
+    body.bare .main, body.bare .view-wrap { overflow: visible; height: auto; display: block; }
+    body.bare .content { padding-top: 6px; }
+    /* evita repetir, no Início, os KPIs que já estão nos cards ao redor do bubo */
+    body.bare .kpi-row { display: none !important; }
     .sidebar { display: flex; flex-direction: column; }
     .sidebar-logo { display: flex; align-items: center; gap: 8px; }
     .logo-img { width: 104px; height: auto; display: block; }
@@ -82,6 +89,26 @@
     .dl-num { margin-left: auto; font-family: var(--font-display); font-weight: 700; color: var(--texto); }
 
     .help-btn { position: fixed; bottom: 20px; right: 20px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    /* Widget Matrículas — manchete + barras verticais por mês */
+    .acc-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 2px 0 18px; }
+    .acc-num { font-family: var(--font-display); font-weight: 800; font-size: 30px; color: var(--texto); line-height: 1; }
+    .acc-trend { font-family: var(--font-display); font-weight: 700; font-size: 13.5px; color: #2E8B00; display: inline-flex; align-items: center; gap: 4px; }
+    .acc-trend.down { color: var(--vermelho); }
+    .acc-sub { font-size: 12px; color: var(--texto-suave); margin-left: 2px; }
+    .acc-bars { display: flex; align-items: flex-end; gap: 14px; height: 180px; padding-top: 18px; }
+    .acc-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 9px; height: 100%; justify-content: flex-end; cursor: pointer; }
+    .acc-bar { width: 100%; max-width: 60px; border-radius: 10px 10px 5px 5px; background: linear-gradient(180deg, #7FB0E8, #12509A); position: relative; transition: filter .15s; }
+    .acc-col:hover .acc-bar { filter: brightness(1.06); }
+    .acc-bar-val { position: absolute; top: -17px; left: 0; right: 0; text-align: center; font-family: var(--font-display); font-size: 11.5px; font-weight: 700; color: var(--texto-suave); }
+    .acc-lbl { font-size: 12px; color: var(--texto-suave); }
+    /* Escolas por localidade — barras horizontais */
+    .locbar { display: grid; grid-template-columns: 120px 1fr 110px; align-items: center; gap: 14px; padding: 9px 0; cursor: pointer; }
+    .locbar + .locbar { border-top: 1px solid var(--borda); }
+    .locbar:hover .lb-name { color: var(--azul); }
+    .lb-name { font-family: var(--font-display); font-size: 13.5px; font-weight: 600; color: var(--texto); }
+    .lb-track { height: 14px; border-radius: 7px; background: #EEF1F5; overflow: hidden; }
+    .lb-fill { display: block; height: 100%; border-radius: 7px; transition: width .3s; }
+    .lb-num { font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--texto); text-align: right; white-space: nowrap; }
     /* Barra de composição (matrículas por etapa) */
     .comp-bar { display: flex; width: 100%; height: 40px; border-radius: 10px; overflow: hidden; margin: 8px 0 16px; background: #EEF1F5; }
     .comp-seg { display: flex; align-items: center; justify-content: center; color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 13px; min-width: 0; white-space: nowrap; transition: width .3s; }
@@ -144,12 +171,6 @@
     <div class="content">
       <div class="kpi-row" id="kpiRow"></div>
 
-      <div class="panel" style="margin-bottom:20px;">
-        <div class="section-head"><div class="section-title">Matrículas por etapa</div><div class="section-hint">Distribuição na rede</div></div>
-        <div class="comp-bar" id="compBar"></div>
-        <div class="comp-legend" id="compLegend"></div>
-      </div>
-
       <div class="grid-2">
         <div class="panel">
           <div class="section-head"><div class="section-title">Vagas e matrículas</div><div class="section-hint">Rede municipal</div></div>
@@ -164,11 +185,28 @@
           </div>
         </div>
         <div class="panel">
-          <div class="section-head"><div class="section-title">Usuários por cargo</div><div class="section-hint">Com acesso ao sistema</div></div>
-          <div class="donut-wrap">
-            <div class="donut" id="donut"><div class="donut-center"><span class="dc-lbl">Usuários</span><span class="dc-val" id="donutTotal"></span></div></div>
-            <div class="donut-legend" id="donutLegend"></div>
-          </div>
+          <div class="section-head"><div class="section-title">Matrículas por mês</div><div class="section-hint">Novas matrículas · últimos 6 meses</div></div>
+          <div class="acc-bars" id="matBars" style="margin-top:8px;"></div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:20px;">
+        <div class="section-head"><div class="section-title">Matrículas por etapa</div><div class="section-hint">Distribuição na rede</div></div>
+        <div class="comp-bar" id="compBar"></div>
+        <div class="comp-legend" id="compLegend"></div>
+      </div>
+
+      <div class="panel" style="margin-top:20px;">
+        <div class="section-head"><div class="section-title">Escolas por localidade</div><div class="section-hint" id="locTot">Distribuição da rede</div></div>
+        <div class="comp-bar" id="locBar"></div>
+        <div class="comp-legend" id="locLegend"></div>
+      </div>
+
+      <div class="panel" style="margin-top:20px;">
+        <div class="section-head"><div class="section-title">Usuários por cargo</div><div class="section-hint">Com acesso ao sistema</div></div>
+        <div class="donut-wrap">
+          <div class="donut" id="donut"><div class="donut-center"><span class="dc-lbl">Usuários</span><span class="dc-val" id="donutTotal"></span></div></div>
+          <div class="donut-legend" id="donutLegend"></div>
         </div>
       </div>
 
@@ -225,7 +263,7 @@ document.getElementById('ocupPct').textContent = pct1(ocupPct);
 document.getElementById('occFill').style.width = Math.min(100,ocupPct).toFixed(1)+'%';
 
 /* matrículas hoje (tempo real, simulado) */
-let hoje = Math.max(3, Math.round(nEsc/4)); const elHoje = document.getElementById('hoje'); elHoje.textContent = hoje;
+const elHoje = document.getElementById('hoje'); if(elHoje) elHoje.textContent = Math.max(3, Math.round(nEsc/4));
 setInterval(()=>{ if(Math.random()<0.55){ hoje++; elHoje.textContent = hoje; elHoje.style.transform='scale(1.08)'; setTimeout(()=>elHoje.style.transform='scale(1)',180); } }, 4000);
 
 /* usuários por cargo (recorte) */
@@ -291,6 +329,52 @@ document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl
   document.getElementById('compLegend').innerHTML = SEGS.map(s=>
     `<div class="comp-li"><span class="comp-dot" style="background:${s.cor}"></span><b>${s.nome}</b> <span class="cl-sub">${fmt(s.v)} · ${pc(s.v)}</span></div>`
   ).join('');
+})();
+
+/* Matrículas — hoje (tempo real) + novas por mês (últimos 6 meses) */
+(function(){
+  const meses = ['mar','abr','mai','jun','jul','ago'];
+  const baseN = Math.max(60, Math.round(totAlunos * 0.011));
+  const fac = [0.84, 0.90, 0.95, 1.0, 1.07, 1.16];
+  const vals = fac.map(f=> Math.round(baseN * f));
+  const maxV = Math.max(...vals, 1);
+  document.getElementById('matBars').innerHTML = vals.map((v,i)=>{
+    const h = Math.round(v / maxV * 100);
+    return `<div class="acc-col" title="${meses[i]}: ${fmt(v)} novas matrículas" onclick="(window.top||window).location.href='alunos.html'"><div class="acc-bar" style="height:${h}%"><span class="acc-bar-val">${fmt(v)}</span></div><span class="acc-lbl">${meses[i]}</span></div>`;
+  }).join('');
+})();
+
+/* Escolas por localidade — rosca clicável */
+(function(){
+  const cont = { 'Urbana':0, 'Campo':0, 'Indígena':0 };
+  E.forEach(e=>{ const l = e.localidade || (e.modalidade==='Campo'?'Campo':e.modalidade==='Indígena'?'Indígena':'Urbana'); cont[l] = (cont[l]||0) + 1; });
+  const LOC = [
+    { nome:'Urbana', cor:'#0EA5B5', n:cont['Urbana']||0 },
+    { nome:'Campo', cor:'#E2663A', n:cont['Campo']||0 },
+    { nome:'Indígena', cor:'#157A3C', n:cont['Indígena']||0 },
+  ];
+  const tot = LOC.reduce((s,x)=>s+x.n,0) || 1;
+  const pc = v => (Math.round(v/tot*1000)/10).toString().replace('.',',')+'%';
+  document.getElementById('locTot').textContent = `${tot} escolas`;
+  document.getElementById('locBar').innerHTML = LOC.filter(c=>c.n>0).map(c=>{
+    const pct = c.n/tot*100;
+    return `<div class="comp-seg" style="width:${pct}%;background:${c.cor};cursor:pointer;" title="${c.nome}: ${pc(c.n)}" onclick="(window.top||window).location.href='turmas.html'"><span>${pct>=8?pc(c.n):''}</span></div>`;
+  }).join('');
+  document.getElementById('locLegend').innerHTML = LOC.map(c=>
+    `<div class="comp-li" style="cursor:pointer" onclick="(window.top||window).location.href='turmas.html'"><span class="comp-dot" style="background:${c.cor}"></span><b>${c.nome}</b> <span class="cl-sub">${c.n} · ${pc(c.n)}</span></div>`
+  ).join('');
+})();
+
+/* modo embutido (iframe no Início): esconde navegação e informa a altura à tela-pai */
+(function(){
+  try {
+    if(new URLSearchParams(location.search).get('bare') !== '1') return;
+    document.body.classList.add('bare');
+    const postH = () => { try { parent.postMessage({ t:'eprof-vg-h', h: document.documentElement.scrollHeight }, '*'); } catch(e){} };
+    window.addEventListener('load', postH);
+    if(window.ResizeObserver) new ResizeObserver(postH).observe(document.body);
+    setTimeout(postH, 200); setTimeout(postH, 800);
+  } catch(e){}
 })();
 </script>
 
