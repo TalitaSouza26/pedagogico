@@ -263,8 +263,12 @@ document.getElementById('ocupPct').textContent = pct1(ocupPct);
 document.getElementById('occFill').style.width = Math.min(100,ocupPct).toFixed(1)+'%';
 
 /* matrículas hoje (tempo real, simulado) */
-const elHoje = document.getElementById('hoje'); if(elHoje) elHoje.textContent = Math.max(3, Math.round(nEsc/4));
-setInterval(()=>{ if(Math.random()<0.55){ hoje++; elHoje.textContent = hoje; elHoje.style.transform='scale(1.08)'; setTimeout(()=>elHoje.style.transform='scale(1)',180); } }, 4000);
+let hoje = Math.max(3, Math.round(nEsc/4));
+const elHoje = document.getElementById('hoje');
+if(elHoje){
+  elHoje.textContent = hoje;
+  setInterval(()=>{ if(Math.random()<0.55){ hoje++; elHoje.textContent = hoje; elHoje.style.transform='scale(1.08)'; setTimeout(()=>elHoje.style.transform='scale(1)',180); } }, 4000);
+}
 
 /* usuários por cargo (recorte) */
 const CARGOS = [
