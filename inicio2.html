@@ -260,7 +260,7 @@
   </div>
   <nav class="nav">
     <a href="inicio2.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg> Início</a>
-    <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
+    <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Índices</a>
     <a href="turmas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/></svg> Escolas</a>
     <a href="alunos.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Alunos</a>
     <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg> Servidores</a>
@@ -313,10 +313,6 @@
         </div>
       </div>
 
-      <div class="vg-embed">
-        <div class="vg-embed-head"><span class="muni-title">Panorama da rede</span><span class="muni-sub">Visão geral · todas as escolas</span></div>
-        <iframe id="vgFrame" src="index.html?bare=1" title="Visão geral da rede" scrolling="no"></iframe>
-      </div>
     </div>
 
   </div>
@@ -780,10 +776,6 @@ function fecharFicha(){
   if(qs.get('bare')==='1'){ document.documentElement.classList.add('bare'); document.body.classList.add('bare'); }
   const inep = qs.get('escola'); if(inep) abrirFicha(inep);
 } catch(e){} })();
-// ajusta a altura do iframe da Visão geral embutida conforme o conteúdo
-window.addEventListener('message', e=>{
-  if(e.data && e.data.t==='eprof-vg-h'){ const f=document.getElementById('vgFrame'); if(f && e.data.h) f.style.height = (e.data.h + 10) + 'px'; }
-});
 </script>
 
 </body>
