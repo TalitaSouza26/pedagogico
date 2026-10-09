@@ -120,6 +120,21 @@
     return team;
   }
 
+  /* Fonte única: equipe e nº de servidores de cada escola vêm de gerarEquipe
+     (evita que a mesma métrica mostre números diferentes entre as telas) */
+  REDE.forEach(e => {
+    const team = gerarEquipe(e.inep);
+    const eq = { direcao: 0, coord: 0, prof: 0, sec: 0, apoio: 0 };
+    team.forEach(p => {
+      if (p.grupo === 'Direção') eq.direcao++;
+      else if (p.grupo === 'Coordenação') eq.coord++;
+      else if (p.grupo === 'Professores') eq.prof++;
+      else eq.sec++;
+    });
+    e.equipe = eq;
+    e.servidores = team.length;
+  });
+
   /* ---- Recorte por perfil (seção 3) ---- */
   function classifica(esc) {
     // aceita objeto {nome, localidade, etapas} OU flags já calculadas

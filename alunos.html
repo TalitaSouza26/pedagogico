@@ -243,8 +243,7 @@ const ALUNOS = [];
       const doc = (semCpf || semResp || h % 13 === 0) ? 'Incompleta' : 'Completa';
       const m = h % 40; const status = m === 0 ? 'Transferido' : m === 1 ? 'Evadido' : m === 2 ? 'Remanejado' : 'Ativo';
       const ee = (h % 33 === 0);
-      const recup = (nivel !== 'Educação Infantil' && status === 'Ativo' && h % 9 === 0);
-      ALUNOS.push({ nome, cpf: semCpf ? null : gerarCPF(h), escola: e.nome, nivel, serie, turno, status, doc, enturmado: !semTurma, resp: !semResp, ee, recup });
+      ALUNOS.push({ nome, cpf: semCpf ? null : gerarCPF(h), escola: e.nome, nivel, serie, turno, status, doc, enturmado: !semTurma, resp: !semResp, ee });
     }
   });
 })();

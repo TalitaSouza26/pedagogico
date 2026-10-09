@@ -506,10 +506,10 @@ function abrirFicha(inep){
   /* aba Alunos — lista de alunos */
   const alunos = alunosDaEscola(e);
   const teaN = alunos.filter(a=>a.tea).length;
-  const alRows = alunos.map(a=>`<tr data-s="${(a.nome+' '+a.turma).toLowerCase()}"><td><b>${a.nome}</b>${a.tea?' <span class="al-tea">TEA</span>':''}</td><td class="muted">${a.turma}</td><td>${a.turno}</td></tr>`).join('');
+  const alRows = alunos.map(a=>`<tr data-s="${(a.nome+' '+a.turma).toLowerCase()}"><td><b>${a.nome}</b>${a.tea?' <span class="al-tea">Ed. Especial</span>':''}</td><td class="muted">${a.turma}</td><td>${a.turno}</td></tr>`).join('');
   const paneAlunos = `
     <div class="al-head">
-      <div class="al-count"><b id="alVis">${fmt(alunos.length)}</b> alunos · <span style="color:#6B3FA0;font-weight:700;">${fmt(teaN)}</span> com TEA</div>
+      <div class="al-count"><b id="alVis">${fmt(alunos.length)}</b> alunos · <span style="color:#6B3FA0;font-weight:700;">${fmt(teaN)}</span> em Educação Especial</div>
       <label class="al-search">${svgP('<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',15)}<input id="alBusca" type="text" placeholder="Buscar aluno ou turma" oninput="filtrarAlunos()" autocomplete="off" /></label>
     </div>
     <table class="pt-tbl"><thead><tr><th>Aluno</th><th>Turma</th><th>Turno</th></tr></thead><tbody id="alunosTbody">${alRows}</tbody></table>`;
