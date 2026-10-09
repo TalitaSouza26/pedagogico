@@ -98,13 +98,13 @@
     .ask-hint { font-size: 12px; color: var(--texto-suave); margin-top: 10px; }
 
     /* ---- palco do quadro (sala de aula) ---- */
-    .board-stage { position: relative; width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    .board-stage { position: relative; flex: 1 1 0; min-width: 0; height: 100%; margin: 0; overflow: hidden; }
     /* frame com a proporção da imagem (3:2), dimensionado p/ cobrir a área toda — sem sobra */
-    .board-frame { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: max(100%, calc((100vh - 90px) * 1.5)); aspect-ratio: 3 / 2; }
+    .board-frame { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: max(100%, calc((100vh - 90px) * 1.333)); aspect-ratio: 4 / 3; }
     .board-bg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
     .board-bg-write { opacity: 0; transition: opacity .4s ease; }         /* bubo escrevendo (aparece ao digitar) */
     .board-frame.writing .board-bg-write { opacity: 1; }
-    .board-area { position: absolute; top: 17%; left: 34.7%; right: 15.3%; bottom: 36%; display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: clamp(12px, 2.4vh, 24px); }
+    .board-area { position: absolute; top: 21%; left: 34.7%; right: 17.3%; bottom: 46%; display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: clamp(12px, 2.4vh, 24px); }
     .board-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(17px, 2vw, 27px); color: #fff; text-align: center; text-shadow: 0 1px 6px rgba(0,0,0,.4); margin-bottom: 2px; }
     /* título azul ACIMA do quadro (na parede) */
     .board-heading { position: absolute; top: 11%; left: 28%; right: 9%; text-align: center; font-family: var(--font-display); font-weight: 800; font-size: clamp(18px, 2.1vw, 30px); color: var(--azul); text-shadow: 0 1px 2px rgba(255,255,255,.55); }
@@ -136,8 +136,26 @@
     .board-results .res-nome { color: var(--texto); font-weight: 700; line-height: 1.2; }
     .board-results .res-sub { color: var(--texto-suave); font-size: 13px; margin-top: 1px; }
     .board-results .res-empty { padding: 14px 16px; color: var(--texto-suave); }
+    /* layout: painel de índices à esquerda + quadro à direita */
+    .inicio-layout { display: flex; height: 100%; }
+    .kpi-panel { flex-shrink: 0; width: clamp(240px, 23vw, 322px); background: #f5f8fc; border-right: 1px solid var(--borda); padding: 22px 18px; overflow-y: auto; }
+    .kpi-panel-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(17px, 1.5vw, 21px); color: var(--azul-escuro); }
+    .kpi-panel-sub { font-size: 13px; color: var(--texto-suave); margin-top: 2px; }
+    .kpi-cards { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+    .kpi-card { display: flex; align-items: center; gap: 14px; background: #fff; border: 1px solid var(--borda); border-radius: 14px; padding: 13px 15px; box-shadow: 0 4px 14px rgba(15,23,32,.05); }
+    .kpi-ic { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .kpi-ic.azul { background: var(--azul-claro); color: var(--azul); }
+    .kpi-ic.laranja { background: var(--laranja-bg); color: var(--laranja); }
+    .kpi-ic.verde { background: var(--verde-bg); color: var(--verde); }
+    .kpi-card .kv { font-family: var(--font-display); font-weight: 800; font-size: clamp(20px, 1.8vw, 25px); color: var(--texto); line-height: 1; }
+    .kpi-card .kl { font-size: 13px; color: var(--texto-suave); margin-top: 3px; }
+
     @media (max-width: 860px){
       .view-wrap > .content { height: auto; }
+      .inicio-layout { flex-direction: column; height: auto; }
+      .kpi-panel { width: auto; border-right: none; border-bottom: 1px solid var(--borda); }
+      .kpi-cards { flex-direction: row; flex-wrap: wrap; }
+      .kpi-card { flex: 1 1 140px; }
       .board-stage { height: auto; }
       .board-frame { position: static; transform: none; width: 100%; aspect-ratio: auto; }
       .board-bg { position: static; height: 160px; object-fit: cover; object-position: 30% 38%; }
@@ -337,6 +355,12 @@
 
   <div class="view-wrap">
     <div class="content">
+     <div class="inicio-layout">
+      <aside class="kpi-panel">
+        <div class="kpi-panel-title">Visão geral da rede</div>
+        <div class="kpi-panel-sub">Indicadores da rede municipal</div>
+        <div class="kpi-cards" id="kpiBar"></div>
+      </aside>
       <div class="board-stage">
        <div class="board-frame" id="boardFrame">
         <img class="board-bg" src="assets/fundo-sala.webp" alt="Sala de aula com o Bubo" />
@@ -351,6 +375,7 @@
         </div>
        </div>
       </div>
+     </div>
 
     </div>
 
@@ -413,6 +438,22 @@ function buboSet(up){ const el = document.getElementById('heroBubo'); if(el) el.
     <div class="hero-card h${i+1}"><div class="kcard-l"><div class="kic ic-${k.c}">${svgP(k.p,21)}</div>
       <div><div class="klbl">${k.l}</div><div class="ksub">${k.s}</div></div></div>
       <div class="kval">${k.v}</div></div>`).join(''));
+
+  /* painel de índices da rede (à esquerda) */
+  const pVagas = '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>';
+  const pTurmas = '<rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>';
+  const pDisp = '<path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>';
+  const KPI = [
+    { l:'Escolas', v:nEsc, c:'azul', p:ICON_ESC },
+    { l:'Vagas ofertadas', v:vagas, c:'laranja', p:pVagas },
+    { l:'Vagas disponíveis', v:disp, c:'verde', p:pDisp },
+    { l:'Alunos', v:alunos, c:'laranja', p:iAlunos },
+    { l:'Responsáveis', v:resp, c:'azul', p:iUsers },
+    { l:'Turmas', v:turmas, c:'azul', p:pTurmas },
+    { l:'Servidores', v:usuarios, c:'laranja', p:iUsers },
+  ];
+  const kb = document.getElementById('kpiBar');
+  if(kb) kb.innerHTML = KPI.map(k=> `<div class="kpi-card"><div class="kpi-ic ${k.c}">${svgP(k.p,22)}</div><div><div class="kv">${fmt(k.v)}</div><div class="kl">${k.l}</div></div></div>`).join('');
 })();
 
 /* ---- busca de escola ---- */
