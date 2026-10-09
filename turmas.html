@@ -106,6 +106,11 @@
     .turma-turno, .user-cpf { font-size: 12px; color: var(--texto-suave); margin-top: 2px; }
     .turma-alunos { text-align: right; font-size: 11px; color: var(--texto-suave); white-space: nowrap; }
     .turma-alunos b { display: block; font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--texto); }
+    .tag-multi { display: inline-block; font-family: var(--font-display); font-size: 10px; font-weight: 700; color: #B5790F; background: #FCF1D8; border-radius: 20px; padding: 2px 9px; margin-left: 8px; vertical-align: 1px; letter-spacing: .02em; }
+    /* ficha da escola embutida (mesma do Início), sobreposta a esta tela */
+    .ficha-ov { position: fixed; inset: 0; z-index: 200; opacity: 0; pointer-events: none; transition: opacity .18s; background: rgba(15,23,32,.45); }
+    .ficha-ov.open { opacity: 1; pointer-events: auto; }
+    .ficha-ov iframe { width: 100%; height: 100%; border: 0; background: transparent; }
     .badge { border-radius: 20px; font-family: var(--font-display); font-weight: 600; font-size: 11.5px; padding: 4px 12px; white-space: nowrap; }
     .b-dir { background: #EFEAF7; color: #6B3FA0; }
     .b-coord { background: var(--verde-bg); color: #2E8B00; }
@@ -197,6 +202,7 @@
     <a href="inicio2.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg> Início</a>
     <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
     <a href="turmas.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/></svg> Escolas</a>
+    <a href="alunos.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Alunos</a>
     <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Servidores</a>
     <a href="ocorrencias.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Ocorrências</a>
     <a href="calendario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendário</a>
@@ -273,10 +279,14 @@ const ESCOLAS = NOMES.map((nome, i)=>{
   const direcao = 1, coord = cmei ? 1+Math.floor(r(9)*2) : 2+Math.floor(r(9)*2), sec = 1+Math.floor(r(10)*2);
   const apoio = cmei ? 7+Math.floor(r(11)*6) : 4+Math.floor(r(11)*6);
   const prof = Math.max(5, servidores - direcao - coord - sec - apoio);
+  const localidade = LOCS[Math.floor(r(13)*LOCS.length)];
+  // Turmas multisseriadas: comuns em escolas do campo/indígenas (grades combinadas numa turma)
+  const multisseriada = !cmei && localidade !== 'Urbana' && r(21) > 0.3;
   return {
     inep: String(31097401 + i), nome,
     bairro: BAIRROS[Math.floor(r(12)*BAIRROS.length)],
-    localidade: LOCS[Math.floor(r(13)*LOCS.length)],
+    localidade,
+    multisseriada,
     nucleo: NUCLEOS[Math.floor(r(19)*NUCLEOS.length)],
     ativa: r(20) > 0.12,
     freq, matriculas: alunos, turmas, servidores, ocupacao, ocorrencias,
@@ -309,11 +319,19 @@ function gerarEquipe(inep){
   return team;
 }
 function turmasDe(e){
+  const turnos = e.turnos.split(', ');
+  if(e.multisseriada){
+    const combos = e.etapas.includes('Anos finais')
+      ? ['1º/2º ano','3º/4º/5º ano','6º/7º ano','8º/9º ano']
+      : ['1º/2º ano','3º/4º ano','4º/5º ano','1º ao 5º ano'];
+    const out=[]; const n = Math.min(e.turmas, 8);
+    for(let i=0;i<n;i++){ out.push({ nome: combos[i%combos.length], turno: turnos[i%turnos.length], alunos: 12 + ((i*5+e.salas)%12), multi:true }); }
+    return out;
+  }
   const cr = e.etapas.includes('Creche');
-  const pool = cr ? ['Berçário','Creche I','Creche II','Pré I','Pré II']
+  const pool = cr ? ['CN I','CN II','Pré I','Pré II']
     : (e.etapas.includes('Anos finais') ? ['1º ano','2º ano','3º ano','4º ano','5º ano','6º ano','7º ano','8º ano','9º ano']
     : ['1º ano','2º ano','3º ano','4º ano','5º ano']);
-  const turnos = e.turnos.split(', ');
   const out=[]; const n = Math.min(e.turmas, 12);
   for(let i=0;i<n;i++){ const letra = String.fromCharCode(65 + Math.floor(i/pool.length)); out.push({ nome: pool[i%pool.length]+' '+letra, turno: turnos[i%turnos.length], alunos: 20 + ((i*7+e.salas)%16) }); }
   return out;
@@ -325,7 +343,7 @@ function verLista(){
     <div class="esc-toolbar">
       <div class="section-title">Escolas da rede <span class="section-hint" id="escCount"></span></div>
       <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="buscaEsc" placeholder="Buscar escola por nome, localidade, núcleo ou INEP" oninput="filtrarEscolas()" aria-label="Buscar escola" /></label>
+        <input type="text" id="buscaEsc" placeholder="Buscar escola por nome ou código INEP…" oninput="filtrarEscolas()" aria-label="Buscar escola" /></label>
     </div>
     <div class="filtros">
       <label class="fsel">Modalidade <select id="fMod" onchange="filtrarEscolas()"><option value="">Todas</option><option>Urbana</option><option>Campo</option><option>Indígena</option></select></label>
@@ -340,13 +358,13 @@ function verLista(){
   history.replaceState(null,'','turmas.html');
 }
 function linhaEscola(e){
-  return `<tr onclick="abrirPaginaEscola('${e.inep}')">
+  return `<tr onclick="verFichaEscola('${e.inep}')">
     <td><div class="cell-name"><span class="esc-ic">${svgP('<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/>',18)}</span><div><b>${e.nome}</b><div class="esc-inep">Código INEP ${e.inep}</div></div></div></td>
     <td>${e.ativa ? '<span class="st-ativa">Ativa</span>' : '<span class="st-inativa">Inativa</span>'}</td>
     <td>${e.localidade}</td>
     <td>${e.nucleo}</td>
     <td>${fmt(e.matriculas)}</td>
-    <td style="text-align:right"><button class="eye" onclick="event.stopPropagation();abrirEscola('${e.inep}')" aria-label="Visualizar escola">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',18)}</button></td>
+    <td style="text-align:right"><button class="eye" onclick="event.stopPropagation();verFichaEscola('${e.inep}')" aria-label="Visualizar escola">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',18)}</button></td>
   </tr>`;
 }
 function filtrarEscolas(){
@@ -365,6 +383,24 @@ function filtrarEscolas(){
   const c = document.getElementById('escCount'); if(c) c.textContent = `· ${lista.length} de ${base.length}`;
 }
 function redefinir(){ document.getElementById('buscaEsc').value=''; document.getElementById('fMod').value=''; document.getElementById('fStatus').value=''; filtrarEscolas(); }
+
+/* ---------- FICHA DA ESCOLA (mesma do Início, embutida sobre esta tela) ---------- */
+function verFichaEscola(inep){
+  let ov = document.getElementById('fichaOverlay');
+  if(!ov){
+    ov = document.createElement('div'); ov.id='fichaOverlay'; ov.className='ficha-ov';
+    ov.innerHTML = '<iframe id="fichaFrame" title="Ficha da escola" allowtransparency="true"></iframe>';
+    document.body.appendChild(ov);
+  }
+  ov.querySelector('iframe').src = 'inicio2.html?escola='+inep+'&bare=1';
+  requestAnimationFrame(()=> ov.classList.add('open'));
+}
+function fecharFichaEscola(){
+  const ov = document.getElementById('fichaOverlay'); if(!ov) return;
+  ov.classList.remove('open');
+  setTimeout(()=>{ const f=ov.querySelector('iframe'); if(f) f.src='about:blank'; }, 200);
+}
+window.addEventListener('message', e=>{ if(e.data==='eprof:fechar-ficha') fecharFichaEscola(); });
 
 /* ---------- PAINEL LATERAL (olho) ---------- */
 let lastFocus=null;

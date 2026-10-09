@@ -7,6 +7,12 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; display: flex; height: 100vh; overflow: hidden; font-size: 13px; color: #333; }
+    /* modo "bare": usado quando a ficha é embutida (iframe) em outra tela — mostra só o bottom-sheet */
+    html.bare, body.bare { background: transparent !important; }
+    body.bare .main { background: transparent !important; }
+    body.bare .sidebar, body.bare .topbar, body.bare .view-wrap { display: none !important; }
+    /* o dim vem da tela-pai (iframe transparente); evita escurecimento duplo */
+    body.bare .sheet-overlay { background: transparent !important; }
     .sidebar { display: flex; flex-direction: column; }
     .sidebar-logo { display: flex; align-items: center; gap: 8px; }
     .logo-img { width: 104px; height: auto; display: block; }
@@ -151,8 +157,8 @@
     .fld { background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio-sm); padding: 12px 14px; }
     .fld .fl { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); margin-bottom: 5px; font-family: var(--font-display); }
     .fld .fv { font-size: 13.5px; color: var(--texto); font-weight: 500; }
-    .sheet-cta { display: inline-flex; align-items: center; gap: 8px; background: var(--laranja); color: #fff; border: none; border-radius: 12px; padding: 12px 20px; font-family: var(--font-display); font-weight: 600; font-size: 14px; cursor: pointer; text-decoration: none; }
-    .sheet-cta:hover { background: var(--laranja-escuro); }
+    .sheet-cta { display: inline-flex; align-items: center; gap: 8px; background: var(--azul); color: #fff; border: none; border-radius: 12px; padding: 12px 20px; font-family: var(--font-display); font-weight: 600; font-size: 14px; cursor: pointer; text-decoration: none; }
+    .sheet-cta:hover { background: var(--azul-escuro); }
     .sheet-cta svg { width: 16px; height: 16px; }
     .eq-title { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--texto); margin: 26px 0 12px; display: flex; align-items: center; gap: 8px; }
     .eq-title svg { width: 18px; height: 18px; color: var(--azul); }
@@ -218,6 +224,7 @@
     <a href="inicio2.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg> Início</a>
     <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
     <a href="turmas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/></svg> Escolas</a>
+    <a href="alunos.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Alunos</a>
     <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg> Servidores</a>
     <a href="ocorrencias.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Ocorrências</a>
     <a href="calendario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendário</a>
@@ -362,12 +369,17 @@ const NOMES_AL = ['Lucas','Mariana','Pedro','Beatriz','Gabriel','Letícia','Rafa
 const SOBR_AL = ['Silva','Souza','Oliveira','Santos','Rocha','Fontes','Melo','Prado','Nunes','Alves','Farias','Menezes','Ribeiro','Gomes'];
 const TIPOS_OC = ['Conflito entre estudantes','Desrespeito ao professor','Uso indevido de celular','Saída sem autorização','Infrequência'];
 function turmasDaEscola(e){
-  const cr = /Creche|Pré/.test(e.etapas);
-  const pool = cr ? ['Berçário','Creche I','Creche II','Pré I','Pré II']
-    : (/Anos finais/.test(e.etapas) ? ['1º ano','2º ano','3º ano','4º ano','5º ano','6º ano','7º ano','8º ano','9º ano']
-    : ['1º ano','2º ano','3º ano','4º ano','5º ano']);
   const turnos = e.cmei ? ['Integral'] : ['Matutino','Vespertino'];
   const base = parseInt(e.inep.slice(-3)); const rr = k=>((base*9301+k*49297)%233280)/233280;
+  if(e.multisseriada){
+    const combos = /Anos finais/.test(e.etapas) ? ['1º/2º ano','3º/4º/5º ano','6º/7º ano','8º/9º ano'] : ['1º/2º ano','3º/4º ano','4º/5º ano','1º ao 5º ano'];
+    const n = Math.min(e.turmas, 8);
+    return Array.from({length: n},(_,i)=>({ nome: combos[i%combos.length], turno: turnos[i%turnos.length], alunos: 12+Math.floor(rr(i+3)*12), multi:true }));
+  }
+  const cr = /Creche|Pré/.test(e.etapas);
+  const pool = cr ? ['CN I','CN II','Pré I','Pré II']
+    : (/Anos finais/.test(e.etapas) ? ['1º ano','2º ano','3º ano','4º ano','5º ano','6º ano','7º ano','8º ano','9º ano']
+    : ['1º ano','2º ano','3º ano','4º ano','5º ano']);
   return Array.from({length: e.turmas},(_,i)=>({ nome: pool[i%pool.length]+' '+String.fromCharCode(65+Math.floor(i/pool.length)), turno: turnos[i%turnos.length], alunos: 16+Math.floor(rr(i+3)*16) }));
 }
 function ocorrenciasDaEscola(e){
@@ -474,6 +486,7 @@ function abrirFicha(inep){
     <div class="fields">
       <div class="fld"><div class="fl">Etapas atendidas</div><div class="fv">${e.etapas}</div></div>
       <div class="fld"><div class="fl">Modalidade</div><div class="fv">${e.modalidade}</div></div>
+      <div class="fld"><div class="fl">Organização das turmas</div><div class="fv">${e.multisseriada ? 'Multisseriada' : 'Seriada (regular)'}</div></div>
       <div class="fld"><div class="fl">Turnos</div><div class="fv">${turnosEsc}</div></div>
       <div class="fld"><div class="fl">Localidade</div><div class="fv">${e.localidade} · ${e.bairro}</div></div>
     </div>`;
@@ -622,7 +635,15 @@ function fecharFicha(){
   document.getElementById('sheet').classList.remove('open');
   document.getElementById('sheetOverlay').classList.remove('open');
   document.removeEventListener('keydown', escHandler);
+  // embutida em iframe (modo bare): avisa a tela-pai para fechar a sobreposição
+  if(document.body.classList.contains('bare')){ try{ parent.postMessage('eprof:fechar-ficha','*'); }catch(e){} }
 }
+// Abre a ficha automaticamente quando chamada por outra tela (ex.: olho em Escolas → inicio2.html?escola=INEP&bare=1)
+(function(){ try {
+  const qs = new URLSearchParams(location.search);
+  if(qs.get('bare')==='1'){ document.documentElement.classList.add('bare'); document.body.classList.add('bare'); }
+  const inep = qs.get('escola'); if(inep) abrirFicha(inep);
+} catch(e){} })();
 </script>
 
 </body>

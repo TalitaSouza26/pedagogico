@@ -66,6 +66,22 @@
     .sp-body { padding: 20px; overflow-y: auto; flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-content: start; }
     @media (max-width: 760px){ .sp-body { grid-template-columns: 1fr; } }
     .card { background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio); padding: 18px; }
+    .sv-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+    @media (max-width: 760px){ .sv-kpis { grid-template-columns: 1fr; } }
+    .sv-kpi { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .sv-kpi-l { display: flex; align-items: center; gap: 13px; min-width: 0; }
+    .sv-kpi-ic { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .sv-kpi-ic svg { width: 21px; height: 21px; }
+    .sv-kpi-lbl { font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--texto-suave); }
+    .sv-kpi-val { font-family: var(--font-display); font-weight: 800; font-size: 30px; color: var(--laranja); line-height: 1; white-space: nowrap; }
+    .pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+    .pager-info { font-size: 12.5px; color: var(--texto-suave); }
+    .pager-ctrls { display: flex; align-items: center; gap: 8px; }
+    .pg-btn { border: 1px solid var(--borda); background: var(--branco); border-radius: 8px; padding: 7px 12px; font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--texto); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .pg-btn:hover:not(:disabled) { border-color: var(--azul); color: var(--azul); }
+    .pg-btn:disabled { opacity: .45; cursor: default; }
+    .pg-btn svg { width: 14px; height: 14px; }
+    .pg-pos { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--texto); }
     .prof-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
     .prof-av { width: 58px; height: 58px; border-radius: 50%; background: linear-gradient(160deg, var(--laranja), var(--azul)); color: #fff; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 20px; flex-shrink: 0; }
     .prof-name { font-family: var(--font-display); font-weight: 700; font-size: 19px; color: var(--texto); }
@@ -135,6 +151,7 @@
     <a href="inicio2.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg> Início</a>
     <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
     <a href="turmas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/></svg> Escolas</a>
+    <a href="alunos.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Alunos</a>
     <a href="horario.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Servidores</a>
     <a href="ocorrencias.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Ocorrências</a>
     <a href="calendario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendário</a>
@@ -160,24 +177,39 @@
   </div>
 
   <div class="cal-header">
-    <span class="ctx-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg><select id="escolaSel" aria-label="Escola"></select></span>
+    <span class="ctx-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg> <span class="js-escopo">Rede municipal · todas as escolas</span></span>
   </div>
 
   <div class="view-wrap">
     <div class="content">
       <a class="back-btn" id="backEscola" style="display:none"></a>
+
+      <div class="sv-kpis">
+        <div class="sv-kpi"><div class="sv-kpi-l"><div class="sv-kpi-ic" style="background:var(--azul-claro);color:var(--azul);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg></div><div class="sv-kpi-lbl">Total de servidores</div></div><div class="sv-kpi-val" id="kTotal">—</div></div>
+        <div class="sv-kpi"><div class="sv-kpi-l"><div class="sv-kpi-ic" style="background:var(--verde-bg);color:#2E8B00;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div class="sv-kpi-lbl">Efetivos</div></div><div class="sv-kpi-val" id="kEfet">—</div></div>
+        <div class="sv-kpi"><div class="sv-kpi-l"><div class="sv-kpi-ic" style="background:var(--laranja-bg);color:var(--laranja-escuro);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="sv-kpi-lbl">Contratados</div></div><div class="sv-kpi-val" id="kContr">—</div></div>
+      </div>
+
       <div class="tbl-toolbar">
         <div class="section-title" id="listTitle">Servidores</div>
         <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
           <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="busca" placeholder="Buscar por nome, matrícula ou cargo" oninput="renderLista()" aria-label="Buscar" /></label>
+            <input type="text" id="busca" placeholder="Buscar por nome, matrícula, cargo ou escola" oninput="onBusca()" aria-label="Buscar" /></label>
           <button class="chip" id="chipCargo" style="display:none" onclick="limparCargo()"></button>
         </div>
       </div>
       <div class="tbl-wrap"><table class="tbl">
-        <thead><tr><th>Servidor</th><th>Cargo</th><th>Escola</th></tr></thead>
+        <thead><tr><th>Servidor</th><th>Cargo</th><th>Vínculo</th><th>Escola</th></tr></thead>
         <tbody id="listBody"></tbody>
       </table></div>
+      <div class="pager">
+        <span class="pager-info" id="pagerInfo"></span>
+        <div class="pager-ctrls">
+          <button class="pg-btn" id="btnPrev" onclick="irPagina(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Anterior</button>
+          <span class="pg-pos" id="pgPos"></span>
+          <button class="pg-btn" id="btnNext" onclick="irPagina(1)">Próxima <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+      </div>
       <div class="section-hint" style="margin-top:12px;">Nenhum aluno é identificado neste painel. Origem: Folha/RH da prefeitura.</div>
     </div>
   </div>
@@ -267,41 +299,59 @@ function gerarEquipe(inep){
 const params = new URLSearchParams(location.search);
 const ESCOPO = (window.inepsEmEscopo ? window.inepsEmEscopo() : null);
 const inScope = i => !ESCOPO || ESCOPO.has(i);
-const cameFromEscola = !!(params.get('escola') && ESCOLAS[params.get('escola')]);
-let escolaAtual = params.get('escola') && ESCOLAS[params.get('escola')] ? params.get('escola')
-  : (Object.keys(ESCOLAS).filter(inScope)[0] || '31097401');
 let filtroCargo = params.get('cargo') || '';
-let SERVIDORES = gerarEquipe(escolaAtual);
+// Rede inteira (no escopo do perfil): junta a equipe de todas as escolas
+let SERVIDORES = [];
+Object.keys(ESCOLAS).filter(inScope).forEach(inep => { SERVIDORES = SERVIDORES.concat(gerarEquipe(inep)); });
 
+const VINC_LBL = { efetivo:'Efetivo', contrato:'Contratado', designado:'Designado' };
 (function(){
-  const sel = document.getElementById('escolaSel');
-  const ineps = Object.keys(ESCOLAS).filter(inScope);
-  if(!ineps.includes(escolaAtual)) ineps.unshift(escolaAtual); // respeita deep-link de fora do recorte
-  sel.innerHTML = ineps.map(i=>`<option value="${i}" ${escolaAtual===i?'selected':''}>${ESCOLAS[i]}</option>`).join('');
-  sel.addEventListener('change', e=>{ location.href = 'horario.html?escola='+e.target.value; });
+  const total = SERVIDORES.length;
+  const efet = SERVIDORES.filter(s=>s.vinculo==='efetivo').length;
+  const contr = SERVIDORES.filter(s=>s.vinculo==='contrato').length;
+  const f = n => n.toLocaleString('pt-BR');
+  document.getElementById('kTotal').textContent = f(total);
+  document.getElementById('kEfet').textContent = f(efet);
+  document.getElementById('kContr').textContent = f(contr);
 })();
-document.getElementById('pageSub').textContent = `${ESCOLAS[escolaAtual]} · Rede Municipal · Porto Seguro/BA`;
-(function(){ const b=document.getElementById('backEscola'); if(cameFromEscola){ b.href='turmas.html#'+escolaAtual; b.innerHTML=`${svgP('<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',15)} Voltar ao perfil de ${ESCOLAS[escolaAtual]}`; b.style.display='inline-flex'; } })();
+document.getElementById('pageSub').textContent = 'Rede Municipal · Porto Seguro/BA';
 
-function limparCargo(){ filtroCargo=''; document.getElementById('chipCargo').style.display='none'; renderLista(); }
+function limparCargo(){ filtroCargo=''; document.getElementById('chipCargo').style.display='none'; pagina=1; renderLista(); }
 
-function renderLista(){
+const POR_PAGINA = 50;
+let pagina = 1;
+function irPagina(d){ const max = Math.max(1, Math.ceil(filtradosServ().length/POR_PAGINA)); pagina = Math.min(max, Math.max(1, pagina+d)); renderLista(); }
+function filtradosServ(){
   const q = (document.getElementById('busca').value||'').toLowerCase();
-  let lista = SERVIDORES.filter(s=>{
+  return SERVIDORES.filter(s=>{
     if(filtroCargo && s.grupo!==filtroCargo) return false;
-    if(q && !(s.nome.toLowerCase().includes(q)||s.m.includes(q)||s.cargo.toLowerCase().includes(q))) return false;
+    if(q && !(s.nome.toLowerCase().includes(q)||s.m.includes(q)||s.cargo.toLowerCase().includes(q)||(ESCOLAS[s.escola]||'').toLowerCase().includes(q))) return false;
     return true;
   });
-  document.getElementById('listTitle').innerHTML = `Servidores <span class="section-hint">· ${ESCOLAS[escolaAtual]} (${lista.length})</span>`;
+}
+function renderLista(){
+  const lista = filtradosServ();
+  const total = lista.length;
+  const max = Math.max(1, Math.ceil(total/POR_PAGINA));
+  if(pagina>max) pagina = max;
+  const ini = (pagina-1)*POR_PAGINA;
+  const slice = lista.slice(ini, ini+POR_PAGINA);
+  document.getElementById('listTitle').innerHTML = `Servidores <span class="section-hint">· ${total.toLocaleString('pt-BR')}</span>`;
   const chip = document.getElementById('chipCargo');
   if(filtroCargo){ chip.style.display='inline-flex'; chip.innerHTML = `${filtroCargo} ✕`; } else chip.style.display='none';
-  document.getElementById('listBody').innerHTML = lista.map(s=>`
+  document.getElementById('listBody').innerHTML = slice.map(s=>`
     <tr tabindex="0" onclick="abrir('${s.m}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrir('${s.m}')}">
       <td><div class="cell-name"><span class="row-avatar">${iniciais(s.nome)}</span><b>${s.nome}</b></div></td>
       <td>${s.ncargos>1 ? `<span class="cargo-badge">${s.ncargos} cargos</span>` : s.cargo}</td>
-      <td>${s.vinculos>1 ? `<span class="vinc-badge">${s.vinculos} vínculos</span>` : (ESCOLAS[s.escola]||'—')}</td>
-    </tr>`).join('') || `<tr><td colspan="3" class="muted" style="text-align:center;padding:30px;">Nenhum servidor encontrado.</td></tr>`;
+      <td>${VINC_LBL[s.vinculo]||'—'}${s.vinculos>1 ? ` <span class="vinc-badge">${s.vinculos} vínculos</span>` : ''}</td>
+      <td>${ESCOLAS[s.escola]||'—'}</td>
+    </tr>`).join('') || `<tr><td colspan="4" class="muted" style="text-align:center;padding:30px;">Nenhum servidor encontrado.</td></tr>`;
+  document.getElementById('pagerInfo').textContent = total ? `Mostrando ${(ini+1).toLocaleString('pt-BR')}–${Math.min(ini+POR_PAGINA,total).toLocaleString('pt-BR')} de ${total.toLocaleString('pt-BR')}` : '';
+  document.getElementById('pgPos').textContent = `${pagina} / ${max}`;
+  document.getElementById('btnPrev').disabled = pagina<=1;
+  document.getElementById('btnNext').disabled = pagina>=max;
 }
+function onBusca(){ pagina = 1; renderLista(); }
 
 let lastFocus=null;
 function abrir(m){
@@ -312,7 +362,7 @@ function abrir(m){
   else { sp0.classList.remove('narrow'); sp0.innerHTML = richHtml(s); }
   document.getElementById('overlay').classList.add('open');
   sp0.classList.add('open');
-  history.replaceState(null,'',`horario.html?escola=${escolaAtual}#${s.m}`);
+  history.replaceState(null,'',`horario.html#${s.m}`);
   sp0.focus();
   document.addEventListener('keydown', escHandler);
 }
@@ -389,7 +439,7 @@ function fechar(){
   document.getElementById('sp').classList.remove('open');
   document.getElementById('overlay').classList.remove('open');
   document.removeEventListener('keydown', escHandler);
-  history.replaceState(null,'',`horario.html?escola=${escolaAtual}`);
+  history.replaceState(null,'',`horario.html`);
   if(lastFocus&&lastFocus.focus) lastFocus.focus();
 }
 

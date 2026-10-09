@@ -82,6 +82,14 @@
     .dl-num { margin-left: auto; font-family: var(--font-display); font-weight: 700; color: var(--texto); }
 
     .help-btn { position: fixed; bottom: 20px; right: 20px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    /* Barra de composição (matrículas por etapa) */
+    .comp-bar { display: flex; width: 100%; height: 40px; border-radius: 10px; overflow: hidden; margin: 8px 0 16px; background: #EEF1F5; }
+    .comp-seg { display: flex; align-items: center; justify-content: center; color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 13px; min-width: 0; white-space: nowrap; transition: width .3s; }
+    .comp-seg span { padding: 0 6px; overflow: hidden; text-overflow: ellipsis; }
+    .comp-legend { display: flex; flex-wrap: wrap; gap: 12px 26px; }
+    .comp-li { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--texto); }
+    .comp-dot { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
+    .comp-li .cl-sub { color: var(--texto-suave); font-size: 12px; }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
   </style>
   <link rel="stylesheet" href="theme.css" />
@@ -97,6 +105,7 @@
     <a href="inicio2.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg> Início</a>
     <a href="index.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
     <a href="turmas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/></svg> Escolas</a>
+    <a href="alunos.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Alunos</a>
     <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Servidores</a>
     <a href="ocorrencias.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Ocorrências</a>
     <a href="calendario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendário</a>
@@ -134,6 +143,12 @@
   <div class="view-wrap">
     <div class="content">
       <div class="kpi-row" id="kpiRow"></div>
+
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="section-head"><div class="section-title">Matrículas por etapa</div><div class="section-hint">Distribuição na rede</div></div>
+        <div class="comp-bar" id="compBar"></div>
+        <div class="comp-legend" id="compLegend"></div>
+      </div>
 
       <div class="grid-2">
         <div class="panel">
@@ -246,6 +261,36 @@ document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl
     ${SERIE.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="${i===SERIE.length-1?5:3}" fill="${i===SERIE.length-1&&lastBelow?'#ED6939':'#12509A'}"/>`).join('')}
     ${meses.map((m,i)=>`<text x="${x(i)}" y="${h-8}" font-size="10" fill="#9AA1AB" text-anchor="middle" font-family="Inter,sans-serif">${m}</text>`).join('')}
   </svg>`;
+})();
+
+/* Matrículas por etapa — barra de composição 100% */
+(function(){
+  const et = { inf:0, f1:0, f2:0, eja:0 };
+  E.forEach(e=>{
+    const cmei = e.cmei || /^CMEI/.test(e.nome) || /Creche/.test(e.etapas||'');
+    if(cmei){ et.inf += e.matriculas; return; }
+    let m = e.matriculas;
+    const temFin = /Anos finais/.test(e.etapas||'');
+    const temEJA = /EJA/.test(e.etapas||'');
+    if(temEJA){ const q = Math.round(m*0.09); et.eja += q; m -= q; }
+    if(temFin){ const q = Math.round(m*5/9); et.f1 += q; et.f2 += (m - q); }
+    else { et.f1 += m; }
+  });
+  const SEGS = [
+    { nome:'Educação Infantil', cor:'#6B3FA0', v:et.inf },
+    { nome:'Fundamental I',     cor:'#12509A', v:et.f1 },
+    { nome:'Fundamental II',    cor:'#3DC200', v:et.f2 },
+    { nome:'EJA',               cor:'#F0B429', v:et.eja },
+  ];
+  const tot = SEGS.reduce((s,x)=>s+x.v,0) || 1;
+  const pc = v => (Math.round(v/tot*1000)/10).toString().replace('.',',')+'%';
+  document.getElementById('compBar').innerHTML = SEGS.filter(s=>s.v>0).map(s=>{
+    const pct = s.v/tot*100;
+    return `<div class="comp-seg" style="width:${pct}%;background:${s.cor};" title="${s.nome}: ${pc(s.v)}"><span>${pct>=7?pc(s.v):''}</span></div>`;
+  }).join('');
+  document.getElementById('compLegend').innerHTML = SEGS.map(s=>
+    `<div class="comp-li"><span class="comp-dot" style="background:${s.cor}"></span><b>${s.nome}</b> <span class="cl-sub">${fmt(s.v)} · ${pc(s.v)}</span></div>`
+  ).join('');
 })();
 </script>
 
