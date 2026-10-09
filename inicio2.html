@@ -101,7 +101,9 @@
     .board-stage { position: relative; width: 100%; height: 100%; margin: 0; overflow: hidden; }
     /* frame com a proporção da imagem (3:2), dimensionado p/ cobrir a área toda — sem sobra */
     .board-frame { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: max(100%, calc((100vh - 90px) * 1.5)); aspect-ratio: 3 / 2; }
-    .board-bg { display: block; width: 100%; height: 100%; }
+    .board-bg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+    .board-bg-write { opacity: 0; transition: opacity .4s ease; }         /* bubo escrevendo (aparece ao digitar) */
+    .board-frame.writing .board-bg-write { opacity: 1; }
     .board-area { position: absolute; top: 17%; left: 34.7%; right: 15.3%; bottom: 36%; display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: clamp(12px, 2.4vh, 24px); }
     .board-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(17px, 2vw, 27px); color: #fff; text-align: center; text-shadow: 0 1px 6px rgba(0,0,0,.4); margin-bottom: 2px; }
     /* título azul ACIMA do quadro (na parede) */
@@ -138,7 +140,8 @@
       .view-wrap > .content { height: auto; }
       .board-stage { height: auto; }
       .board-frame { position: static; transform: none; width: 100%; aspect-ratio: auto; }
-      .board-bg { height: 160px; object-fit: cover; object-position: 30% 38%; }
+      .board-bg { position: static; height: 160px; object-fit: cover; object-position: 30% 38%; }
+      .board-bg-write { display: none; }
       .board-area { position: static; inset: auto; background: #23453a; margin: 0; padding: 16px; gap: 10px; min-height: 240px; }
     }
 
@@ -335,8 +338,9 @@
   <div class="view-wrap">
     <div class="content">
       <div class="board-stage">
-       <div class="board-frame">
-        <img class="board-bg" src="assets/fundo-sala.webp" alt="Sala de aula com o Bubo apontando para o quadro" />
+       <div class="board-frame" id="boardFrame">
+        <img class="board-bg" src="assets/fundo-sala.webp" alt="Sala de aula com o Bubo" />
+        <img class="board-bg board-bg-write" src="assets/fundo-sala-escrevendo.webp" alt="" aria-hidden="true" />
         <div class="board-area ask-search" id="boardArea" onclick="document.getElementById('busca').focus()">
           <div class="board-title">Vamos falar de que escola? 🦉</div>
           <div class="board-input-wrap">
@@ -417,6 +421,7 @@ function buscar(){
   const q = document.getElementById('busca').value.trim().toLowerCase();
   const box = document.getElementById('results');
   const tk = document.getElementById('boardTicker'); if(tk) tk.style.visibility = q ? 'hidden' : '';
+  const fr = document.getElementById('boardFrame'); if(fr) fr.classList.toggle('writing', !!q);  // bubo vira p/ escrever
   if(!q){ box.hidden = true; matches = []; selIdx = -1; return; }
   matches = ESCOLAS.filter(e=> e.nome.toLowerCase().includes(q) || e.bairro.toLowerCase().includes(q));
   selIdx = -1;
