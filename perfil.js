@@ -62,9 +62,11 @@
     const etapas = cmei ? 'Creche, Pré-escola' : ETAPAS_OPTS[Math.floor(r(14) * ETAPAS_OPTS.length)];
     const modalidade = localidade === 'Campo' ? 'Campo' : localidade === 'Indígena' ? 'Indígena' : 'Regular';
     const multisseriada = !cmei && localidade !== 'Urbana' && r(21) > 0.3;
+    const salas = cmei ? 6 + Math.floor(r(7) * 6) : 9 + Math.floor(r(7) * 15);
+    const anexos = r(8) < 0.25 ? 1 + Math.floor(r(17) * 3) : 0;
     return {
       inep: String(31097401 + i), nome, cmei, bairro: BAIRROS[Math.floor(r(12) * BAIRROS.length)],
-      localidade, modalidade, multisseriada, etapas, alunos, matriculas: alunos, freq, turmas, servidores, ocupacao, ocorrencias, vagas,
+      localidade, modalidade, multisseriada, salas, anexos, etapas, alunos, matriculas: alunos, freq, turmas, servidores, ocupacao, ocorrencias, vagas,
       responsaveis: Math.round(alunos * 0.72),
       equipe: { direcao, coord, prof, sec, apoio },
       infantil: cmei || /Creche|Pré/.test(etapas),

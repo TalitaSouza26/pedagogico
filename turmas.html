@@ -261,7 +261,12 @@ const NOMES = [
 const GESTORES = ['Marta Nogueira','Cláudio Souza','Rita Fontes','Josefa Lima','Paulo Menezes','Elaine Castro','Hélio Barros','Sônia Prado','Aline Duarte','Roberto Alves','Dora Vasconcelos','Ivo Santana','Lúcia Farias','Gilberto Nunes','Célia Andrade','Marcos Teles'];
 const LOCS = ['Urbana','Urbana','Urbana','Urbana','Campo','Campo','Indígena'];
 const BAIRROS = ['Centro','Cidade Alta','Baianão','Cambolo','Trancoso',"Arraial d'Ajuda",'Coroa Vermelha','Vale Verde','Mundaí','Taperapuã','Juçara','Zona Rural','Nova Esperança','Pindorama','Mirante'];
-const NUCLEOS = ['Centro','Vila Jardim','Frei Calixto','Parque Ecológico','Trancoso',"Arraial d'Ajuda",'Cambolo / Fontana','Vila Parracho','Coroa Vermelha','Mundaí','Baianão','Taperapuã'];
+// Núcleos por modalidade (base: planilha da rede). O núcleo é a localidade dentro da área.
+const NUCLEOS_MOD = {
+  'Urbana': ['Centro','Arraial d’Ajuda','Frei Calixto','Parque Ecológico','Paraguai','Vila Parracho','Vila Jardim','Vila Vitória','Mirante','Cambolo / Fontana'],
+  'Campo': ['Vale Verde','Vera Cruz','Pindorama','Trancoso','Caraíva','BR-367','Itaporanga','Meio Rural'],
+  'Indígena': ['Área Indígena'],
+};
 const ETAPAS_OPTS = ['Anos iniciais','Anos iniciais, Anos finais','Anos iniciais, Anos finais, EJA'];
 
 const ESCOLAS = NOMES.map((nome, i)=>{
@@ -275,6 +280,7 @@ const ESCOLAS = NOMES.map((nome, i)=>{
   const ocorrencias = Math.floor(r(6)*12);
   const vagas = Math.max(alunos, Math.round(alunos/(ocupacao/100)));
   const salas = cmei ? 6 + Math.floor(r(7)*6) : 9 + Math.floor(r(7)*15);
+  const anexos = r(8) < 0.25 ? 1 + Math.floor(r(17)*3) : 0;
   const rotas = Math.floor(r(8)*8);
   const direcao = 1, coord = cmei ? 1+Math.floor(r(9)*2) : 2+Math.floor(r(9)*2), sec = 1+Math.floor(r(10)*2);
   const apoio = cmei ? 7+Math.floor(r(11)*6) : 4+Math.floor(r(11)*6);
@@ -287,13 +293,13 @@ const ESCOLAS = NOMES.map((nome, i)=>{
     bairro: BAIRROS[Math.floor(r(12)*BAIRROS.length)],
     localidade,
     multisseriada,
-    nucleo: NUCLEOS[Math.floor(r(19)*NUCLEOS.length)],
+    nucleo: (NUCLEOS_MOD[localidade] || NUCLEOS_MOD.Urbana)[Math.floor(r(19) * (NUCLEOS_MOD[localidade] || NUCLEOS_MOD.Urbana).length)],
     ativa: r(20) > 0.12,
     freq, matriculas: alunos, turmas, servidores, ocupacao, ocorrencias,
     alerta: freq < 88 || ocorrencias >= 8,
     etapas: cmei ? 'Creche, Pré-escola' : ETAPAS_OPTS[Math.floor(r(14)*ETAPAS_OPTS.length)],
     turnos: cmei ? 'Integral' : (r(15)>0.5 ? 'Manhã, Tarde' : 'Manhã, Tarde, Noite'),
-    salas, vagas,
+    salas, anexos, vagas,
     cozinha: r(16)>0.2 ? 'Própria' : 'Terceirizada',
     rotas,
     gestor: GESTORES[Math.floor(r(17)*GESTORES.length)],
@@ -346,17 +352,28 @@ function verLista(){
         <input type="text" id="buscaEsc" placeholder="Buscar escola por nome ou código INEP…" oninput="filtrarEscolas()" aria-label="Buscar escola" /></label>
     </div>
     <div class="filtros">
-      <label class="fsel">Modalidade <select id="fMod" onchange="filtrarEscolas()"><option value="">Todas</option><option>Urbana</option><option>Campo</option><option>Indígena</option></select></label>
+      <label class="fsel">Modalidade <select id="fMod" onchange="onModChange()"><option value="">Todas</option><option>Urbana</option><option>Campo</option><option>Indígena</option></select></label>
+      <label class="fsel">Núcleo <select id="fNucleo" onchange="filtrarEscolas()"><option value="">Todos</option></select></label>
       <label class="fsel">Status <select id="fStatus" onchange="filtrarEscolas()"><option value="">Todos</option><option value="ativa">Apenas ativas</option><option value="inativa">Apenas inativas</option></select></label>
       <button class="btn-redef" onclick="redefinir()">Redefinir buscas</button>
     </div>
     <div class="tbl-wrap"><table class="tbl">
-      <thead><tr><th>Escola</th><th>Status</th><th>Localidade</th><th>Núcleo</th><th>Alunos</th><th></th></tr></thead>
+      <thead><tr><th>Escola</th><th>Status</th><th>Localidade</th><th>Núcleo</th><th>Alunos</th><th>Salas</th><th>Anexos</th><th></th></tr></thead>
       <tbody id="escBody"></tbody>
     </table></div>`;
+  popularNucleos();
   filtrarEscolas();
   history.replaceState(null,'','turmas.html');
 }
+function popularNucleos(){
+  const mod = (document.getElementById('fMod')||{}).value || '';
+  const sel = document.getElementById('fNucleo'); if(!sel) return;
+  const prev = sel.value;
+  const list = mod ? (NUCLEOS_MOD[mod] || []) : [].concat(...Object.values(NUCLEOS_MOD));
+  sel.innerHTML = '<option value="">Todos</option>' + list.map(n=>`<option>${n}</option>`).join('');
+  sel.value = [...sel.options].some(o=>o.value===prev) ? prev : '';
+}
+function onModChange(){ popularNucleos(); filtrarEscolas(); }
 function linhaEscola(e){
   return `<tr onclick="verFichaEscola('${e.inep}')">
     <td><div class="cell-name"><span class="esc-ic">${svgP('<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/>',18)}</span><div><b>${e.nome}</b><div class="esc-inep">Código INEP ${e.inep}</div></div></div></td>
@@ -364,25 +381,29 @@ function linhaEscola(e){
     <td>${e.localidade}</td>
     <td>${e.nucleo}</td>
     <td>${fmt(e.matriculas)}</td>
+    <td>${e.salas}</td>
+    <td>${e.anexos || '—'}</td>
     <td style="text-align:right"><button class="eye" onclick="event.stopPropagation();verFichaEscola('${e.inep}')" aria-label="Visualizar escola">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',18)}</button></td>
   </tr>`;
 }
 function filtrarEscolas(){
   const q = (document.getElementById('buscaEsc').value||'').toLowerCase().trim();
   const mod = (document.getElementById('fMod')||{}).value || '';
+  const nuc = (document.getElementById('fNucleo')||{}).value || '';
   const st = (document.getElementById('fStatus')||{}).value || '';
   const base = ESCOLAS.filter(e=> PERFIL.emEscopo(e));
   const lista = base.filter(e=>{
     if(q && !(e.nome.toLowerCase().includes(q) || e.localidade.toLowerCase().includes(q) || e.nucleo.toLowerCase().includes(q) || e.inep.includes(q))) return false;
     if(mod && e.localidade !== mod) return false;
+    if(nuc && e.nucleo !== nuc) return false;
     if(st==='ativa' && !e.ativa) return false;
     if(st==='inativa' && e.ativa) return false;
     return true;
   });
-  document.getElementById('escBody').innerHTML = lista.map(linhaEscola).join('') || `<tr><td colspan="6" class="muted" style="text-align:center;padding:26px;">Nenhuma escola encontrada.</td></tr>`;
+  document.getElementById('escBody').innerHTML = lista.map(linhaEscola).join('') || `<tr><td colspan="8" class="muted" style="text-align:center;padding:26px;">Nenhuma escola encontrada.</td></tr>`;
   const c = document.getElementById('escCount'); if(c) c.textContent = `· ${lista.length} de ${base.length}`;
 }
-function redefinir(){ document.getElementById('buscaEsc').value=''; document.getElementById('fMod').value=''; document.getElementById('fStatus').value=''; filtrarEscolas(); }
+function redefinir(){ document.getElementById('buscaEsc').value=''; document.getElementById('fMod').value=''; document.getElementById('fStatus').value=''; popularNucleos(); filtrarEscolas(); }
 
 /* ---------- FICHA DA ESCOLA (mesma do Início, embutida sobre esta tela) ---------- */
 function verFichaEscola(inep){

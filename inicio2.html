@@ -109,7 +109,9 @@
     .sheet-ic svg { width: 24px; height: 24px; }
     .sheet-name { font-family: var(--font-display); font-weight: 700; font-size: 20px; color: var(--texto); }
     .sheet-subt { font-size: 12.5px; color: var(--texto-suave); margin-top: 2px; }
-    .sheet-close { margin-left: auto; border: 1px solid var(--borda); background: var(--branco); border-radius: 10px; cursor: pointer; color: var(--texto-suave); padding: 9px; display: flex; }
+    .bim-sel { margin-left: auto; border: 1px solid var(--borda); background: var(--branco); border-radius: 10px; padding: 8px 12px; font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--texto); cursor: pointer; outline: none; }
+    .bim-sel:hover { border-color: var(--azul); }
+    .sheet-close { border: 1px solid var(--borda); background: var(--branco); border-radius: 10px; cursor: pointer; color: var(--texto-suave); padding: 9px; display: flex; }
     .sheet-close:hover { border-color: var(--azul); color: var(--azul); }
     .sheet-close svg { width: 18px; height: 18px; }
     .sheet-tabs { display: flex; gap: 2px; padding: 0 22px; border-bottom: 1px solid var(--borda); overflow-x: auto; flex-shrink: 0; }
@@ -131,6 +133,33 @@
     .al-search:focus-within { border-color: var(--azul); }
     .al-search svg { width: 15px; height: 15px; color: var(--texto-suave); }
     .al-search input { border: none; outline: none; font-family: var(--font-display); font-size: 13px; width: 100%; background: none; color: var(--texto); }
+    .al-ee-chk { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-display); font-size: 12.5px; font-weight: 600; color: #6B3FA0; background: #EFEAF7; border: 1px solid #DFD3EF; border-radius: 10px; padding: 7px 12px; cursor: pointer; white-space: nowrap; }
+    .al-ee-chk input { accent-color: #6B3FA0; cursor: pointer; }
+    /* Filtros da aba Alunos (mesmo padrão da tela Alunos) */
+    .fflt-toggle { display: inline-flex; align-items: center; gap: 8px; background: var(--azul); color: #fff; border: none; border-radius: 10px; padding: 8px 14px; font-family: var(--font-display); font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .fflt-toggle:hover { background: var(--azul-escuro); }
+    .fflt-toggle.on { background: var(--azul-escuro); box-shadow: inset 0 0 0 2px rgba(255,255,255,.25); }
+    .fflt-toggle svg { width: 15px; height: 15px; }
+    .fflt-count { background: #fff; color: var(--azul); border-radius: 20px; font-size: 11px; font-weight: 800; padding: 1px 7px; }
+    .fflt-count[hidden] { display: none; }
+    .fflt-redef { border: 1px solid var(--borda); background: var(--branco); border-radius: 10px; padding: 8px 12px; font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--azul); cursor: pointer; }
+    .fflt-redef:hover { border-color: var(--azul); background: var(--azul-claro); }
+    .fflt-panel { position: absolute; right: 0; top: calc(100% + 8px); width: 420px; max-width: 94vw; background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); box-shadow: 0 20px 50px rgba(15,23,32,.22); z-index: 60; display: flex; flex-direction: column; max-height: 62vh; }
+    .fflt-panel[hidden] { display: none; }
+    .fflt-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--borda); }
+    .fflt-title { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 700; font-size: 14px; color: var(--texto); }
+    .fflt-title svg { width: 16px; height: 16px; color: var(--laranja); }
+    .fflt-x { border: none; background: none; cursor: pointer; color: var(--texto-suave); padding: 4px; display: flex; }
+    .fflt-x svg { width: 16px; height: 16px; }
+    .fflt-body { padding: 14px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 9px; }
+    .fflt { display: grid; grid-template-columns: 140px 1fr; gap: 10px; align-items: center; }
+    .fflt-lbl { display: flex; align-items: center; font-family: var(--font-display); font-size: 12.5px; font-weight: 700; color: var(--laranja-escuro); border: 1px solid var(--laranja); border-radius: 10px; padding: 8px 10px; }
+    .fflt select { width: 100%; border: 1px solid var(--borda); border-radius: 10px; padding: 8px 10px; font-family: var(--font-body); font-size: 12.5px; color: var(--texto); background: var(--branco); outline: none; cursor: pointer; }
+    .fflt-foot { display: flex; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--borda); background: var(--bg); }
+    .btn-fechar2 { flex: 1; background: var(--azul); color: #fff; border: none; border-radius: 10px; padding: 10px; font-family: var(--font-display); font-weight: 600; font-size: 13.5px; cursor: pointer; }
+    .btn-fechar2:hover { background: var(--azul-escuro); }
+    .btn-redef3 { flex: 1; background: var(--branco); color: var(--texto); border: 1px solid var(--borda); border-radius: 10px; padding: 10px; font-family: var(--font-display); font-weight: 600; font-size: 13.5px; cursor: pointer; }
+    .btn-redef3:hover { border-color: var(--azul); color: var(--azul); }
     .al-tea { display: inline-block; font-family: var(--font-display); font-size: 10px; font-weight: 700; color: #6B3FA0; background: #EFEAF7; border-radius: 20px; padding: 2px 8px; margin-left: 6px; vertical-align: 1px; }
     .stat-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 20px; }
     .sch-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
@@ -392,31 +421,61 @@ function ocorrenciasDaEscola(e){
     data: String(1+Math.floor(rr(i*4+5)*25)).padStart(2,'0')+'/08/2026',
   }));
 }
+function serieDaTurma(t){ return t.replace(/\s+[A-Z]$/,''); }
+function nivelDaSerie(s){
+  if(/Creche|CN|Pré|Berçário/.test(s)) return 'Educação Infantil';
+  if(/EJA/.test(s)) return 'EJA';
+  const n = parseInt(s); if(isNaN(n)) return 'Anos iniciais';
+  return n <= 5 ? 'Anos iniciais' : 'Anos finais';
+}
 function alunosDaEscola(e){
   const turmas = turmasDaEscola(e); const out = []; let idx = 0;
   turmas.forEach(t=>{ for(let i=0;i<t.alunos;i++){
     const h = seedFrom(e.inep+'a'+idx);
     const nome = NOMES_AL[h % NOMES_AL.length] + ' ' + SOBR_AL[Math.floor(h/97) % SOBR_AL.length];
     const tea = (seedFrom(e.inep+'t'+idx) % 40) === 0;
-    out.push({ nome, turma: t.nome, turno: t.turno, tea }); idx++;
+    const serie = serieDaTurma(t.nome);
+    const nivel = nivelDaSerie(serie);
+    const semCpf = (h % 17 === 0), semResp = (h % 23 === 0), semTurma = (h % 29 === 0);
+    const doc = (semCpf || semResp || h % 13 === 0) ? 'Incompleta' : 'Completa';
+    const m = h % 40; const status = m === 0 ? 'Transferido' : m === 1 ? 'Evadido' : m === 2 ? 'Remanejado' : 'Ativo';
+    out.push({ nome, turma: t.nome, turno: t.turno, tea, serie, nivel, cpf: !semCpf, resp: !semResp, enturmado: !semTurma, doc, status }); idx++;
   }});
   return out.sort((a,b)=> a.nome.localeCompare(b.nome) || a.turma.localeCompare(b.turma));
 }
+const FFLT_IDS = ['fnivel','fserie','fturno','fdoc','fstatus','fentur','fcpf','fresp','fee'];
+const FFLT_MAP = { fnivel:'nivel', fserie:'serie', fturno:'turno', fdoc:'doc', fstatus:'status', fentur:'entur', fcpf:'cpf', fresp:'resp', fee:'ee' };
+function toggleFichaFiltros(){ const p=document.getElementById('ffltPanel'); if(!p) return; const willOpen=p.hidden; p.hidden=!willOpen; document.getElementById('ffltToggle').classList.toggle('on', willOpen); }
+function redefinirFichaFiltros(){ FFLT_IDS.forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; }); const b=document.getElementById('alBusca'); if(b) b.value=''; filtrarAlunos(); }
 function filtrarAlunos(){
   const q = (document.getElementById('alBusca').value||'').toLowerCase().trim();
+  const vals = {}; let ativos = 0;
+  FFLT_IDS.forEach(id=>{ const v=(document.getElementById(id)||{}).value||''; vals[id]=v; if(v) ativos++; });
   let vis = 0;
-  document.querySelectorAll('#alunosTbody tr').forEach(tr=>{ const ok = !q || tr.dataset.s.includes(q); tr.style.display = ok?'':'none'; if(ok) vis++; });
+  document.querySelectorAll('#alunosTbody tr').forEach(tr=>{
+    const d = tr.dataset;
+    let ok = !q || d.s.includes(q);
+    if(ok) for(const id of FFLT_IDS){ if(vals[id] && d[FFLT_MAP[id]] !== vals[id]){ ok=false; break; } }
+    tr.style.display = ok?'':'none'; if(ok) vis++;
+  });
   const c = document.getElementById('alVis'); if(c) c.textContent = fmt(vis);
+  const bc = document.getElementById('ffltCount'); if(bc){ if(ativos){ bc.textContent=ativos; bc.hidden=false; } else bc.hidden=true; }
 }
 function fichaTab(btn,name){
+  fichaTabAtual = name;
   document.querySelectorAll('#sheet .sheet-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   document.querySelectorAll('#sheet .stabpane').forEach(p=> p.hidden = p.dataset.pane!==name);
   document.querySelector('.sheet-body').scrollTop = 0;
 }
-function abrirFicha(inep){
+const BIMS = ['1º bimestre','2º bimestre','3º bimestre','4º bimestre'];
+let fichaInep = null, fichaBim = '3º bimestre', fichaTabAtual = 'inicio';
+function setBim(v){ fichaBim = v; if(fichaInep) abrirFicha(fichaInep, true); }
+function abrirFicha(inep, keepTab){
   const e = ESCOLAS.find(x=>x.inep===inep) || REDE.find(x=>x.inep===inep);
   if(!e) return;
+  fichaInep = inep;
+  if(!keepTab) fichaTabAtual = 'inicio';
   document.getElementById('busca').value = e.nome;
   document.getElementById('results').hidden = true;
   const disp = Math.max(0, e.vagas - e.matriculas);
@@ -436,7 +495,13 @@ function abrirFicha(inep){
   /* aba Início — dashboard da escola */
   const espEsc = Math.round(e.matriculas*0.03);
   const espAEE = Math.round(espEsc*0.55), espAPAE = Math.round(espEsc*0.25), espCEAME = Math.max(0, espEsc - espAEE - espAPAE);
-  const freqAcessoEsc = Math.round((72 + (seedFrom('acc'+e.inep)%160)/10)*10)/10;
+  // Métricas que variam por bimestre (frequência e frequência de acesso)
+  const bi = Math.max(0, BIMS.indexOf(fichaBim));
+  const dFreq = [0.7,-0.5,0.2,-1.0][bi] + ((seedFrom(e.inep+'fq'+bi)%12)/10 - 0.6);
+  const freqBim = Math.max(72, Math.min(99, Math.round((e.freq + dFreq)*10)/10));
+  const accBase = 72 + (seedFrom('acc'+e.inep)%160)/10;
+  const dAcc = [1.3,-0.9,0.4,-1.6][bi] + ((seedFrom(e.inep+'ac'+bi)%16)/10 - 0.8);
+  const freqAcessoEsc = Math.max(60, Math.min(99, Math.round((accBase + dAcc)*10)/10));
   const turnosEsc = e.cmei ? 'Integral' : 'Manhã e Tarde';
   const IC = {
     alunos:'<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
@@ -453,7 +518,7 @@ function abrirFicha(inep){
     { v:fmt(e.turmas), l:'Turmas', s:'na escola', c:'laranja', p:IC.turmas },
     { v:fmt(servidoresN), l:'Servidores', s:'equipe da escola', c:'ambar', p:IC.users },
     { v:fmt(disp), l:'Vagas disponíveis', s:'livres para matrícula', c:'verde', p:IC.vaga },
-    { v:pct1(e.freq), l:'Frequência média', s:'presença dos alunos', c:'azul', p:IC.freq },
+    { v:pct1(freqBim), l:'Frequência média', s:'presença dos alunos', c:'azul', p:IC.freq },
     { v:pct1(freqAcessoEsc), l:'Freq. média de acesso', s:'uso da plataforma', c:'verde', p:IC.clock },
     { v:fmt(espEsc), l:'Educação Especial', s:'AEE · APAE · CEAME', c:'roxo', p:IC.tea },
     { v:fmt(e.responsaveis), l:'Responsáveis', s:'vinculados a alunos', c:'laranja', p:IC.resp },
@@ -487,6 +552,8 @@ function abrirFicha(inep){
       <div class="fld"><div class="fl">Etapas atendidas</div><div class="fv">${e.etapas}</div></div>
       <div class="fld"><div class="fl">Modalidade</div><div class="fv">${e.modalidade}</div></div>
       <div class="fld"><div class="fl">Organização das turmas</div><div class="fv">${e.multisseriada ? 'Multisseriada' : 'Seriada (regular)'}</div></div>
+      <div class="fld"><div class="fl">Salas (no prédio)</div><div class="fv">${e.salas != null ? e.salas : '—'}</div></div>
+      <div class="fld"><div class="fl">Anexos</div><div class="fv">${e.anexos ? e.anexos : 'Nenhum'}</div></div>
       <div class="fld"><div class="fl">Turnos</div><div class="fv">${turnosEsc}</div></div>
       <div class="fld"><div class="fl">Localidade</div><div class="fv">${e.localidade} · ${e.bairro}</div></div>
     </div>`;
@@ -506,11 +573,35 @@ function abrirFicha(inep){
   /* aba Alunos — lista de alunos */
   const alunos = alunosDaEscola(e);
   const teaN = alunos.filter(a=>a.tea).length;
-  const alRows = alunos.map(a=>`<tr data-s="${(a.nome+' '+a.turma).toLowerCase()}"><td><b>${a.nome}</b>${a.tea?' <span class="al-tea">Ed. Especial</span>':''}</td><td class="muted">${a.turma}</td><td>${a.turno}</td></tr>`).join('');
+  const alRows = alunos.map(a=>`<tr data-s="${(a.nome+' '+a.turma).toLowerCase()}" data-nivel="${a.nivel}" data-serie="${a.serie}" data-turno="${a.turno}" data-doc="${a.doc}" data-status="${a.status}" data-entur="${a.enturmado?'Enturmado':'Sem turma'}" data-cpf="${a.cpf?'Com CPF':'Sem CPF'}" data-resp="${a.resp?'Com responsável':'Sem responsável'}" data-ee="${a.tea?'Sim':'Não'}"><td><b>${a.nome}</b>${a.tea?' <span class="al-tea">Ed. Especial</span>':''}</td><td class="muted">${a.turma}</td><td>${a.turno}</td></tr>`).join('');
+  const uniq = k => [...new Set(alunos.map(a=>a[k]))];
+  const FFLT = [
+    ['fnivel','Nível de ensino', uniq('nivel')],
+    ['fserie','Série ou ano', [...new Set(alunos.map(a=>a.serie))]],
+    ['fturno','Turno', uniq('turno')],
+    ['fdoc','Documentação', ['Completa','Incompleta']],
+    ['fstatus','Status', ['Ativo','Transferido','Evadido','Remanejado']],
+    ['fentur','Enturmação', ['Enturmado','Sem turma']],
+    ['fcpf','CPF', ['Com CPF','Sem CPF']],
+    ['fresp','Responsável', ['Com responsável','Sem responsável']],
+    ['fee','Educação Especial', ['Sim','Não']],
+  ];
+  const sldr = '<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="9" cy="6" r="2" fill="currentColor"/><circle cx="15" cy="12" r="2" fill="currentColor"/><circle cx="9" cy="18" r="2" fill="currentColor"/>';
   const paneAlunos = `
-    <div class="al-head">
-      <div class="al-count"><b id="alVis">${fmt(alunos.length)}</b> alunos · <span style="color:#6B3FA0;font-weight:700;">${fmt(teaN)}</span> em Educação Especial</div>
-      <label class="al-search">${svgP('<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',15)}<input id="alBusca" type="text" placeholder="Buscar aluno ou turma" oninput="filtrarAlunos()" autocomplete="off" /></label>
+    <div class="al-head" style="position:relative;">
+      <div class="al-count"><b id="alVis">${fmt(alunos.length)}</b> alunos</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <label class="al-search">${svgP('<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',15)}<input id="alBusca" type="text" placeholder="Buscar aluno ou turma" oninput="filtrarAlunos()" autocomplete="off" /></label>
+        <button class="fflt-toggle" id="ffltToggle" onclick="toggleFichaFiltros()">${svgP(sldr,15)} Filtrar busca por <span class="fflt-count" id="ffltCount" hidden></span></button>
+        <button class="fflt-redef" onclick="redefinirFichaFiltros()">Redefinir filtros</button>
+      </div>
+      <div class="fflt-panel" id="ffltPanel" hidden>
+        <div class="fflt-head"><span class="fflt-title">${svgP(sldr,16)} Filtrar busca por</span><button class="fflt-x" onclick="toggleFichaFiltros()" aria-label="Fechar">${svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',16)}</button></div>
+        <div class="fflt-body">
+          ${FFLT.map(f=>`<div class="fflt"><span class="fflt-lbl">${f[1]}</span><select id="${f[0]}" onchange="filtrarAlunos()"><option value="">Selecione uma opção</option>${f[2].map(o=>`<option>${o}</option>`).join('')}</select></div>`).join('')}
+        </div>
+        <div class="fflt-foot"><button class="btn-fechar2" onclick="toggleFichaFiltros()">Fechar</button><button class="btn-redef3" onclick="redefinirFichaFiltros()">Redefinir</button></div>
+      </div>
     </div>
     <table class="pt-tbl"><thead><tr><th>Aluno</th><th>Turma</th><th>Turno</th></tr></thead><tbody id="alunosTbody">${alRows}</tbody></table>`;
 
@@ -523,7 +614,8 @@ function abrirFicha(inep){
       <div class="sheet-ic ${e.cmei?'cmei':''}">${svgP(ICON_ESC,24)}</div>
       <div><div class="sheet-name" id="sheetName">${e.nome}</div>
         <div class="sheet-subt">${e.bairro} · ${e.localidade} · ${e.modalidade} · INEP ${e.inep}</div></div>
-      <button class="sheet-close" onclick="fecharFicha()" aria-label="Fechar">${svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',18)}</button>
+      <select class="bim-sel" onchange="setBim(this.value)" aria-label="Bimestre">${BIMS.map(b=>`<option ${b===fichaBim?'selected':''}>${b}</option>`).join('')}</select>
+      <button class="sheet-close" onclick="fecharFicha()" aria-label="Fechar" style="margin-left:10px;">${svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',18)}</button>
     </div>
     <div class="sheet-tabs">
       <button class="sheet-tab active" onclick="fichaTab(this,'inicio')">Início</button>
@@ -542,6 +634,11 @@ function abrirFicha(inep){
   document.getElementById('sheetOverlay').classList.add('open');
   document.getElementById('sheet').classList.add('open');
   document.addEventListener('keydown', escHandler);
+  // restaura a aba ativa (ex.: ao trocar o bimestre, mantém a aba em que estava)
+  if(fichaTabAtual && fichaTabAtual!=='inicio'){
+    const b = [...document.querySelectorAll('#sheet .sheet-tab')].find(x=>(x.getAttribute('onclick')||'').includes("'"+fichaTabAtual+"'"));
+    if(b) fichaTab(b, fichaTabAtual);
+  }
 }
 const SIT_LBL = { exercicio:'Ativo', licenca:'Licença', afastado:'Afastado', cedido:'Cedido' };
 function seedFrom(str){ let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; }

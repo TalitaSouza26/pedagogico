@@ -159,7 +159,6 @@
         <div class="al-kpi" onclick="quick('total')"><div class="al-kpi-ic" style="background:#EFEAF7;color:#6B3FA0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div><div><div class="al-kpi-lbl">Total de alunos</div><div class="al-kpi-val" id="kTotalAl">—</div></div></div>
         <div class="al-kpi" onclick="quick('ee')"><div class="al-kpi-ic" style="background:var(--azul-claro);color:var(--azul);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg></div><div><div class="al-kpi-lbl">Educação Especial</div><div class="al-kpi-val" id="kEE">—</div></div></div>
         <div class="al-kpi" onclick="quick('semTurma')"><div class="al-kpi-ic" style="background:var(--laranja-bg);color:var(--laranja-escuro);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg></div><div><div class="al-kpi-lbl">Alunos sem turma</div><div class="al-kpi-val" id="kSemTurma">—</div></div></div>
-        <div class="al-kpi" onclick="quick('semCpf')"><div class="al-kpi-ic" style="background:var(--laranja-bg);color:var(--laranja-escuro);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div><div><div class="al-kpi-lbl">Alunos sem CPF</div><div class="al-kpi-val" id="kSemCpf">—</div></div></div>
         <div class="al-kpi" onclick="quick('semResp')"><div class="al-kpi-ic" style="background:var(--laranja-bg);color:var(--laranja-escuro);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="8" x2="23" y2="14"/><line x1="23" y1="8" x2="17" y2="14"/></svg></div><div><div class="al-kpi-lbl">Alunos sem responsável</div><div class="al-kpi-val" id="kSemResp">—</div></div></div>
         <div class="al-kpi" onclick="quick('semDoc')"><div class="al-kpi-ic" style="background:var(--laranja-bg);color:var(--laranja-escuro);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></div><div><div class="al-kpi-lbl">Alunos sem documentos</div><div class="al-kpi-val" id="kSemDoc">—</div></div></div>
       </div>
@@ -322,7 +321,6 @@ function casa(a){
 document.getElementById('kTotalAl').textContent = fmt(ALUNOS.length);
 document.getElementById('kEE').textContent = fmt(ALUNOS.filter(a=>a.ee).length);
 document.getElementById('kSemTurma').textContent = fmt(ALUNOS.filter(a=>!a.enturmado).length);
-document.getElementById('kSemCpf').textContent = fmt(ALUNOS.filter(a=>!a.cpf).length);
 document.getElementById('kSemResp').textContent = fmt(ALUNOS.filter(a=>!a.resp).length);
 document.getElementById('kSemDoc').textContent = fmt(ALUNOS.filter(a=>a.doc==='Incompleta').length);
 

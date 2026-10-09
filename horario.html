@@ -108,7 +108,9 @@
     .mini-tbl th { text-align: left; padding: 8px 6px; font-family: var(--font-display); font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); border-bottom: 1px solid var(--borda); }
     .mini-tbl td { padding: 11px 6px; border-bottom: 1px solid var(--borda); font-size: 12.5px; }
     .mini-tbl tr:last-child td { border-bottom: none; }
-    .eye { color: var(--laranja); } .eye svg { width: 16px; height: 16px; }
+    .eye { border: none; background: none; cursor: pointer; color: var(--laranja); padding: 6px; border-radius: 8px; display: inline-flex; align-items: center; }
+    .eye:hover { color: var(--laranja-escuro); background: var(--laranja-bg); }
+    .eye svg { width: 18px; height: 18px; }
     .empty { text-align: center; padding: 30px 10px; color: var(--texto-suave); }
     .empty svg { width: 38px; height: 38px; color: #C7CDD4; margin-bottom: 10px; }
     .sp-foot { padding: 12px 20px; border-top: 1px solid var(--borda); background: var(--bg); font-size: 11px; color: var(--texto-suave); line-height: 1.5; }
@@ -184,11 +186,6 @@
     <div class="content">
       <a class="back-btn" id="backEscola" style="display:none"></a>
 
-      <div class="sv-kpis">
-        <div class="sv-kpi"><div class="sv-kpi-l"><div class="sv-kpi-ic" style="background:var(--azul-claro);color:var(--azul);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg></div><div class="sv-kpi-lbl">Total de servidores</div></div><div class="sv-kpi-val" id="kTotal">—</div></div>
-        <div class="sv-kpi"><div class="sv-kpi-l"><div class="sv-kpi-ic" style="background:var(--verde-bg);color:#2E8B00;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div class="sv-kpi-lbl">Efetivos</div></div><div class="sv-kpi-val" id="kEfet">—</div></div>
-        <div class="sv-kpi"><div class="sv-kpi-l"><div class="sv-kpi-ic" style="background:var(--laranja-bg);color:var(--laranja-escuro);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="sv-kpi-lbl">Contratados</div></div><div class="sv-kpi-val" id="kContr">—</div></div>
-      </div>
 
       <div class="tbl-toolbar">
         <div class="section-title" id="listTitle">Servidores</div>
@@ -199,7 +196,7 @@
         </div>
       </div>
       <div class="tbl-wrap"><table class="tbl">
-        <thead><tr><th>Servidor</th><th>Cargo</th><th>Vínculo</th><th>Escola</th></tr></thead>
+        <thead><tr><th>Servidor</th><th>Cargo</th><th>Vínculo</th><th>Escola</th><th></th></tr></thead>
         <tbody id="listBody"></tbody>
       </table></div>
       <div class="pager">
@@ -305,15 +302,6 @@ let SERVIDORES = [];
 Object.keys(ESCOLAS).filter(inScope).forEach(inep => { SERVIDORES = SERVIDORES.concat(gerarEquipe(inep)); });
 
 const VINC_LBL = { efetivo:'Efetivo', contrato:'Contratado', designado:'Designado' };
-(function(){
-  const total = SERVIDORES.length;
-  const efet = SERVIDORES.filter(s=>s.vinculo==='efetivo').length;
-  const contr = SERVIDORES.filter(s=>s.vinculo==='contrato').length;
-  const f = n => n.toLocaleString('pt-BR');
-  document.getElementById('kTotal').textContent = f(total);
-  document.getElementById('kEfet').textContent = f(efet);
-  document.getElementById('kContr').textContent = f(contr);
-})();
 document.getElementById('pageSub').textContent = 'Rede Municipal · Porto Seguro/BA';
 
 function limparCargo(){ filtroCargo=''; document.getElementById('chipCargo').style.display='none'; pagina=1; renderLista(); }
@@ -345,7 +333,8 @@ function renderLista(){
       <td>${s.ncargos>1 ? `<span class="cargo-badge">${s.ncargos} cargos</span>` : s.cargo}</td>
       <td>${VINC_LBL[s.vinculo]||'—'}${s.vinculos>1 ? ` <span class="vinc-badge">${s.vinculos} vínculos</span>` : ''}</td>
       <td>${ESCOLAS[s.escola]||'—'}</td>
-    </tr>`).join('') || `<tr><td colspan="4" class="muted" style="text-align:center;padding:30px;">Nenhum servidor encontrado.</td></tr>`;
+      <td style="text-align:right"><button class="eye" onclick="event.stopPropagation();abrir('${s.m}')" aria-label="Ver detalhes de ${s.nome}">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',18)}</button></td>
+    </tr>`).join('') || `<tr><td colspan="5" class="muted" style="text-align:center;padding:30px;">Nenhum servidor encontrado.</td></tr>`;
   document.getElementById('pagerInfo').textContent = total ? `Mostrando ${(ini+1).toLocaleString('pt-BR')}–${Math.min(ini+POR_PAGINA,total).toLocaleString('pt-BR')} de ${total.toLocaleString('pt-BR')}` : '';
   document.getElementById('pgPos').textContent = `${pagina} / ${max}`;
   document.getElementById('btnPrev').disabled = pagina<=1;
