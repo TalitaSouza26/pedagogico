@@ -235,18 +235,19 @@ const ocupPct = totVagas ? (totAlunos/totVagas*100) : 0;
 const freqMedia = nEsc ? E.reduce((s,e)=>s+e.freq,0)/nEsc : 0;
 const totOcor = E.reduce((s,e)=>s+e.ocorrencias,0);
 const totResp = E.reduce((s,e)=>s+e.responsaveis,0);
+const totTurmas = E.reduce((s,e)=>s+e.turmas,0);
 const cg = E.reduce((a,e)=>{ a.prof+=e.equipe.prof; a.coord+=e.equipe.coord; a.sec+=e.equipe.sec; a.direcao+=e.equipe.direcao; return a; }, {prof:0,coord:0,sec:0,direcao:0});
 const totUsuarios = cg.prof+cg.coord+cg.sec+cg.direcao;
 const pct1 = v => (Math.round(v*10)/10).toString().replace('.',',')+'%';
 const subEsc = PERFIL.transversal ? 'na rede municipal' : 'no recorte do perfil';
 
 const KPIS = [
-  { label:'Número de escolas', valor:fmt(nEsc), sub:subEsc, ic:'azul', p:'<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/>' },
-  { label:'Alunos matriculados', valor:fmt(totAlunos), sub:'matrículas ativas', ic:'roxo', p:'<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>' },
-  { label:'Frequência média', valor:pct1(freqMedia), sub:'meta 92%', ic:'verde', p:'<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>' },
-  { label:'Usuários', valor:fmt(totUsuarios), sub:'com acesso ao sistema', ic:'laranja', p:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/>' },
-  { label:'Ocorrências', valor:fmt(totOcor), sub:'registradas no período', ic:'ambar', p:'<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>' },
-  { label:'Responsáveis cadastrados', valor:fmt(totResp), sub:'vinculados a alunos', ic:'roxo', p:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>' },
+  { label:'Escolas', valor:fmt(nEsc), sub:subEsc, ic:'azul', p:'<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/>' },
+  { label:'Vagas ofertadas', valor:fmt(totVagas), sub:'na rede municipal', ic:'laranja', p:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>' },
+  { label:'Responsáveis', valor:fmt(totResp), sub:'vinculados a alunos', ic:'roxo', p:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>' },
+  { label:'Alunos', valor:fmt(totAlunos), sub:'matrículas ativas', ic:'verde', p:'<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>' },
+  { label:'Turmas', valor:fmt(totTurmas), sub:'na rede', ic:'ambar', p:'<rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>' },
+  { label:'Servidores', valor:fmt(totUsuarios), sub:'com acesso ao sistema', ic:'azul', p:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/>' },
 ];
 document.getElementById('kpiRow').innerHTML = KPIS.map(k=>`
   <div class="kpi-card"><div class="kpi-left"><div class="kpi-ic ic-${k.ic}">${svgIc(k.p)}</div>
