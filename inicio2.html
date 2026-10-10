@@ -98,10 +98,10 @@
     .ask-hint { font-size: 12px; color: var(--texto-suave); margin-top: 10px; }
 
     /* ---- palco do quadro (sala de aula) ---- */
-    .board-stage { position: relative; flex: 1 1 0; min-width: 0; height: 100%; margin: 0; overflow: hidden; }
+    .board-stage { position: relative; width: 100%; height: 100%; margin: 0; overflow: hidden; }
     /* frame com a proporção da imagem (3:2), dimensionado p/ cobrir a área toda — sem sobra */
     .board-frame { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: max(100%, calc((100vh - 90px) * 1.333)); aspect-ratio: 4 / 3; }
-    .board-bg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+    .board-bg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
     .board-bg-write { opacity: 0; transition: opacity .4s ease; }         /* bubo escrevendo (aparece ao digitar) */
     .board-frame.writing .board-bg-write { opacity: 1; }
     .board-area { position: absolute; top: 21%; left: 34.7%; right: 17.3%; bottom: 46%; display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: clamp(12px, 2.4vh, 24px); }
@@ -355,12 +355,6 @@
 
   <div class="view-wrap">
     <div class="content">
-     <div class="inicio-layout">
-      <aside class="kpi-panel">
-        <div class="kpi-panel-title">Visão geral da rede</div>
-        <div class="kpi-panel-sub">Indicadores da rede municipal</div>
-        <div class="kpi-cards" id="kpiBar"></div>
-      </aside>
       <div class="board-stage">
        <div class="board-frame" id="boardFrame">
         <img class="board-bg" src="assets/fundo-sala.webp" alt="Sala de aula com o Bubo" />
@@ -375,7 +369,6 @@
         </div>
        </div>
       </div>
-     </div>
 
     </div>
 
