@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Painel Pedagógico — Início (2)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; display: flex; height: 100vh; overflow: hidden; font-size: 13px; color: #333; }
@@ -115,8 +118,8 @@
     .board-search:focus-within { border-color: #fff; box-shadow: 0 8px 22px rgba(0,0,0,.3); }
     /* o próprio quadro é o campo de texto (escrever a "giz") */
     .board-area { cursor: text; }
-    .board-write { width: 100%; background: transparent; border: none; outline: none; text-align: center; font-family: var(--font-display); font-weight: 800; color: #fff; caret-color: #fff; font-size: clamp(20px, 2.6vw, 34px); text-shadow: 0 1px 10px rgba(0,0,0,.45); padding: 4px; }
-    .board-write::placeholder { color: rgba(255,255,255,.72); font-weight: 600; font-size: clamp(13px, 1.5vw, 18px); }
+    .board-write { width: 100%; background: transparent; border: none; outline: none; text-align: center; font-family: 'Caveat', var(--font-display), cursive; font-weight: 700; color: #fff; caret-color: #fff; font-size: clamp(30px, 4vw, 52px); letter-spacing: .5px; text-shadow: 0 1px 10px rgba(0,0,0,.4); padding: 2px 4px; }
+    .board-write::placeholder { font-family: var(--font-display), sans-serif; color: rgba(255,255,255,.72); font-weight: 600; font-size: clamp(13px, 1.5vw, 18px); letter-spacing: 0; }
     /* nomes de escolas aparecendo/sumindo — bem calmo, sem efeito giz */
     .board-ticker { flex: 0 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); align-items: start; justify-items: center; gap: clamp(12px, 2vh, 22px) clamp(14px, 2.2vw, 34px); text-align: center; overflow: hidden; }
     .board-ticker .tk-item { min-width: 0; opacity: 0; transition: opacity 1.4s ease; border-radius: 10px; padding: 5px 8px; }
