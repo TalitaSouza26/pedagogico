@@ -154,6 +154,18 @@
     .disc-bar { height: 5px; background: var(--bg); border-radius: 4px; margin-top: 5px; overflow: hidden; }
     .disc-fill { height: 100%; background: linear-gradient(90deg, var(--azul), #22C3DC); border-radius: 4px; }
     @media (max-width: 720px){ .plan-grid { grid-template-columns: 1fr; } }
+    /* cards "por escola" (lista expansível) */
+    .esc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .esc-list { max-height: 150px; overflow-y: auto; margin-top: 6px; transition: max-height .25s ease; }
+    .esc-card.open .esc-list { max-height: 470px; }
+    .esc-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 9px 2px; border-bottom: 1px solid var(--bg); font-size: 13px; }
+    .esc-row:last-child { border-bottom: none; }
+    .esc-nome { color: var(--texto); font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .esc-val { flex-shrink: 0; }
+    .esc-val b { font-family: var(--font-display); }
+    .esc-de { color: var(--texto-suave); font-size: 12px; }
+    .esc-toggle { margin-top: 10px; background: none; border: none; color: var(--azul); font-weight: 700; font-size: 12px; cursor: pointer; padding: 0; }
+    @media (max-width: 860px){ .esc-grid { grid-template-columns: 1fr; } }
     /* botão e modal de relatório */
     .ctx-right { display: flex; align-items: center; gap: 16px; }
     .rel-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--azul); color: #fff; border: none; border-radius: 10px; padding: 9px 16px; font-family: var(--font-display); font-weight: 700; font-size: 13px; cursor: pointer; transition: background .15s; }
@@ -232,6 +244,24 @@
         <div class="comp-legend" id="locLegend"></div>
       </div>
 
+      <div class="esc-grid" style="margin-top:20px;">
+        <div class="panel esc-card">
+          <div class="section-head"><div class="section-title">Servidores por escola</div><div class="section-hint">total: <b id="escServTot">—</b></div></div>
+          <div class="esc-list" id="escServ"></div>
+          <button class="esc-toggle" onclick="toggleEsc(this)">ver todas ▾</button>
+        </div>
+        <div class="panel esc-card">
+          <div class="section-head"><div class="section-title">Alunos por escola</div><div class="section-hint">total: <b id="escAlTot">—</b></div></div>
+          <div class="esc-list" id="escAl"></div>
+          <button class="esc-toggle" onclick="toggleEsc(this)">ver todas ▾</button>
+        </div>
+        <div class="panel esc-card">
+          <div class="section-head"><div class="section-title">Vagas por escola</div><div class="section-hint">total: <b id="escVaTot">—</b></div></div>
+          <div class="esc-list" id="escVa"></div>
+          <button class="esc-toggle" onclick="toggleEsc(this)">ver todas ▾</button>
+        </div>
+      </div>
+
       <div class="grid-2" style="margin-top:20px;">
         <div class="panel">
           <div class="section-head"><div class="section-title">Top escolas com mais servidores</div><div class="section-hint">Maior quadro</div></div>
@@ -240,23 +270,6 @@
         <div class="panel">
           <div class="section-head"><div class="section-title">Top escolas com menos servidores</div><div class="section-hint">Menor quadro</div></div>
           <div id="servMenos" style="margin-top:8px;"></div>
-        </div>
-      </div>
-
-      <div class="panel" style="margin-top:20px;">
-        <div class="section-head"><div class="section-title">Escolas por tipo</div><div class="section-hint" id="tipoTot">Composição da rede</div></div>
-        <div class="comp-bar" id="tipoBar"></div>
-        <div class="comp-legend" id="tipoLegend"></div>
-      </div>
-
-      <div class="grid-2" style="margin-top:20px;">
-        <div class="panel">
-          <div class="section-head"><div class="section-title">Top escolas com mais vagas</div><div class="section-hint">Vagas livres</div></div>
-          <div id="ocupLoc" style="margin-top:8px;"></div>
-        </div>
-        <div class="panel">
-          <div class="section-head"><div class="section-title">Top escolas mais lotadas</div><div class="section-hint">Maior ocupação</div></div>
-          <div id="vagaSit" style="margin-top:8px;"></div>
         </div>
       </div>
 
@@ -316,17 +329,9 @@
       </div>
 
       <div class="grid-2" style="margin-top:20px;">
-        <div class="panel">
-          <div class="section-head"><div class="section-title">Turmas</div><div class="section-hint">Organização da rede</div></div>
-          <div class="vm">
-            <div class="vm-block"><div class="vm-label">Total de turmas</div><div class="vm-num" id="turTot">—</div><div class="vm-sub">na rede</div></div>
-            <div class="vm-block"><div class="vm-label">Alunos por turma</div><div class="vm-num orange" id="turMedia">—</div><div class="vm-sub">média na rede</div></div>
-            <div class="vm-block"><div class="vm-label">Turmas por escola</div><div class="vm-num" id="turPorEsc">—</div><div class="vm-sub">média</div></div>
-          </div>
-        </div>
-        <div class="panel">
-          <div class="section-head"><div class="section-title">Organização das turmas</div><div class="section-hint">Regulares × multisseriadas</div></div>
-          <div class="turno-cards" id="orgCards" style="grid-template-columns:repeat(2,1fr);margin-top:12px;"></div>
+        <div class="panel" style="grid-column:1/-1;">
+          <div class="section-head"><div class="section-title">Turmas por etapa</div><div class="section-hint">total de turmas: <b id="turTot">—</b></div></div>
+          <div class="turno-cards" id="turEtapaCards" style="grid-template-columns:repeat(5,1fr);margin-top:12px;"></div>
         </div>
       </div>
 
@@ -522,27 +527,6 @@ document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl
   ).join('');
 })();
 
-/* Escolas por tipo — CMEI/Infantil · Fundamental · Multisseriada */
-(function(){
-  const cont = { 'Educação Infantil':0, 'Ensino Fundamental':0, 'Multisseriada':0 };
-  E.forEach(e=>{ const t = e.cmei ? 'Educação Infantil' : (e.multisseriada ? 'Multisseriada' : 'Ensino Fundamental'); cont[t]++; });
-  const TIPO = [
-    { nome:'Educação Infantil (CMEI)', cor:'#6B3FA0', n:cont['Educação Infantil'] },
-    { nome:'Ensino Fundamental', cor:'#0EA5B5', n:cont['Ensino Fundamental'] },
-    { nome:'Multisseriada', cor:'#F0B429', n:cont['Multisseriada'] },
-  ];
-  const tot = TIPO.reduce((s,x)=>s+x.n,0) || 1;
-  const pc = v => (Math.round(v/tot*1000)/10).toString().replace('.',',')+'%';
-  const tt = document.getElementById('tipoTot'); if(tt) tt.textContent = `${tot} escolas`;
-  document.getElementById('tipoBar').innerHTML = TIPO.filter(c=>c.n>0).map(c=>{
-    const pct = c.n/tot*100;
-    return `<div class="comp-seg" style="width:${pct}%;background:${c.cor};cursor:pointer;" title="${c.nome}: ${pc(c.n)}" onclick="(window.top||window).location.href='turmas.html'"><span>${pct>=8?pc(c.n):''}</span></div>`;
-  }).join('');
-  document.getElementById('tipoLegend').innerHTML = TIPO.map(c=>
-    `<div class="comp-li"><span class="comp-dot" style="background:${c.cor}"></span><b>${c.nome}</b> <span class="cl-sub">${c.n} · ${pc(c.n)}</span></div>`
-  ).join('');
-})();
-
 /* Alunos — pendências de cadastro (mesma regra da tela de Alunos) */
 (function(){
   const seedFrom = str => { let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; };
@@ -579,6 +563,34 @@ document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl
   set('turTot', fmt(totTurmas));
   set('turMedia', totTurmas ? dec(totAlunos/totTurmas) : '0');
   set('turPorEsc', nEsc ? dec(totTurmas/nEsc) : '0');
+
+  // turmas por etapa (distribuídas proporcionalmente às matrículas por etapa)
+  const et = { inf:0, f1:0, f2:0, eja:0 };
+  E.forEach(e=>{
+    const cmei = e.cmei || /^CMEI/.test(e.nome) || /Creche/.test(e.etapas||'');
+    if(cmei){ et.inf += e.matriculas; return; }
+    let m = e.matriculas;
+    const temFin = /Anos finais/.test(e.etapas||'');
+    const temEJA = /EJA/.test(e.etapas||'');
+    if(temEJA){ const q = Math.round(m*0.09); et.eja += q; m -= q; }
+    if(temFin){ const q = Math.round(m*5/9); et.f1 += q; et.f2 += (m - q); }
+    else { et.f1 += m; }
+  });
+  const totAlEt = (et.inf+et.f1+et.f2+et.eja) || 1;
+  const tInf = Math.round(totTurmas*et.inf/totAlEt);
+  const tF1  = Math.round(totTurmas*et.f1/totAlEt);
+  const tF2  = Math.round(totTurmas*et.f2/totAlEt);
+  const tEja = Math.max(0, totTurmas - tInf - tF1 - tF2);
+  const tEja1 = Math.round(tEja/2), tEja2 = tEja - tEja1;
+  const ET = [
+    { nome:'Educação Infantil', cor:'#6B3FA0', n:tInf },
+    { nome:'Fundamental I',     cor:'#12509A', n:tF1 },
+    { nome:'Fundamental II',    cor:'#3DC200', n:tF2 },
+    { nome:'EJA I',             cor:'#F0B429', n:tEja1 },
+    { nome:'EJA II',            cor:'#E8952A', n:tEja2 },
+  ];
+  const te = document.getElementById('turEtapaCards');
+  if(te) te.innerHTML = ET.map(x=>`<div class="turno-card" style="background:linear-gradient(135deg, ${x.cor}26, ${x.cor}0d); border-color:${x.cor}33;"><div class="tc-top"><span class="tc-dot" style="background:${x.cor}"></span><span class="tc-lbl">${x.nome}</span></div><div class="tc-val" style="color:${x.cor}">${fmt(x.n)}</div><div class="tc-pct">turmas</div></div>`).join('');
   let multi = 0;
   E.forEach(e=>{ if(e.multisseriada) multi += Math.round((e.turmas||0)/3); });
   const reg = Math.max(0, totTurmas - multi);
@@ -650,6 +662,25 @@ document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl
   const tt = document.getElementById('planTot'); if(tt) tt.textContent = fmt(total);
 })();
 
+/* cards "por escola" — listas expansíveis (Servidores / Alunos / Vagas) */
+function toggleEsc(btn){ const c=btn.closest('.esc-card'); const open=c.classList.toggle('open'); btn.textContent = open ? 'ver menos ▴' : 'ver todas ▾'; }
+(function(){
+  const sc = e => e.equipe ? (e.equipe.prof+e.equipe.coord+e.equipe.sec+e.equipe.direcao) : (e.servidores||0);
+  const totServ = E.reduce((s,e)=>s+sc(e),0);
+  const totAl = E.reduce((s,e)=>s+e.matriculas,0);
+  const totVa = E.reduce((s,e)=>s+e.vagas,0);
+  const set=(id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v;};
+  set('escServTot', fmt(totServ)); set('escAlTot', fmt(totAl)); set('escVaTot', fmt(totVa));
+  const fill = (id, valFn, total, cor) => {
+    const el = document.getElementById(id); if(!el) return;
+    const rows = [...E].map(e=>({ e, v: valFn(e) })).sort((a,b)=> b.v - a.v);
+    el.innerHTML = rows.map(x=>`<div class="esc-row"><span class="esc-nome" title="${x.e.nome}">${x.e.nome}</span><span class="esc-val"><b style="color:${cor}">${fmt(x.v)}</b> <span class="esc-de">de ${fmt(total)}</span></span></div>`).join('');
+  };
+  fill('escServ', sc, totServ, '#12509A');
+  fill('escAl', e=>e.matriculas, totAl, '#6B3FA0');
+  fill('escVa', e=>e.vagas, totVa, '#2E8B00');
+})();
+
 /* relatório — escolha do tipo */
 (function(){
   const REL = [
@@ -706,47 +737,6 @@ function gerarRelatorio(tipo){
   if(eb) eb.innerHTML = [['AEE — sala de recursos',aee],['APAE',apae],['CEAME',ceame]].map(r=>
     `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bg);font-size:13px;color:var(--texto);"><span>${r[0]}</span><b>${fmt(r[1])}</b></div>`
   ).join('');
-})();
-
-/* Vagas — Top escolas com mais vagas livres */
-(function(){
-  const el = document.getElementById('ocupLoc'); if(!el) return;
-  const arr = E.map(e=>({ e, livres: Math.max(0, e.vagas - e.matriculas) }))
-    .sort((a,b)=> b.livres - a.livres).slice(0,5);
-  el.innerHTML = arr.map((x,i)=>{
-    const e=x.e, pctLivre = e.vagas ? x.livres/e.vagas*100 : 0;
-    const loc = e.localidade || (e.modalidade==='Campo'?'Campo':e.modalidade==='Indígena'?'Indígena':'Urbana');
-    return `<div class="rank-row" onclick="(window.top||window).location.href='turmas.html'">
-      <div class="rank-pos" style="background:var(--verde-bg);color:#2E8B00;">${i+1}</div>
-      <div class="rank-main">
-        <div class="rank-nome">${e.nome}</div>
-        <div class="rank-sub">${loc} · ${fmt(e.matriculas)}/${fmt(e.vagas)} vagas</div>
-        <div class="rank-track"><div class="rank-fill" style="width:${Math.min(100,pctLivre).toFixed(0)}%;background:#3DC200"></div></div>
-      </div>
-      <div class="rank-val" style="color:#2E8B00;">${fmt(x.livres)}</div>
-    </div>`;
-  }).join('');
-})();
-
-/* Vagas — Top escolas mais lotadas */
-(function(){
-  const el = document.getElementById('vagaSit'); if(!el) return;
-  const arr = E.map(e=>({ e, p: e.vagas ? e.matriculas/e.vagas*100 : 0 }))
-    .sort((a,b)=> b.p - a.p).slice(0,5);
-  el.innerHTML = arr.map((x,i)=>{
-    const e=x.e, pct=Math.min(100,x.p);
-    const cor = x.p>=100 ? '#D4531F' : x.p>=95 ? '#ED6939' : '#F0B429';
-    const loc = e.localidade || (e.modalidade==='Campo'?'Campo':e.modalidade==='Indígena'?'Indígena':'Urbana');
-    return `<div class="rank-row" onclick="(window.top||window).location.href='turmas.html'">
-      <div class="rank-pos">${i+1}</div>
-      <div class="rank-main">
-        <div class="rank-nome">${e.nome}</div>
-        <div class="rank-sub">${loc} · ${fmt(e.matriculas)}/${fmt(e.vagas)} vagas</div>
-        <div class="rank-track"><div class="rank-fill" style="width:${pct.toFixed(0)}%;background:${cor}"></div></div>
-      </div>
-      <div class="rank-val">${pct1(x.p)}</div>
-    </div>`;
-  }).join('');
 })();
 
 /* modo embutido (iframe no Início): esconde navegação e informa a altura à tela-pai */
