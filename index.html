@@ -56,6 +56,7 @@
     .ic-verde { background: var(--verde-bg); color: #2E8B00; }
     .ic-laranja { background: var(--laranja-bg); color: var(--laranja-escuro); }
     .ic-ambar { background: #FDF3D9; color: var(--ambar-escuro); }
+    .ic-teal { background: #D9F2F5; color: #0E7E8C; }
 
     .panel { background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio); padding: 20px; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -81,7 +82,7 @@
     .donut::after { content: ''; position: absolute; inset: 42px; background: var(--bg); border-radius: 50%; }
     .donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; }
     .donut-center .dc-lbl { font-size: 12px; color: var(--texto-suave); }
-    .donut-center .dc-val { font-family: var(--font-display); font-weight: 800; font-size: 28px; color: var(--texto); line-height: 1.1; }
+    .donut-center .dc-val { font-family: var(--font-display); font-weight: 800; font-size: 28px; color: var(--laranja); line-height: 1.1; }
     .donut-legend { flex: 1; min-width: 200px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 22px; }
     .dl-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
     .dl-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
@@ -236,9 +237,7 @@
   </div>
 
   <div class="cal-header">
-    <div class="ctx-left">
-      <span class="ctx-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg> <span class="js-escopo">Rede municipal · todas as escolas</span></span>
-    </div>
+    <div></div>
     <div class="ctx-right">
       <button class="rel-btn" onclick="abrirRelatorio()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg> Relatório</button>
       <span class="sync-stamp"><span class="live"></span> Dados de 06/08/2026</span>
@@ -381,12 +380,16 @@ const KPIS = [
   { label:'Responsáveis', valor:fmt(totResp), sub:'vinculados a alunos', ic:'roxo', p:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>' },
   { label:'Alunos', valor:fmt(totAlunos), sub:'matrículas ativas', ic:'verde', p:'<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>' },
   { label:'Turmas', valor:fmt(totTurmas), sub:'na rede', ic:'ambar', p:'<rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>' },
-  { label:'Servidores', valor:fmt(totUsuarios), sub:'com acesso ao sistema', ic:'azul', p:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/>' },
+  { label:'Servidores', valor:fmt(totUsuarios), sub:'com acesso ao sistema', ic:'teal', p:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/>' },
 ];
-document.getElementById('kpiRow').innerHTML = KPIS.map(k=>`
-  <div class="kpi-card"><div class="kpi-left"><div class="kpi-ic ic-${k.ic}">${svgIc(k.p)}</div>
+const KPI_COR = { azul:'#12509A', laranja:'#ED6939', roxo:'#6B3FA0', verde:'#2E8B00', ambar:'#F0B429', teal:'#0E9DAE' };
+document.getElementById('kpiRow').innerHTML = KPIS.map((k,i)=>{
+  const c = KPI_COR[k.ic] || '#12509A';
+  const style = ` style="background:linear-gradient(135deg, ${c}22, ${c}0a); border-color:${c}33;"`;
+  return `<div class="kpi-card"${style}><div class="kpi-left"><div class="kpi-ic ic-${k.ic}">${svgIc(k.p)}</div>
     <div><div class="kpi-label">${k.label}</div><div class="kpi-sub">${k.sub}</div></div></div>
-    <div class="kpi-value">${k.valor}</div></div>`).join('');
+    <div class="kpi-value">${k.valor}</div></div>`;
+}).join('');
 
 /* vagas e ocupação */
 document.getElementById('vagas').textContent = fmt(totVagas);
@@ -478,11 +481,12 @@ document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl
   const pc = v => (Math.round(v/totAl*1000)/10).toString().replace('.',',')+'%';
   const aee = Math.round(eeCount*0.55), apae = Math.round(eeCount*0.25), ceame = Math.max(0, eeCount-aee-apae);
   const row = (cor, label, val) => `<div class="aln-stat"><span class="as-l">${cor?`<span class="as-dot" style="background:${cor}"></span>`:''}${label}</span><span class="as-v"${cor?` style="color:${cor}"`:''}>${fmt(val)}</span></div>`;
+  const totalRow = (label, val, cor) => `<div class="aln-stat"><span class="as-l"><b>${label}</b></span><span class="as-v" style="color:${cor}">${fmt(val)}</span></div>`;
   const set=(id,html)=>{const el=document.getElementById(id); if(el) el.innerHTML=html;};
   set('alnTurno', [['Matutino','#12509A'],['Vespertino','#0EA5B5'],['Noturno','#6B3FA0'],['Integral','#F0B429']].map(([k,c])=>row(c,k,turno[k])).join(''));
-  set('alnEE', row('#6B3FA0','Total',eeCount) + row('','AEE',aee) + row('','APAE',apae) + row('','CEAME',ceame));
-  set('alnLoc', [['Urbana','#12509A'],['Campo','#6E8FB3'],['Indígena','#6B7A8F']].map(([k,c])=>row(c,k,loc[k])).join(''));
-  set('alnPend', row('#ED6939','Sem turma',semTurma) + row('#ED6939','Sem responsável',semResp) + row('#ED6939','Sem documentos',semDoc));
+  set('alnEE', totalRow('Total',eeCount,'#6B3FA0') + row('','AEE',aee) + row('','APAE',apae) + row('','CEAME',ceame));
+  set('alnLoc', totalRow('Total',totAl,'#12509A') + [['Urbana','#12509A'],['Campo','#6E8FB3'],['Indígena','#6B7A8F']].map(([k,c])=>row(c,k,loc[k])).join(''));
+  set('alnPend', totalRow('Total',semTurma+semResp+semDoc,'#ED6939') + row('#ED6939','Sem turma',semTurma) + row('#ED6939','Sem responsável',semResp) + row('#ED6939','Sem documentos',semDoc));
 })();
 
 /* Turmas — média de alunos por turma + organização (regulares × multisseriadas) */
@@ -514,7 +518,7 @@ document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl
   const ET = [
     { nome:'Educação Infantil', cor:'#6B3FA0', n:tInf },
     { nome:'Fundamental I',     cor:'#12509A', n:tF1 },
-    { nome:'Fundamental II',    cor:'#3DC200', n:tF2 },
+    { nome:'Fundamental II',    cor:'#16A34A', n:tF2 },
     { nome:'EJA I',             cor:'#F0B429', n:tEja1 },
     { nome:'EJA II',            cor:'#E8952A', n:tEja2 },
   ];
