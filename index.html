@@ -144,7 +144,7 @@
     .pend-val { font-family: var(--font-display); font-weight: 800; font-size: 26px; color: var(--laranja); line-height: 1; margin-top: 4px; }
     @media (max-width: 720px){ .pend-cards { grid-template-columns: 1fr; } }
     /* planos de aula por etapa/disciplina */
-    .plan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 10px; }
+    .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 24px; margin-top: 10px; }
     .plan-etapa { font-family: var(--font-display); font-weight: 800; font-size: 14px; color: var(--azul-escuro); margin-bottom: 6px; padding-bottom: 8px; border-bottom: 2px solid var(--azul-claro); display: flex; justify-content: space-between; align-items: baseline; }
     .plan-etapa .pe-tot { font-size: 12px; color: var(--texto-suave); font-weight: 600; }
     .disc-row { padding: 8px 2px; }
@@ -264,6 +264,23 @@
 
       <div class="grid-2" style="margin-top:20px;">
         <div class="panel">
+          <div class="section-head"><div class="section-title">Servidores por cargo</div><div class="section-hint">Com acesso ao sistema</div></div>
+          <div class="donut-wrap">
+            <div class="donut" id="donut"><div class="donut-center"><span class="dc-lbl">Servidores</span><span class="dc-val" id="donutTotal"></span></div></div>
+            <div class="donut-legend" id="donutLegend"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="section-head"><div class="section-title">Servidores por localidade</div><div class="section-hint">Distribuição na rede</div></div>
+          <div class="donut-wrap">
+            <div class="donut" id="donutLoc"><div class="donut-center"><span class="dc-lbl">Servidores</span><span class="dc-val" id="donutLocTotal"></span></div></div>
+            <div class="donut-legend" id="donutLocLegend"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:20px;">
+        <div class="panel">
           <div class="section-head"><div class="section-title">Vagas e matrículas</div><div class="section-hint">Rede municipal</div></div>
           <div class="vm">
             <div class="vm-block"><div class="vm-label">Vagas ofertadas na rede</div><div class="vm-num" id="vagas">34.560</div><div class="vm-sub" id="vmSub">nas 60 escolas do município</div></div>
@@ -313,26 +330,10 @@
         </div>
       </div>
 
-      <div class="grid-2" style="margin-top:20px;">
-        <div class="panel">
-          <div class="section-head"><div class="section-title">Servidores por cargo</div><div class="section-hint">Com acesso ao sistema</div></div>
-          <div class="donut-wrap">
-            <div class="donut" id="donut"><div class="donut-center"><span class="dc-lbl">Servidores</span><span class="dc-val" id="donutTotal"></span></div></div>
-            <div class="donut-legend" id="donutLegend"></div>
-          </div>
-        </div>
-        <div class="panel">
-          <div class="section-head"><div class="section-title">Servidores por localidade</div><div class="section-hint">Distribuição na rede</div></div>
-          <div class="donut-wrap">
-            <div class="donut" id="donutLoc"><div class="donut-center"><span class="dc-lbl">Servidores</span><span class="dc-val" id="donutLocTotal"></span></div></div>
-            <div class="donut-legend" id="donutLocLegend"></div>
-          </div>
-        </div>
-      </div>
-
       <div class="panel" style="margin-top:20px;">
         <div class="section-head"><div class="section-title">Planos de aula</div><div class="section-hint">Gerados pelos professores · <b id="planTot">—</b> no total</div></div>
         <div class="plan-grid">
+          <div><div class="plan-etapa"><span>Educação Infantil</span><span class="pe-tot" id="planInfTot"></span></div><div id="planInf"></div></div>
           <div><div class="plan-etapa"><span>Fundamental I</span><span class="pe-tot" id="planF1Tot"></span></div><div id="planF1"></div></div>
           <div><div class="plan-etapa"><span>Fundamental II</span><span class="pe-tot" id="planF2Tot"></span></div><div id="planF2"></div></div>
           <div><div class="plan-etapa"><span>EJA</span><span class="pe-tot" id="planEJATot"></span></div><div id="planEJA"></div></div>
@@ -548,6 +549,7 @@ document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl
 (function(){
   const seedFrom = str => { let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; };
   const ETAPAS = [
+    { id:'planInf', tot:'planInfTot', nome:'Educação Infantil', discs:['(EO) O eu, o outro e o nós','(CG) Corpo, gestos e movimentos','(TS) Traços, sons, cores e formas','(EF) Escuta, fala, pensamento e imaginação','(ET) Espaços, tempos, quantidades, relações, transformações','(CR) Culturas regionais'] },
     { id:'planF1', tot:'planF1Tot', nome:'Fundamental I', discs:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física','Ensino Religioso'] },
     { id:'planF2', tot:'planF2Tot', nome:'Fundamental II', discs:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física','Inglês','Ensino Religioso'] },
     { id:'planEJA', tot:'planEJATot', nome:'EJA', discs:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Inglês'] },
