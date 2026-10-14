@@ -264,17 +264,6 @@
 
       <div class="grid-2" style="margin-top:20px;">
         <div class="panel">
-          <div class="section-head"><div class="section-title">Top escolas com mais servidores</div><div class="section-hint">Maior quadro</div></div>
-          <div id="servMais" style="margin-top:8px;"></div>
-        </div>
-        <div class="panel">
-          <div class="section-head"><div class="section-title">Top escolas com menos servidores</div><div class="section-hint">Menor quadro</div></div>
-          <div id="servMenos" style="margin-top:8px;"></div>
-        </div>
-      </div>
-
-      <div class="grid-2" style="margin-top:20px;">
-        <div class="panel">
           <div class="section-head"><div class="section-title">Vagas e matrículas</div><div class="section-hint">Rede municipal</div></div>
           <div class="vm">
             <div class="vm-block"><div class="vm-label">Vagas ofertadas na rede</div><div class="vm-num" id="vagas">34.560</div><div class="vm-sub" id="vmSub">nas 60 escolas do município</div></div>
@@ -292,12 +281,6 @@
         </div>
       </div>
 
-      <div class="panel" style="margin-top:20px;">
-        <div class="section-head"><div class="section-title">Matrículas por etapa</div><div class="section-hint">Distribuição na rede</div></div>
-        <div class="comp-bar" id="compBar"></div>
-        <div class="comp-legend" id="compLegend"></div>
-      </div>
-
       <div class="grid-2" style="margin-top:20px;">
         <div class="panel">
           <div class="section-head"><div class="section-title">Alunos por turno</div><div class="section-hint">Distribuição na rede</div></div>
@@ -311,11 +294,6 @@
           </div>
           <div id="eeBreak"></div>
         </div>
-      </div>
-
-      <div class="panel" style="margin-top:20px;">
-        <div class="section-head"><div class="section-title">Frequência ao longo do ano</div></div>
-        <div id="lineChart"></div>
       </div>
 
       <div class="panel" style="margin-top:20px;">
@@ -444,55 +422,6 @@ const stops = CARGOS.map(c=>{ const a=acc/totCargo*100, b=(acc+c.n)/totCargo*100
 document.getElementById('donut').style.background = `conic-gradient(${stops})`;
 document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl-item"><span class="dl-dot" style="background:${c.cor}"></span><span class="dl-name">${c.nome}</span><span class="dl-num">${c.n}</span></div>`).join('');
 
-/* frequência ao longo do ano */
-(function(){
-  const BASE=[88.9,89.4,90.1,90.6,90.4,91.0,90.8,91.2], META=92;
-  const dl = freqMedia - 91.2;
-  const SERIE = BASE.map(v=> Math.round((v+dl)*10)/10);
-  const w=880,h=210,pl=34,pr=16,pt=16,pb=28, min=82,max=96,rg=max-min;
-  const meses=['jan','fev','mar','abr','mai','jun','jul','ago'];
-  const x=i=>pl+(i/(SERIE.length-1))*(w-pl-pr), y=v=>pt+(1-(v-min)/rg)*(h-pt-pb);
-  const pts=SERIE.map((v,i)=>`${x(i)},${y(v)}`).join(' '), metaY=y(META);
-  const lastBelow=SERIE[SERIE.length-1]<META;
-  document.getElementById('lineChart').innerHTML=`
-  <svg viewBox="0 0 ${w} ${h}" width="100%" role="img" aria-label="Frequência mensal de ${SERIE[0]}% a ${SERIE[SERIE.length-1]}%.">
-    ${[86,90,94].map(g=>`<line x1="${pl}" y1="${y(g)}" x2="${w-pr}" y2="${y(g)}" stroke="#E4E8EE"/><text x="4" y="${y(g)+4}" font-size="10" fill="#9AA1AB" font-family="Inter,sans-serif">${g}%</text>`).join('')}
-    <polyline points="${pts}" fill="none" stroke="#12509A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    ${SERIE.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="${i===SERIE.length-1?5:3}" fill="${i===SERIE.length-1&&lastBelow?'#ED6939':'#12509A'}"/>`).join('')}
-    ${meses.map((m,i)=>`<text x="${x(i)}" y="${h-8}" font-size="10" fill="#9AA1AB" text-anchor="middle" font-family="Inter,sans-serif">${m}</text>`).join('')}
-  </svg>`;
-})();
-
-/* Matrículas por etapa — barra de composição 100% */
-(function(){
-  const et = { inf:0, f1:0, f2:0, eja:0 };
-  E.forEach(e=>{
-    const cmei = e.cmei || /^CMEI/.test(e.nome) || /Creche/.test(e.etapas||'');
-    if(cmei){ et.inf += e.matriculas; return; }
-    let m = e.matriculas;
-    const temFin = /Anos finais/.test(e.etapas||'');
-    const temEJA = /EJA/.test(e.etapas||'');
-    if(temEJA){ const q = Math.round(m*0.09); et.eja += q; m -= q; }
-    if(temFin){ const q = Math.round(m*5/9); et.f1 += q; et.f2 += (m - q); }
-    else { et.f1 += m; }
-  });
-  const SEGS = [
-    { nome:'Educação Infantil', cor:'#6B3FA0', v:et.inf },
-    { nome:'Fundamental I',     cor:'#12509A', v:et.f1 },
-    { nome:'Fundamental II',    cor:'#3DC200', v:et.f2 },
-    { nome:'EJA',               cor:'#F0B429', v:et.eja },
-  ];
-  const tot = SEGS.reduce((s,x)=>s+x.v,0) || 1;
-  const pc = v => (Math.round(v/tot*1000)/10).toString().replace('.',',')+'%';
-  document.getElementById('compBar').innerHTML = SEGS.filter(s=>s.v>0).map(s=>{
-    const pct = s.v/tot*100;
-    return `<div class="comp-seg" style="width:${pct}%;background:${s.cor};" title="${s.nome}: ${pc(s.v)}"><span>${pct>=7?pc(s.v):''}</span></div>`;
-  }).join('');
-  document.getElementById('compLegend').innerHTML = SEGS.map(s=>
-    `<div class="comp-li"><span class="comp-dot" style="background:${s.cor}"></span><b>${s.nome}</b> <span class="cl-sub">${fmt(s.v)} · ${pc(s.v)}</span></div>`
-  ).join('');
-})();
-
 /* Matrículas — hoje (tempo real) + novas por mês (últimos 6 meses) */
 (function(){
   const meses = ['mar','abr','mai','jun','jul','ago'];
@@ -613,33 +542,6 @@ document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl
   const d = document.getElementById('donutLoc'); if(d) d.style.background = `conic-gradient(${stops})`;
   const dl = document.getElementById('donutLocLegend');
   if(dl) dl.innerHTML = LOC.map(c=>`<div class="dl-item"><span class="dl-dot" style="background:${c.cor}"></span><span class="dl-name">${c.nome}</span><span class="dl-num">${c.n}</span></div>`).join('');
-})();
-
-/* Servidores — Top 3 com mais × Top 3 com menos */
-(function(){
-  const sc = e => e.equipe ? (e.equipe.prof+e.equipe.coord+e.equipe.sec+e.equipe.direcao) : (e.servidores||0);
-  const loc = e => e.localidade || (e.modalidade==='Campo'?'Campo':e.modalidade==='Indígena'?'Indígena':'Urbana');
-  const arr = E.map(e=>({ e, n: sc(e) }));
-  const max = Math.max(...arr.map(a=>a.n), 1);
-  const mais = [...arr].sort((a,b)=>b.n-a.n).slice(0,3);
-  const menos = [...arr].sort((a,b)=>a.n-b.n).slice(0,3);
-  const MEDAL = ['#F0B429','#9AA1AB','#CD7F32'];
-  const render = (id, list) => {
-    const el = document.getElementById(id); if(!el) return;
-    el.innerHTML = list.map((x,i)=>{
-      const e=x.e;
-      return `<div class="rank-row" onclick="(window.top||window).location.href='horario.html'">
-        <div class="rank-pos" style="background:${MEDAL[i]}22;color:${MEDAL[i]}">${i+1}</div>
-        <div class="rank-main">
-          <div class="rank-nome">${e.nome}</div>
-          <div class="rank-sub">${loc(e)}</div>
-        </div>
-        <div class="rank-val" style="color:var(--texto)">${fmt(x.n)}<span style="font-size:11px;color:var(--texto-suave);font-weight:600;"> serv.</span></div>
-      </div>`;
-    }).join('');
-  };
-  render('servMais', mais);
-  render('servMenos', menos);
 })();
 
 /* Planos de aula por etapa/disciplina (gerados pelos professores) */
