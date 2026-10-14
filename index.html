@@ -154,6 +154,17 @@
     .disc-bar { height: 5px; background: var(--bg); border-radius: 4px; margin-top: 5px; overflow: hidden; }
     .disc-fill { height: 100%; background: linear-gradient(90deg, var(--azul), #22C3DC); border-radius: 4px; }
     @media (max-width: 720px){ .plan-grid { grid-template-columns: 1fr; } }
+    /* bloco Alunos — 4 cards */
+    .aln-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 12px; }
+    .aln-card { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio-sm); padding: 16px 18px; }
+    .aln-card-t { font-weight: 700; color: var(--texto); font-size: 13px; margin-bottom: 10px; }
+    .aln-stat { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--bg); }
+    .aln-stat:last-child { border-bottom: none; }
+    .aln-stat .as-l { font-size: 12px; color: var(--texto-suave); display: flex; align-items: center; gap: 7px; min-width: 0; }
+    .aln-stat .as-dot { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
+    .aln-stat .as-v { font-family: var(--font-display); font-weight: 800; font-size: 16px; line-height: 1; flex-shrink: 0; }
+    @media (max-width: 860px){ .aln-cards { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 520px){ .aln-cards { grid-template-columns: 1fr; } }
     /* cards "por escola" (lista expansível) */
     .esc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .esc-list { max-height: 150px; overflow-y: auto; margin-top: 6px; transition: max-height .25s ease; }
@@ -298,29 +309,14 @@
         </div>
       </div>
 
-      <div class="grid-2" style="margin-top:20px;">
-        <div class="panel">
-          <div class="section-head"><div class="section-title">Alunos por turno</div><div class="section-hint">Distribuição na rede</div></div>
-          <div class="turno-cards" id="turnoCards"></div>
-        </div>
-        <div class="panel">
-          <div class="section-head"><div class="section-title">Educação Especial</div><div class="section-hint" id="eePct">—</div></div>
-          <div style="display:flex;align-items:baseline;gap:10px;margin:8px 0 12px;">
-            <div class="vm-num" id="eeTot" style="color:#6B3FA0;">—</div>
-            <div class="vm-sub">alunos em acompanhamento</div>
-          </div>
-          <div id="eeBreak"></div>
-        </div>
-      </div>
-
       <div class="panel" style="margin-top:20px;">
-        <div class="section-head"><div class="section-title">Alunos por localidade</div><div class="section-hint">Distribuição na rede</div></div>
-        <div class="turno-cards" id="alLocCards" style="grid-template-columns:repeat(3,1fr);margin-top:12px;"></div>
-      </div>
-
-      <div class="panel" style="margin-top:20px;">
-        <div class="section-head"><div class="section-title">Alunos — pendências de cadastro</div><div class="section-hint">Precisam de regularização</div></div>
-        <div class="pend-cards" id="pendCards"></div>
+        <div class="section-head"><div class="section-title">Alunos</div><div class="section-hint">panorama da rede</div></div>
+        <div class="aln-cards">
+          <div class="aln-card"><div class="aln-card-t">Por turno</div><div id="alnTurno"></div></div>
+          <div class="aln-card"><div class="aln-card-t">Educação Especial</div><div id="alnEE"></div></div>
+          <div class="aln-card"><div class="aln-card-t">Por localidade</div><div id="alnLoc"></div></div>
+          <div class="aln-card"><div class="aln-card-t">Pendências de cadastro</div><div id="alnPend"></div></div>
+        </div>
       </div>
 
       <div class="grid-2" style="margin-top:20px;">
@@ -457,33 +453,36 @@ document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl
   ).join('');
 })();
 
-/* Alunos — pendências de cadastro (mesma regra da tela de Alunos) */
+/* Alunos — bloco único (turno · Educação Especial · localidade · pendências) */
 (function(){
   const seedFrom = str => { let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; };
-  let semTurma=0, semResp=0, semDoc=0;
-  E.forEach(e=>{ const n=e.matriculas||0; for(let i=0;i<n;i++){ const h=seedFrom(e.inep+'al'+i);
-    if(h%29===0) semTurma++;
-    if(h%23===0) semResp++;
-    if((h%17===0)||(h%23===0)||(h%13===0)) semDoc++;
-  }});
-  const CARDS = [
-    { l:'Alunos sem turma', v:semTurma, p:'<rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>' },
-    { l:'Alunos sem responsável', v:semResp, p:'<path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="11" cy="7" r="4"/><line x1="17" y1="8" x2="22" y2="13"/><line x1="22" y1="8" x2="17" y2="13"/>' },
-    { l:'Alunos sem documentos', v:semDoc, p:'<path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/>' },
-  ];
-  const el = document.getElementById('pendCards');
-  if(el) el.innerHTML = CARDS.map(c=>`<div class="pend-card"><div class="pend-ic">${svgIc(c.p)}</div><div><div class="pend-lbl">${c.l}</div><div class="pend-val">${fmt(c.v)}</div></div></div>`).join('');
-})();
-
-/* Alunos por localidade (Urbana/Campo/Indígena) */
-(function(){
+  const turno = {'Matutino':0,'Vespertino':0,'Noturno':0,'Integral':0};
   const loc = {'Urbana':0,'Campo':0,'Indígena':0};
-  E.forEach(e=>{ const l = e.localidade || (e.modalidade==='Campo'?'Campo':e.modalidade==='Indígena'?'Indígena':'Urbana'); loc[l] = (loc[l]||0) + (e.matriculas||0); });
-  const LOC = [ { nome:'Urbana', cor:'#12509A', n:loc['Urbana'] }, { nome:'Campo', cor:'#6E8FB3', n:loc['Campo'] }, { nome:'Indígena', cor:'#6B7A8F', n:loc['Indígena'] } ];
-  const tot = LOC.reduce((s,x)=>s+x.n,0) || 1;
-  const pc = v => (Math.round(v/tot*1000)/10).toString().replace('.',',')+'%';
-  const el = document.getElementById('alLocCards');
-  if(el) el.innerHTML = LOC.map(c=>`<div class="turno-card" style="background:linear-gradient(135deg, ${c.cor}26, ${c.cor}0d); border-color:${c.cor}33;"><div class="tc-top"><span class="tc-dot" style="background:${c.cor}"></span><span class="tc-lbl">${c.nome}</span></div><div class="tc-val" style="color:${c.cor}">${fmt(c.n)}</div><div class="tc-pct">${pc(c.n)} dos alunos</div></div>`).join('');
+  let eeCount=0, semTurma=0, semResp=0, semDoc=0;
+  E.forEach(e=>{
+    const l = e.localidade || (e.modalidade==='Campo'?'Campo':e.modalidade==='Indígena'?'Indígena':'Urbana');
+    loc[l] = (loc[l]||0) + (e.matriculas||0);
+    const cmei = e.cmei || /^CMEI/.test(e.nome) || /Creche/.test(e.etapas||'');
+    const temEJA = /EJA/.test(e.etapas||'');
+    const turnos = cmei ? ['Integral'] : (temEJA ? ['Matutino','Vespertino','Noturno'] : ['Matutino','Vespertino']);
+    const n = e.matriculas||0;
+    for(let i=0;i<n;i++){ const h=seedFrom(e.inep+'al'+i);
+      turno[turnos[h % turnos.length]]++;
+      if(h%33===0) eeCount++;
+      if(h%29===0) semTurma++;
+      if(h%23===0) semResp++;
+      if((h%17===0)||(h%23===0)||(h%13===0)) semDoc++;
+    }
+  });
+  const totAl = (loc['Urbana']+loc['Campo']+loc['Indígena']) || 1;
+  const pc = v => (Math.round(v/totAl*1000)/10).toString().replace('.',',')+'%';
+  const aee = Math.round(eeCount*0.55), apae = Math.round(eeCount*0.25), ceame = Math.max(0, eeCount-aee-apae);
+  const row = (cor, label, val) => `<div class="aln-stat"><span class="as-l">${cor?`<span class="as-dot" style="background:${cor}"></span>`:''}${label}</span><span class="as-v"${cor?` style="color:${cor}"`:''}>${fmt(val)}</span></div>`;
+  const set=(id,html)=>{const el=document.getElementById(id); if(el) el.innerHTML=html;};
+  set('alnTurno', [['Matutino','#12509A'],['Vespertino','#0EA5B5'],['Noturno','#6B3FA0'],['Integral','#F0B429']].map(([k,c])=>row(c,k,turno[k])).join(''));
+  set('alnEE', row('#6B3FA0','Total',eeCount) + row('','AEE',aee) + row('','APAE',apae) + row('','CEAME',ceame));
+  set('alnLoc', [['Urbana','#12509A'],['Campo','#6E8FB3'],['Indígena','#6B7A8F']].map(([k,c])=>row(c,k,loc[k])).join(''));
+  set('alnPend', row('#ED6939','Sem turma',semTurma) + row('#ED6939','Sem responsável',semResp) + row('#ED6939','Sem documentos',semDoc));
 })();
 
 /* Turmas — média de alunos por turma + organização (regulares × multisseriadas) */
@@ -605,43 +604,6 @@ function gerarRelatorio(tipo){
   const t = document.getElementById('toast');
   if(t){ t.textContent = 'Gerando relatório: ' + tipo + '…'; t.classList.add('show'); clearTimeout(_toastT); _toastT = setTimeout(()=>t.classList.remove('show'), 2800); }
 }
-
-/* Alunos — por turno + Educação Especial */
-(function(){
-  const seedFrom = str => { let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; };
-  const cont = {'Matutino':0,'Vespertino':0,'Noturno':0,'Integral':0};
-  let eeCount = 0;
-  E.forEach(e=>{
-    const cmei = e.cmei || /^CMEI/.test(e.nome) || /Creche/.test(e.etapas||'');
-    const temEJA = /EJA/.test(e.etapas||'');
-    const turnos = cmei ? ['Integral'] : (temEJA ? ['Matutino','Vespertino','Noturno'] : ['Matutino','Vespertino']);
-    const n = e.matriculas||0;
-    for(let i=0;i<n;i++){ const h=seedFrom(e.inep+'al'+i); cont[turnos[h % turnos.length]]++; if(h % 33 === 0) eeCount++; }
-  });
-  const TUR = [
-    { nome:'Matutino', cor:'#12509A', n:cont['Matutino'] },
-    { nome:'Vespertino', cor:'#0EA5B5', n:cont['Vespertino'] },
-    { nome:'Noturno', cor:'#6B3FA0', n:cont['Noturno'] },
-    { nome:'Integral', cor:'#F0B429', n:cont['Integral'] },
-  ];
-  const tot = TUR.reduce((s,x)=>s+x.n,0) || 1;
-  const pc = v => (Math.round(v/tot*1000)/10).toString().replace('.',',')+'%';
-  const tc = document.getElementById('turnoCards');
-  if(tc) tc.innerHTML = TUR.filter(c=>c.n>0).map(c=>
-    `<div class="turno-card" style="background:linear-gradient(135deg, ${c.cor}26, ${c.cor}0d); border-color:${c.cor}33;"><div class="tc-top"><span class="tc-dot" style="background:${c.cor}"></span><span class="tc-lbl">${c.nome}</span></div><div class="tc-val" style="color:${c.cor}">${fmt(c.n)}</div><div class="tc-pct">${pc(c.n)} dos alunos</div></div>`
-  ).join('');
-
-  // Educação Especial: mesma contagem da tela de Alunos (h%33); AEE 55% · APAE 25% · CEAME resto
-  const eeTot = eeCount;
-  const aee = Math.round(eeTot*0.55), apae = Math.round(eeTot*0.25), ceame = Math.max(0, eeTot-aee-apae);
-  const set=(id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v;};
-  set('eeTot', fmt(eeTot));
-  set('eePct', pct1(totAlunos ? eeTot/totAlunos*100 : 0) + ' dos alunos');
-  const eb = document.getElementById('eeBreak');
-  if(eb) eb.innerHTML = [['AEE — sala de recursos',aee],['APAE',apae],['CEAME',ceame]].map(r=>
-    `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bg);font-size:13px;color:var(--texto);"><span>${r[0]}</span><b>${fmt(r[1])}</b></div>`
-  ).join('');
-})();
 
 /* modo embutido (iframe no Início): esconde navegação e informa a altura à tela-pai */
 (function(){
