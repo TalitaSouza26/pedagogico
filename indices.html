@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Pedagógico — Índices</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; display: flex; height: 100vh; overflow: hidden; font-size: 13px; color: #333; }
+    .sidebar { display: flex; flex-direction: column; }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; }
+    .logo-img { width: 104px; height: auto; display: block; }
+    .nav { flex: 1 1 auto; }
+    .nav-item { display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background .15s; text-decoration: none; }
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .logout { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .logout svg { width: 16px; height: 16px; }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 12px; }
+    .user-info { text-align: right; }
+    .view-wrap { flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--branco); }
+    .content { padding: 26px 34px; }
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; margin: 4px 0 14px; gap: 12px; }
+    .section-title { font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--texto); }
+    .section-hint { font-size: 12px; color: var(--texto-suave); }
+    .panel { background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio); padding: 20px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 1000px){ .grid-2 { grid-template-columns: 1fr; } }
+    .help-btn { position: fixed; bottom: 20px; right: 20px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    /* grupos de índices */
+    .idx-group { font-family: var(--font-display); font-weight: 800; font-size: 19px; color: var(--texto); margin: 6px 0 14px; }
+    .idx-group small { display: block; font-family: 'Segoe UI', Arial, sans-serif; font-weight: 400; font-size: 12.5px; color: var(--texto-suave); margin-top: 2px; }
+    .idx-group.sep { margin-top: 34px; padding-top: 26px; border-top: 1px solid var(--borda); }
+    /* média de nota por disciplina / etapa */
+    .nota-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 24px; margin-top: 10px; }
+    .nota-etapa { font-family: var(--font-display); font-weight: 800; font-size: 14px; color: var(--azul-escuro); margin-bottom: 6px; padding-bottom: 8px; border-bottom: 2px solid var(--azul-claro); display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+    .nota-etapa .ne-med { font-size: 12px; color: var(--texto-suave); font-weight: 600; white-space: nowrap; }
+    .nota-etapa .ne-med b { font-family: var(--font-display); font-size: 14px; }
+    .nota-row { padding: 9px 2px; }
+    .nota-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; gap: 10px; }
+    .nota-top .nt-n { color: var(--texto); }
+    .nota-top .nt-v { font-family: var(--font-display); font-weight: 800; font-size: 15px; flex-shrink: 0; }
+    .nota-bar { height: 6px; background: var(--bg); border-radius: 4px; margin-top: 6px; overflow: hidden; }
+    .nota-fill { height: 100%; border-radius: 4px; }
+    .nota-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 16px; font-size: 12px; color: var(--texto-suave); }
+    .nota-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .nota-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+    /* média de nota — mapa de calor */
+    .heat { display: grid; grid-template-columns: minmax(150px, 1.5fr) repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+    .heat .hc { padding: 11px 12px; border-radius: 8px; font-size: 13px; }
+    .heat .hc-head { font-weight: 700; color: var(--texto-suave); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; padding: 4px 12px; }
+    .heat .hc-disc { font-weight: 600; color: var(--texto); display: flex; align-items: center; }
+    .heat .hc-val { text-align: center; font-family: var(--font-display); font-weight: 800; }
+    .heat .hc-na { text-align: center; color: #AEB6C0; background: var(--bg); }
+    /* frequência geral */
+    .freq-head { display: flex; align-items: baseline; gap: 12px; margin: 6px 0 14px; }
+    .fh-num { font-family: var(--font-display); font-weight: 800; font-size: 40px; color: var(--azul); line-height: 1; }
+    .fh-sub { font-size: 13px; color: var(--texto-suave); }
+    .freq-loc { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
+    .floc-card { background: var(--branco); border: 1px solid var(--borda); border-radius: 12px; padding: 14px 16px; }
+    .floc-top { display: flex; align-items: center; gap: 8px; }
+    .floc-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .floc-lbl { font-size: 12px; color: var(--texto-suave); font-weight: 700; }
+    .floc-val { font-family: var(--font-display); font-weight: 800; font-size: 22px; margin-top: 6px; line-height: 1; }
+    @media (max-width: 720px){ .freq-loc { grid-template-columns: 1fr; } }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+  </style>
+  <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="logo.png" alt="Rede Municipal" class="logo-img" />
+    <span class="portal-tag">Painel Pedagógico</span>
+  </div>
+  <nav class="nav">
+    <a href="inicio2.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg> Início</a>
+    <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
+    <a href="indices.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Índices</a>
+    <a href="turmas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/></svg> Escolas</a>
+    <a href="alunos.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Alunos</a>
+    <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Servidores</a>
+    <a href="calendario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendário</a>
+    <a href="comunicacao.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Comunicação</a>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 5.34L3.93 6.75M21 12h-2M5 12H3M19.07 19.07l-1.41-1.41M5.34 18.66l-1.41 1.41M12 19v2M12 3V1"/></svg> Configurações</div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sair da conta</div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <svg class="page-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <div><div class="topbar-title">Índices</div><div class="topbar-sub">Rede Municipal de Ensino · Porto Seguro/BA</div></div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-info"><div class="user-name">Ana Ribeiro</div><div class="user-role">Secretaria de Educação</div></div>
+      <div class="avatar">AR</div>
+    </div>
+  </div>
+
+  <div class="view-wrap">
+    <div class="content" id="content">
+      <div class="idx-group">Notas<small>Desempenho por disciplina e etapa</small></div>
+
+      <div class="panel">
+        <div class="section-head"><div class="section-title">Média de nota por disciplina</div></div>
+        <div class="nota-grid">
+          <div><div class="nota-etapa"><span>Fundamental I</span></div><div id="notaF1"></div></div>
+          <div><div class="nota-etapa"><span>Fundamental II</span></div><div id="notaF2"></div></div>
+          <div><div class="nota-etapa"><span>EJA</span></div><div id="notaEJA"></div></div>
+        </div>
+        <div class="nota-legend">
+          <span><i style="background:#16A34A"></i> Bom · 7,0 ou mais</span>
+          <span><i style="background:#F0B429"></i> Regular · 5,0 a 6,9</span>
+          <span><i style="background:#E24A3A"></i> Baixo · abaixo de 5,0</span>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:20px;">
+        <div class="section-head"><div class="section-title">Média de nota por disciplina</div></div>
+        <div class="heat" id="notaHeat"></div>
+        <div class="nota-legend" style="margin-top:16px;">
+          <span><i style="background:#16A34A"></i> Bom · 7,0 ou mais</span>
+          <span><i style="background:#F0B429"></i> Regular · 5,0 a 6,9</span>
+          <span><i style="background:#E24A3A"></i> Baixo · abaixo de 5,0</span>
+          <span><i style="background:#C4CCD6"></i> Não ofertada na etapa</span>
+        </div>
+      </div>
+
+      <div class="idx-group sep">Frequência<small>Presença dos alunos na rede</small></div>
+
+      <div class="panel">
+        <div class="section-head"><div class="section-title">Frequência geral da rede</div></div>
+        <div class="freq-head"><div class="fh-num" id="freqMed">—</div><div class="fh-sub">frequência média da rede</div></div>
+        <div id="freqLine"></div>
+        <div class="freq-loc" id="freqLoc"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="help-btn">?</div>
+
+<script src="perfil.js"></script>
+<script>
+const fmt = n => n.toLocaleString('pt-BR');
+const svgIc = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${p}</svg>`;
+const pct1 = v => (Math.round(v*10)/10).toString().replace('.',',')+'%';
+
+/* dados recortados pelo perfil ativo (prontos para montar a tela) */
+const E = escolasEmEscopo();
+const nEsc = E.length;
+const totAlunos = E.reduce((s,e)=>s+e.matriculas,0);
+const totVagas = E.reduce((s,e)=>s+e.vagas,0);
+const totTurmas = E.reduce((s,e)=>s+e.turmas,0);
+const totResp = E.reduce((s,e)=>s+e.responsaveis,0);
+const cg = E.reduce((a,e)=>{ a.prof+=e.equipe.prof; a.coord+=e.equipe.coord; a.sec+=e.equipe.sec; a.direcao+=e.equipe.direcao; return a; }, {prof:0,coord:0,sec:0,direcao:0});
+const totUsuarios = cg.prof+cg.coord+cg.sec+cg.direcao;
+
+/* Índice 1 — Média de nota por disciplina e por etapa */
+(function(){
+  const seedFrom = str => { let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; };
+  const dec = v => (Math.round(v*10)/10).toString().replace('.',',');
+  const corNota = n => n>=7 ? '#16A34A' : n>=5 ? '#F0B429' : '#E24A3A';
+  const ETAPAS = [
+    { id:'notaF1', nome:'Fundamental I', discs:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física','Ensino Religioso'] },
+    { id:'notaF2', nome:'Fundamental II', discs:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física','Inglês','Ensino Religioso'] },
+    { id:'notaEJA', nome:'EJA', discs:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Inglês'] },
+  ];
+  ETAPAS.forEach(et=>{
+    const rows = et.discs.map(d=>{ const nota = Math.round((4.6 + (seedFrom(et.nome+'|'+d) % 44)/10) * 10) / 10; return { d, nota }; });
+    const med = rows.reduce((s,r)=>s+r.nota,0) / rows.length;
+    const el = document.getElementById(et.id);
+    if(el) el.innerHTML = rows.map(r=>{ const c = corNota(r.nota); return `<div class="nota-row"><div class="nota-top"><span class="nt-n">${r.d}</span><span class="nt-v" style="color:${c}">${dec(r.nota)}</span></div><div class="nota-bar"><div class="nota-fill" style="width:${(r.nota*10).toFixed(0)}%;background:${c}"></div></div></div>`; }).join('');
+    const h = document.getElementById(et.id+'Med'); if(h){ h.textContent = dec(med); h.style.color = corNota(med); }
+  });
+})();
+
+/* Índice 1 (forma alternativa) — mapa de calor disciplina × etapa */
+(function(){
+  const seedFrom = str => { let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; };
+  const dec = v => (Math.round(v*10)/10).toString().replace('.',',');
+  const pal = n => n>=7 ? {bg:'#DEF4E6', fg:'#138A43'} : n>=5 ? {bg:'#FCEFCC', fg:'#9A7400'} : {bg:'#FBE2DE', fg:'#C33A2D'};
+  const grade = (etapa,disc) => Math.round((4.6 + (seedFrom(etapa+'|'+disc) % 44)/10) * 10) / 10;
+  const ETAPAS = [
+    { nome:'Fundamental I', discs:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física','Ensino Religioso'] },
+    { nome:'Fundamental II', discs:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física','Inglês','Ensino Religioso'] },
+    { nome:'EJA', discs:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Inglês'] },
+  ];
+  const ORDER = ['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física','Inglês','Ensino Religioso'];
+  let html = `<div class="hc hc-head">Disciplina</div><div class="hc hc-head" style="text-align:center">Fund. I</div><div class="hc hc-head" style="text-align:center">Fund. II</div><div class="hc hc-head" style="text-align:center">EJA</div>`;
+  ORDER.forEach(disc=>{
+    html += `<div class="hc hc-disc">${disc}</div>`;
+    ETAPAS.forEach(et=>{
+      if(et.discs.includes(disc)){ const n = grade(et.nome, disc); const p = pal(n); html += `<div class="hc hc-val" style="background:${p.bg};color:${p.fg}">${dec(n)}</div>`; }
+      else { html += `<div class="hc hc-na">—</div>`; }
+    });
+  });
+  const el = document.getElementById('notaHeat'); if(el) el.innerHTML = html;
+})();
+
+/* Índice 2 — Frequência geral da rede */
+(function(){
+  const dec = v => (Math.round(v*10)/10).toString().replace('.',',');
+  const freqMedia = nEsc ? E.reduce((s,e)=>s+e.freq,0)/nEsc : 0;
+  const fm = document.getElementById('freqMed'); if(fm) fm.textContent = dec(freqMedia)+'%';
+  // evolução no ano
+  const BASE=[88.9,89.4,90.1,90.6,90.4,91.0,90.8,91.2];
+  const dl = freqMedia - 91.2;
+  const SERIE = BASE.map(v=> Math.round((v+dl)*10)/10);
+  const w=880,h=200,pl=34,pr=16,pt=16,pb=28, min=82,max=96,rg=max-min;
+  const meses=['jan','fev','mar','abr','mai','jun','jul','ago'];
+  const x=i=>pl+(i/(SERIE.length-1))*(w-pl-pr), y=v=>pt+(1-(v-min)/rg)*(h-pt-pb);
+  const pts=SERIE.map((v,i)=>`${x(i)},${y(v)}`).join(' ');
+  const fl = document.getElementById('freqLine');
+  if(fl) fl.innerHTML=`<svg viewBox="0 0 ${w} ${h}" width="100%" role="img" aria-label="Frequência mensal da rede">
+    ${[86,90,94].map(g=>`<line x1="${pl}" y1="${y(g)}" x2="${w-pr}" y2="${y(g)}" stroke="#E4E8EE"/><text x="4" y="${y(g)+4}" font-size="10" fill="#9AA1AB" font-family="Inter,sans-serif">${g}%</text>`).join('')}
+    <polyline points="${pts}" fill="none" stroke="#12509A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${SERIE.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="${i===SERIE.length-1?5:3}" fill="#12509A"/>`).join('')}
+    ${meses.map((m,i)=>`<text x="${x(i)}" y="${h-8}" font-size="10" fill="#9AA1AB" text-anchor="middle" font-family="Inter,sans-serif">${m}</text>`).join('')}
+  </svg>`;
+  // por localidade (média ponderada por alunos)
+  const loc = {'Urbana':{s:0,w:0},'Campo':{s:0,w:0},'Indígena':{s:0,w:0}};
+  E.forEach(e=>{ const l = e.localidade || (e.modalidade==='Campo'?'Campo':e.modalidade==='Indígena'?'Indígena':'Urbana'); if(!loc[l]) loc[l]={s:0,w:0}; loc[l].s += e.freq*e.matriculas; loc[l].w += e.matriculas; });
+  const COR = {'Urbana':'#12509A','Campo':'#6E8FB3','Indígena':'#6B7A8F'};
+  const fo = document.getElementById('freqLoc');
+  if(fo) fo.innerHTML = Object.keys(loc).map(l=>{
+    const v = loc[l].w ? loc[l].s/loc[l].w : 0;
+    return `<div class="floc-card"><div class="floc-top"><span class="floc-dot" style="background:${COR[l]}"></span><span class="floc-lbl">${l}</span></div><div class="floc-val" style="color:${COR[l]}">${dec(v)}%</div></div>`;
+  }).join('');
+})();
+</script>
+
+</body>
+</html>
