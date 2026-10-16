@@ -658,6 +658,67 @@ function abrirFicha(inep, keepTab){
   const etapaArr = ETAPA_ORD.filter(x=>etapaMap[x]).map(x=>({ s:x, n:etapaMap[x], cor:ETAPA_COR[x] }));
   const etapaMax = Math.max(...etapaArr.map(x=>x.n), 1);
   const serieBars = etapaArr.map(x=>`<div class="srow"><span class="s-name">${x.s}</span><span class="s-track"><span class="s-fill" style="width:${Math.round(x.n/etapaMax*100)}%;background:${x.cor}"></span></span><span class="s-num">${fmt(x.n)}</span></div>`).join('');
+
+  /* ---- métricas da Visão geral, aplicadas à escola ---- */
+  const alunosEsc = alunosDaEscola(e);
+  const turnoCont = {};
+  alunosEsc.forEach(a=>{ turnoCont[a.turno] = (turnoCont[a.turno]||0)+1; });
+  const TURNO_COR = { 'Matutino':'#12509A','Vespertino':'#0EA5B5','Noturno':'#6B3FA0','Integral':'#F0B429' };
+  const turnoRows = Object.keys(turnoCont).map(t=>{ const c=TURNO_COR[t]||'#12509A'; return `<div class="eq-row"><span><span style="display:inline-block;width:9px;height:9px;border-radius:3px;background:${c};margin-right:8px;vertical-align:middle;"></span>${t}</span><b>${fmt(turnoCont[t])}</b></div>`; }).join('');
+  const semTurmaN = alunosEsc.filter(a=>!a.enturmado).length;
+  const semRespN = alunosEsc.filter(a=>!a.resp).length;
+  const semDocN = alunosEsc.filter(a=>a.doc==='Incompleta').length;
+  // média de nota por disciplina (não se aplica à Educação Infantil)
+  const ehInfantil = e.cmei || /Creche|Pré/.test(e.etapas);
+  const corNota = n => n>=7 ? '#16A34A' : n>=5 ? '#F0B429' : '#E24A3A';
+  let notaHtml;
+  if(!ehInfantil){
+    const discs = ['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física'];
+    if(/Anos finais/.test(e.etapas)) discs.push('Inglês');
+    discs.push('Ensino Religioso');
+    notaHtml = `<div class="card" style="margin-bottom:20px;"><div class="card-t">Média de nota por disciplina</div><div class="serie-list">` +
+      discs.map(dn=>{ const nota=Math.round((4.6 + (seedFrom(e.inep+'nt'+dn)%44)/10)*10)/10; const c=corNota(nota); return `<div class="srow"><span class="s-name">${dn}</span><span class="s-track"><span class="s-fill" style="width:${(nota/10*100).toFixed(0)}%;background:${c}"></span></span><span class="s-num" style="color:${c}">${nota.toFixed(1).replace('.',',')}</span></div>`; }).join('') +
+      `</div></div>`;
+  } else {
+    notaHtml = `<div class="card" style="margin-bottom:20px;"><div class="card-t">Avaliação — Educação Infantil</div><div style="font-size:13px;color:var(--texto-suave);">Avaliação por campos de experiência (sem nota numérica).</div></div>`;
+  }
+  // frequência ao longo do ano (ancorada na frequência da escola)
+  const freqAnoSvg = (function(){
+    const BASE=[88.9,89.4,90.1,90.6,90.4,91.0,90.8,91.2];
+    const dl = (e.freq||91) - 91.2;
+    const S = BASE.map(v=> Math.round((v+dl)*10)/10);
+    const w=760,h=180,pl=30,pr=14,pt=14,pb=26, mn=82,mx=98,rg=mx-mn;
+    const ms=['jan','fev','mar','abr','mai','jun','jul','ago'];
+    const X=i=>pl+(i/(S.length-1))*(w-pl-pr), Y=v=>pt+(1-(v-mn)/rg)*(h-pt-pb);
+    const pts=S.map((v,i)=>`${X(i)},${Y(v)}`).join(' ');
+    return `<svg viewBox="0 0 ${w} ${h}" width="100%" role="img" aria-label="Frequência mensal da escola">${[86,90,94].map(g=>`<line x1="${pl}" y1="${Y(g)}" x2="${w-pr}" y2="${Y(g)}" stroke="#E4E8EE"/><text x="2" y="${Y(g)+4}" font-size="10" fill="#9AA1AB" font-family="Inter,sans-serif">${g}%</text>`).join('')}<polyline points="${pts}" fill="none" stroke="#12509A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>${S.map((v,i)=>`<circle cx="${X(i)}" cy="${Y(v)}" r="${i===S.length-1?5:3}" fill="#12509A"/>`).join('')}${ms.map((m,i)=>`<text x="${X(i)}" y="${h-8}" font-size="10" fill="#9AA1AB" text-anchor="middle" font-family="Inter,sans-serif">${m}</text>`).join('')}</svg>`;
+  })();
+  // matrículas por mês (escola) — barras horizontais
+  const matMesHtml = (function(){
+    const ms2=['mar','abr','mai','jun','jul','ago'];
+    const base = Math.max(6, Math.round(e.matriculas*0.012));
+    const fac=[0.84,0.90,0.95,1.0,1.07,1.16];
+    const vals = fac.map((f,i)=> Math.round(base*f*(0.9 + (seedFrom(e.inep+'mm'+i)%20)/100)));
+    const mx = Math.max(...vals,1);
+    return `<div class="serie-list">` + vals.map((v,i)=>`<div class="srow"><span class="s-name">${ms2[i]}</span><span class="s-track"><span class="s-fill" style="width:${(v/mx*100).toFixed(0)}%;background:#12509A"></span></span><span class="s-num">${fmt(v)}</span></div>`).join('') + `</div>`;
+  })();
+  // planos de aula por disciplina (escola)
+  const planoDados = (function(){
+    let discs;
+    if(ehInfantil) discs = ['(EO) O eu, o outro e o nós','(CG) Corpo, gestos e movimentos','(TS) Traços, sons, cores e formas','(EF) Escuta, fala, pensamento e imaginação','(ET) Espaços, tempos, quantidades, relações, transformações','(CR) Culturas regionais'];
+    else { discs=['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física']; if(/Anos finais/.test(e.etapas)) discs.push('Inglês'); discs.push('Ensino Religioso'); }
+    const rows = discs.map(d=>({ d, n: 8 + seedFrom(e.inep+'pa'+d)%60 })).sort((a,b)=>b.n-a.n);
+    const mx = Math.max(...rows.map(r=>r.n),1), tot = rows.reduce((s,r)=>s+r.n,0);
+    return { tot, html:`<div class="serie-list">` + rows.map(r=>`<div class="srow"><span class="s-name">${r.d}</span><span class="s-track"><span class="s-fill" style="width:${(r.n/mx*100).toFixed(0)}%;background:#22A0C8"></span></span><span class="s-num">${fmt(r.n)}</span></div>`).join('') + `</div>` };
+  })();
+  const paneDesempenho = `
+    ${notaHtml}
+    <div class="card" style="margin-bottom:20px;"><div class="card-t">Frequência ao longo do ano</div>${freqAnoSvg}</div>
+    <div class="two">
+      <div class="card"><div class="card-t">Matrículas por mês</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">novas matrículas · últimos 6 meses</div>${matMesHtml}</div>
+      <div class="card"><div class="card-t">Planos de aula por disciplina</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">${fmt(planoDados.tot)} planos no total</div>${planoDados.html}</div>
+    </div>`;
+
   const paneInicio = `
     <div class="sch-stats">${dash.map(k=>`<div class="kcard"><div class="kcard-l"><div class="kic ic-${k.c}">${svgP(k.p,21)}</div><div><div class="klbl">${k.l}</div><div class="ksub">${k.s}</div></div></div><div class="kval">${k.v}</div></div>`).join('')}</div>
     <div class="two">
@@ -686,13 +747,17 @@ function abrirFicha(inep, keepTab){
     <div class="card" style="margin-bottom:20px;"><div class="card-t">Alunos por etapa</div>
       <div class="serie-list">${serieBars}</div>
     </div>
+    <div class="two">
+      <div class="card"><div class="card-t">Alunos por turno</div>${turnoRows}</div>
+      <div class="card"><div class="card-t">Pendências de cadastro</div>
+        <div class="eq-row"><span>Sem turma</span><b>${fmt(semTurmaN)}</b></div>
+        <div class="eq-row"><span>Sem responsável</span><b>${fmt(semRespN)}</b></div>
+        <div class="eq-row"><span>Sem documentos</span><b>${fmt(semDocN)}</b></div>
+      </div>
+    </div>
     <div class="fields">
       <div class="fld"><div class="fl">Etapas atendidas</div><div class="fv">${e.etapas}</div></div>
-      <div class="fld"><div class="fl">Modalidade</div><div class="fv">${e.modalidade}</div></div>
       <div class="fld"><div class="fl">Organização das turmas</div><div class="fv">${e.multisseriada ? 'Seriada e multisseriada' : 'Seriada (regular)'}</div></div>
-      <div class="fld"><div class="fl">Salas (no prédio)</div><div class="fv">${e.salas != null ? e.salas : '—'}</div></div>
-      <div class="fld"><div class="fl">Anexos</div><div class="fv">${e.anexos ? e.anexos : 'Nenhum'}</div></div>
-      <div class="fld"><div class="fl">Turnos</div><div class="fv">${turnosEsc}</div></div>
       <div class="fld"><div class="fl">Localidade</div><div class="fv">${e.localidade} · ${e.bairro}</div></div>
     </div>`;
 
@@ -757,6 +822,7 @@ function abrirFicha(inep, keepTab){
     </div>
     <div class="sheet-tabs">
       <button class="sheet-tab active" onclick="fichaTab(this,'inicio')">Início</button>
+      <button class="sheet-tab" onclick="fichaTab(this,'desempenho')">Desempenho</button>
       <button class="sheet-tab" onclick="fichaTab(this,'servidores')">Servidores</button>
       <button class="sheet-tab" onclick="fichaTab(this,'turmas')">Turmas</button>
       <button class="sheet-tab" onclick="fichaTab(this,'alunos')">Alunos</button>
@@ -764,6 +830,7 @@ function abrirFicha(inep, keepTab){
     </div>
     <div class="sheet-body">
       <div class="stabpane" data-pane="inicio">${paneInicio}</div>
+      <div class="stabpane" data-pane="desempenho" hidden>${paneDesempenho}</div>
       <div class="stabpane" data-pane="servidores" hidden>${paneServidores}</div>
       <div class="stabpane" data-pane="turmas" hidden>${paneTurmas}</div>
       <div class="stabpane" data-pane="alunos" hidden>${paneAlunos}</div>
