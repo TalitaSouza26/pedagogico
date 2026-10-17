@@ -83,6 +83,13 @@
     .acc-bars.dense .acc-lbl { font-size: 10px; }
     .mes-select { font-family: inherit; font-size: 13px; font-weight: 600; color: var(--azul-escuro); border: 1px solid var(--borda); border-radius: 8px; padding: 6px 12px; background: var(--branco); cursor: pointer; }
     .mes-select:focus { outline: none; border-color: var(--azul); }
+    .fet-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 12px; }
+    .fet-card { background: var(--branco); border: 1px solid var(--borda); border-top: 3px solid var(--azul); border-radius: 12px; padding: 16px; }
+    .fet-top { display: flex; align-items: center; gap: 8px; }
+    .fet-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .fet-lbl { font-size: 12px; color: var(--texto-suave); font-weight: 700; }
+    .fet-val { font-family: var(--font-display); font-weight: 800; font-size: 26px; margin-top: 12px; line-height: 1; }
+    @media (max-width: 720px){ .fet-grid { grid-template-columns: repeat(2, 1fr); } }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
   </style>
   <link rel="stylesheet" href="theme.css" />
@@ -166,6 +173,11 @@
         <div class="section-head"><div class="section-title">Frequência mensal</div><div class="section-hint">Média por mês · ano letivo</div></div>
         <div class="freq-head"><div class="fh-num" id="freqMed">—</div><div class="fh-sub">média diária da rede em 2026</div></div>
         <div class="acc-bars" id="freqMesBars"></div>
+      </div>
+
+      <div class="panel" style="margin-top:20px;">
+        <div class="section-head"><div class="section-title">Frequência por etapa</div><div class="section-hint">Média do ano letivo</div></div>
+        <div class="fet-grid" id="freqEtapa"></div>
       </div>
     </div>
   </div>
@@ -302,6 +314,21 @@ const totUsuarios = cg.prof+cg.coord+cg.sec+cg.direcao;
     const meses = []; for(let m=3;m<=11;m++) meses.push(m);
     host.innerHTML = meses.map(m=>{ const v = Math.round(mediaMes(m)*10)/10;
       return `<div class="acc-col" title="${MESNOME[m]}: ${dec(v)}% de presença"><div class="acc-bar" style="height:${barH(v)}%"><span class="acc-bar-val">${dec(v)}%</span></div><span class="acc-lbl">${MESCURTO[m]}</span></div>`;
+    }).join('');
+  })();
+
+  // --- Frequência por etapa (média do ano) ---
+  (function(){
+    const host = document.getElementById('freqEtapa'); if(!host) return;
+    const ET = [
+      { nome:'Educação Infantil', off:-1.4, cor:'#6B3FA0' },
+      { nome:'Fundamental I', off:0.6, cor:'#12509A' },
+      { nome:'Fundamental II', off:-0.4, cor:'#2E8B00' },
+      { nome:'EJA I', off:-2.0, cor:'#F0B429' },
+      { nome:'EJA II', off:-2.7, cor:'#E8952A' },
+    ];
+    host.innerHTML = ET.map(e=>{ const v = Math.round((freqMedia + e.off)*10)/10;
+      return `<div class="fet-card" style="border-top-color:${e.cor}"><div class="fet-top"><span class="fet-dot" style="background:${e.cor}"></span><span class="fet-lbl">${e.nome}</span></div><div class="fet-val" style="color:${e.cor}">${dec(v)}%</div></div>`;
     }).join('');
   })();
 
