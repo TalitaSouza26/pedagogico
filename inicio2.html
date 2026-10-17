@@ -671,13 +671,21 @@ function abrirFicha(inep, keepTab){
   // média de nota por disciplina (não se aplica à Educação Infantil)
   const ehInfantil = e.cmei || /Creche|Pré/.test(e.etapas);
   const corNota = n => n>=5 ? '#16A34A' : '#E24A3A';
+  // disciplinas ofertadas pela escola (base comum + parte diversificada da rede)
+  const _temFinais = /final|finais/i.test(e.etapas);
+  const _temIniciais = /inicia/i.test(e.etapas) || !_temFinais;
+  const _campoInd = e.localidade==='Campo' || e.localidade==='Indígena';
+  const ORDER_DISC = ['Língua Portuguesa','Leitura e Produção de Texto','Língua Inglesa','Língua Patxôhã','Matemática','Ciências','História','História de Porto Seguro','Geografia','Diversidade Afrodescendente e Indígena','Agroecologia','Arte','Educação Física','Ensino Religioso'];
+  const discsEsc = ORDER_DISC.filter(d => {
+    if(d==='Leitura e Produção de Texto') return _temIniciais;
+    if(d==='Língua Inglesa') return _temFinais;
+    if(d==='Língua Patxôhã' || d==='Agroecologia') return _campoInd;
+    return true;
+  });
   let notaHtml;
   if(!ehInfantil){
-    const discs = ['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física'];
-    if(/Anos finais/.test(e.etapas)) discs.push('Inglês');
-    discs.push('Ensino Religioso');
     notaHtml = `<div class="card" style="margin-bottom:20px;"><div class="card-t">Média de nota por disciplina</div><div class="serie-list">` +
-      discs.map(dn=>{ const nota=Math.round((4.6 + (seedFrom(e.inep+'nt'+dn)%44)/10)*10)/10; const c=corNota(nota); return `<div class="srow"><span class="s-name">${dn}</span><span class="s-track"><span class="s-fill" style="width:${(nota/10*100).toFixed(0)}%;background:${c}"></span></span><span class="s-num" style="color:${c}">${nota.toFixed(1).replace('.',',')}</span></div>`; }).join('') +
+      discsEsc.map(dn=>{ const nota=Math.round((4.6 + (seedFrom(e.inep+'nt'+dn)%44)/10)*10)/10; const c=corNota(nota); return `<div class="srow"><span class="s-name">${dn}</span><span class="s-track"><span class="s-fill" style="width:${(nota/10*100).toFixed(0)}%;background:${c}"></span></span><span class="s-num" style="color:${c}">${nota.toFixed(1).replace('.',',')}</span></div>`; }).join('') +
       `</div></div>`;
   } else {
     notaHtml = `<div class="card" style="margin-bottom:20px;"><div class="card-t">Avaliação — Educação Infantil</div><div style="font-size:13px;color:var(--texto-suave);">Avaliação por campos de experiência (sem nota numérica).</div></div>`;
@@ -706,7 +714,7 @@ function abrirFicha(inep, keepTab){
   const planoDados = (function(){
     let discs;
     if(ehInfantil) discs = ['(EO) O eu, o outro e o nós','(CG) Corpo, gestos e movimentos','(TS) Traços, sons, cores e formas','(EF) Escuta, fala, pensamento e imaginação','(ET) Espaços, tempos, quantidades, relações, transformações','(CR) Culturas regionais'];
-    else { discs=['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física']; if(/Anos finais/.test(e.etapas)) discs.push('Inglês'); discs.push('Ensino Religioso'); }
+    else discs = discsEsc;
     const rows = discs.map(d=>({ d, n: 8 + seedFrom(e.inep+'pa'+d)%60 })).sort((a,b)=>b.n-a.n);
     const mx = Math.max(...rows.map(r=>r.n),1), tot = rows.reduce((s,r)=>s+r.n,0);
     return { tot, html:`<div class="serie-list">` + rows.map(r=>`<div class="srow"><span class="s-name">${r.d}</span><span class="s-track"><span class="s-fill" style="width:${(r.n/mx*100).toFixed(0)}%;background:#22A0C8"></span></span><span class="s-num">${fmt(r.n)}</span></div>`).join('') + `</div>` };

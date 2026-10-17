@@ -589,11 +589,12 @@ document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl
 /* Planos de aula por etapa/disciplina (gerados pelos professores) */
 (function(){
   const seedFrom = str => { let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; };
+  const BASE_COMUM = ['Língua Portuguesa','Matemática','Ciências','História','História de Porto Seguro','Geografia','Diversidade Afrodescendente e Indígena','Arte','Educação Física','Ensino Religioso','Língua Patxôhã','Agroecologia'];
   const ETAPAS = [
     { id:'planInf', tot:'planInfTot', nome:'Educação Infantil', discs:['(EO) O eu, o outro e o nós','(CG) Corpo, gestos e movimentos','(TS) Traços, sons, cores e formas','(EF) Escuta, fala, pensamento e imaginação','(ET) Espaços, tempos, quantidades, relações, transformações','(CR) Culturas regionais'] },
-    { id:'planF1', tot:'planF1Tot', nome:'Fundamental I', discs:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física','Ensino Religioso'] },
-    { id:'planF2', tot:'planF2Tot', nome:'Fundamental II', discs:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física','Inglês','Ensino Religioso'] },
-    { id:'planEJA', tot:'planEJATot', nome:'EJA', discs:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Inglês'] },
+    { id:'planF1', tot:'planF1Tot', nome:'Fundamental I', discs:[...BASE_COMUM,'Leitura e Produção de Texto'] },
+    { id:'planF2', tot:'planF2Tot', nome:'Fundamental II', discs:[...BASE_COMUM,'Língua Inglesa'] },
+    { id:'planEJA', tot:'planEJATot', nome:'EJA', discs:[...BASE_COMUM,'Leitura e Produção de Texto','Língua Inglesa'] },
   ];
   let total = 0;
   ETAPAS.forEach(E2=>{

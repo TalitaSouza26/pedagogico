@@ -49,7 +49,8 @@
     .nota-legend span { display: inline-flex; align-items: center; gap: 6px; }
     .nota-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
     /* média de nota — mapa de calor */
-    .heat { display: grid; grid-template-columns: minmax(130px, 1.4fr) repeat(5, 1fr) 20px repeat(4, 1fr) 20px repeat(2, 1fr); gap: 5px; margin-top: 10px; }
+    .heat-sub { font-family: var(--font-display); font-weight: 800; font-size: 13px; color: var(--laranja); text-transform: uppercase; letter-spacing: .04em; margin-top: 14px; }
+    .heat { display: grid; grid-template-columns: minmax(170px, 1.7fr) repeat(5, 1fr) 20px repeat(4, 1fr); gap: 5px; margin-top: 10px; }
     .heat .hc { padding: 10px 6px; border-radius: 7px; font-size: 12.5px; }
     .heat .hc-gap { position: relative; }
     .heat .hc-gap::after { content: ''; position: absolute; top: 2px; bottom: 2px; left: 50%; transform: translateX(-50%); width: 1px; background: var(--borda); }
@@ -77,6 +78,11 @@
     .acc-col:hover .acc-bar { filter: brightness(1.06); }
     .acc-bar-val { position: absolute; top: -18px; left: 0; right: 0; text-align: center; font-family: var(--font-display); font-size: 11.5px; font-weight: 700; color: var(--texto-suave); }
     .acc-lbl { font-size: 12px; color: var(--texto-suave); }
+    .acc-bars.dense { gap: 5px; }
+    .acc-bars.dense .acc-bar { border-radius: 5px 5px 3px 3px; }
+    .acc-bars.dense .acc-lbl { font-size: 10px; }
+    .mes-select { font-family: inherit; font-size: 13px; font-weight: 600; color: var(--azul-escuro); border: 1px solid var(--borda); border-radius: 8px; padding: 6px 12px; background: var(--branco); cursor: pointer; }
+    .mes-select:focus { outline: none; border-color: var(--azul); }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
   </style>
   <link rel="stylesheet" href="theme.css" />
@@ -123,10 +129,10 @@
       <div class="panel">
         <div class="section-head"><div class="section-title">Média de nota por disciplina</div></div>
         <div class="nota-grid">
-          <div><div class="nota-etapa"><span>Fundamental I</span></div><div id="notaF1"></div></div>
-          <div><div class="nota-etapa"><span>Fundamental II</span></div><div id="notaF2"></div></div>
-          <div><div class="nota-etapa"><span>EJA I</span></div><div id="notaEJA1"></div></div>
-          <div><div class="nota-etapa"><span>EJA II</span></div><div id="notaEJA2"></div></div>
+          <div><div class="nota-etapa"><span>Fundamental I</span><span class="ne-med">1º ao 5º ano</span></div><div id="notaF1"></div></div>
+          <div><div class="nota-etapa"><span>Fundamental II</span><span class="ne-med">6º ao 9º ano</span></div><div id="notaF2"></div></div>
+          <div><div class="nota-etapa"><span>EJA I</span><span class="ne-med">anos iniciais · 1º ao 5º</span></div><div id="notaEJA1"></div></div>
+          <div><div class="nota-etapa"><span>EJA II</span><span class="ne-med">anos finais · 6º ao 9º</span></div><div id="notaEJA2"></div></div>
         </div>
         <div class="nota-legend">
           <span><i style="background:#16A34A"></i> Bom · 5,0 ou mais</span>
@@ -136,7 +142,10 @@
 
       <div class="panel" style="margin-top:20px;">
         <div class="section-head"><div class="section-title">Média de nota por disciplina e série</div></div>
-        <div class="heat" id="notaHeat"></div>
+        <div class="heat-sub">Ensino Fundamental</div>
+        <div class="heat" id="notaHeatFund"></div>
+        <div class="heat-sub" style="margin-top:22px;">EJA — Educação de Jovens e Adultos</div>
+        <div class="heat" id="notaHeatEja"></div>
         <div class="nota-legend" style="margin-top:16px;">
           <span><i style="background:#16A34A"></i> Bom · 5,0 ou mais</span>
           <span><i style="background:#E24A3A"></i> Baixo · abaixo de 5,0</span>
@@ -147,10 +156,16 @@
       <div class="idx-group sep">Frequência<small>Presença dos alunos na rede</small></div>
 
       <div class="panel">
-        <div class="section-head"><div class="section-title">Frequência da rede</div><div class="section-hint">Ano letivo atual · por mês</div></div>
-        <div class="freq-head"><div class="fh-num" id="freqMed">—</div><div class="fh-sub">frequência média da rede em 2026</div></div>
-        <div class="acc-bars" id="freqBars"></div>
+        <div class="section-head"><div class="section-title">Frequência diária</div><div class="section-hint">Últimos dias letivos da rede</div></div>
+        <div class="freq-head"><div class="fh-num" id="freqMed">—</div><div class="fh-sub">média diária da rede</div></div>
+        <div class="acc-bars" id="freqDiaBars"></div>
         <div class="freq-loc" id="freqLoc"></div>
+      </div>
+
+      <div class="panel" style="margin-top:20px;">
+        <div class="section-head"><div class="section-title">Frequência mensal</div><select class="mes-select" id="mesSel" aria-label="Selecionar mês"></select></div>
+        <div class="freq-head"><div class="fh-num" id="freqMesMed">—</div><div class="fh-sub" id="freqMesSub">média do mês</div></div>
+        <div class="acc-bars dense" id="freqMesBars"></div>
       </div>
     </div>
   </div>
@@ -179,11 +194,15 @@ const totUsuarios = cg.prof+cg.coord+cg.sec+cg.direcao;
   const seedFrom = str => { let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; };
   const dec = v => (Math.round(v*10)/10).toString().replace('.',',');
   const corNota = n => n>=5 ? '#16A34A' : '#E24A3A';
+  const BASE_COMUM = ['Língua Portuguesa','Matemática','Ciências','História','História de Porto Seguro','Geografia','Diversidade Afrodescendente e Indígena','Arte','Educação Física','Ensino Religioso','Língua Patxôhã','Agroecologia'];
+  const ORDER = ['Língua Portuguesa','Leitura e Produção de Texto','Língua Inglesa','Língua Patxôhã','Matemática','Ciências','História','História de Porto Seguro','Geografia','Diversidade Afrodescendente e Indígena','Agroecologia','Arte','Educação Física','Ensino Religioso'];
+  const INICIAIS = ORDER.filter(d=> BASE_COMUM.includes(d) || d==='Leitura e Produção de Texto');
+  const FINAIS = ORDER.filter(d=> BASE_COMUM.includes(d) || d==='Língua Inglesa');
   const ETAPAS = [
-    { id:'notaF1', nome:'Fundamental I', discs:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física','Ensino Religioso'] },
-    { id:'notaF2', nome:'Fundamental II', discs:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física','Inglês','Ensino Religioso'] },
-    { id:'notaEJA1', nome:'EJA I', discs:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte'] },
-    { id:'notaEJA2', nome:'EJA II', discs:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Inglês'] },
+    { id:'notaF1', nome:'Fundamental I', discs:INICIAIS },
+    { id:'notaF2', nome:'Fundamental II', discs:FINAIS },
+    { id:'notaEJA1', nome:'EJA I', discs:INICIAIS },
+    { id:'notaEJA2', nome:'EJA II', discs:FINAIS },
   ];
   ETAPAS.forEach(et=>{
     const rows = et.discs.map(d=>{ const nota = Math.round((4.6 + (seedFrom(et.nome+'|'+d) % 44)/10) * 10) / 10; return { d, nota }; });
@@ -200,57 +219,91 @@ const totUsuarios = cg.prof+cg.coord+cg.sec+cg.direcao;
   const dec = v => (Math.round(v*10)/10).toString().replace('.',',');
   const pal = n => n>=5 ? {bg:'#DEF4E6', fg:'#138A43'} : {bg:'#FBE2DE', fg:'#C33A2D'};
   const grade = (serie,disc) => Math.round((4.6 + (seedFrom(serie+'|'+disc) % 44)/10) * 10) / 10;
-  const DISC_ETAPA = {
-    'Fundamental I': ['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física','Ensino Religioso'],
-    'Fundamental II': ['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física','Inglês','Ensino Religioso'],
-    'EJA I': ['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte'],
-    'EJA II': ['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Inglês'],
-  };
-  const GROUPS = [
+  const BASE_COMUM = ['Língua Portuguesa','Matemática','Ciências','História','História de Porto Seguro','Geografia','Diversidade Afrodescendente e Indígena','Arte','Educação Física','Ensino Religioso','Língua Patxôhã','Agroecologia'];
+  const INICIAIS = [...BASE_COMUM, 'Leitura e Produção de Texto'];
+  const FINAIS = [...BASE_COMUM, 'Língua Inglesa'];
+  const DISC_ETAPA = { 'Fundamental I':INICIAIS, 'Fundamental II':FINAIS, 'EJA I':INICIAIS, 'EJA II':FINAIS };
+  const ORDER = ['Língua Portuguesa','Leitura e Produção de Texto','Língua Inglesa','Língua Patxôhã','Matemática','Ciências','História','História de Porto Seguro','Geografia','Diversidade Afrodescendente e Indígena','Agroecologia','Arte','Educação Física','Ensino Religioso'];
+  const FUND = [
     { nome:'Fundamental I', cols:[['1º','Fundamental I'],['2º','Fundamental I'],['3º','Fundamental I'],['4º','Fundamental I'],['5º','Fundamental I']] },
     { nome:'Fundamental II', cols:[['6º','Fundamental II'],['7º','Fundamental II'],['8º','Fundamental II'],['9º','Fundamental II']] },
-    { nome:'EJA', cols:[['EJA I','EJA I'],['EJA II','EJA II']] },
   ];
-  const ORDER = ['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física','Inglês','Ensino Religioso'];
-  const last = GROUPS.length-1;
-  // linha de grupos (etapa)
-  let html = `<div class="hc hc-group"></div>`;
-  GROUPS.forEach((g,gi)=>{ html += `<div class="hc hc-group" style="grid-column:span ${g.cols.length}">${g.nome}</div>`; if(gi<last) html += `<div class="hc-gap"></div>`; });
-  // linha de séries
-  html += `<div class="hc hc-head hc-disc-head">Disciplina</div>`;
-  GROUPS.forEach((g,gi)=>{ g.cols.forEach(c=> html += `<div class="hc hc-head">${c[0]}</div>`); if(gi<last) html += `<div class="hc-gap"></div>`; });
-  // linhas de disciplinas
-  ORDER.forEach(disc=>{
-    html += `<div class="hc hc-disc">${disc}</div>`;
-    GROUPS.forEach((g,gi)=>{
-      g.cols.forEach(c=>{
-        const etapa = c[1];
-        if(DISC_ETAPA[etapa].includes(disc)){ const n = grade(c[0]+'·'+etapa, disc); const p = pal(n); html += `<div class="hc hc-val" style="background:${p.bg};color:${p.fg}" title="${disc} · ${etapa}${c[0].startsWith('EJA')?'':' · '+c[0]+' ano'}">${dec(n)}</div>`; }
-        else { html += `<div class="hc hc-na">—</div>`; }
+  const EJA = [
+    { nome:'EJA I', cols:[['1º','EJA I'],['2º','EJA I'],['3º','EJA I'],['4º','EJA I'],['5º','EJA I']] },
+    { nome:'EJA II', cols:[['6º','EJA II'],['7º','EJA II'],['8º','EJA II'],['9º','EJA II']] },
+  ];
+  const buildHeat = groups => {
+    const last = groups.length-1;
+    let html = `<div class="hc hc-group"></div>`;
+    groups.forEach((g,gi)=>{ html += `<div class="hc hc-group" style="grid-column:span ${g.cols.length}">${g.nome}</div>`; if(gi<last) html += `<div class="hc-gap"></div>`; });
+    html += `<div class="hc hc-head hc-disc-head">Disciplina</div>`;
+    groups.forEach((g,gi)=>{ g.cols.forEach(c=> html += `<div class="hc hc-head">${c[0]}</div>`); if(gi<last) html += `<div class="hc-gap"></div>`; });
+    ORDER.forEach(disc=>{
+      html += `<div class="hc hc-disc">${disc}</div>`;
+      groups.forEach((g,gi)=>{
+        g.cols.forEach(c=>{
+          const etapa = c[1];
+          if(DISC_ETAPA[etapa].includes(disc)){ const n = grade(c[0]+'·'+etapa, disc); const p = pal(n); html += `<div class="hc hc-val" style="background:${p.bg};color:${p.fg}" title="${disc} · ${etapa} · ${c[0]} ano">${dec(n)}</div>`; }
+          else { html += `<div class="hc hc-na">—</div>`; }
+        });
+        if(gi<last) html += `<div class="hc-gap"></div>`;
       });
-      if(gi<last) html += `<div class="hc-gap"></div>`;
     });
-  });
-  const el = document.getElementById('notaHeat'); if(el) el.innerHTML = html;
+    return html;
+  };
+  const ef = document.getElementById('notaHeatFund'); if(ef) ef.innerHTML = buildHeat(FUND);
+  const ee = document.getElementById('notaHeatEja'); if(ee) ee.innerHTML = buildHeat(EJA);
 })();
 
-/* Índice 2 — Frequência geral da rede */
+/* Índice 2 — Frequência: diária + mensal (por mês selecionado) */
 (function(){
   const dec = v => (Math.round(v*10)/10).toString().replace('.',',');
+  const seedFrom = str => { let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; };
   const freqMedia = nEsc ? E.reduce((s,e)=>s+e.freq,0)/nEsc : 0;
   const fm = document.getElementById('freqMed'); if(fm) fm.textContent = dec(freqMedia)+'%';
   const dl = freqMedia - 91.2;
-  const floor = 82, top = 96;
+  const floor = 82, top = 96, ano = 2026;
   const barH = v => Math.max(8, Math.min(100, Math.round((v-floor)/(top-floor)*100)));
+  const MESNOME = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  const MESCURTO = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const MBASE = {3:90.6,4:90.4,5:91.0,6:90.8,7:91.2,8:91.5,9:91.3,10:91.8,11:92.0};
+  const ehLetivo = d => { const w = d.getDay(); return w>=1 && w<=5; };
+  const freqDia = d => {
+    const dow = d.getDay();
+    let fac = 0; if(dow===1) fac = -1.0; else if(dow===5) fac = -1.6; // segundas e sextas um pouco menores
+    const base = (MBASE[d.getMonth()] != null ? MBASE[d.getMonth()] : 91.0) + dl + fac;
+    const noise = ((seedFrom('fd'+d.getMonth()+'_'+d.getDate())%26)/10) - 1.2;
+    return Math.round((base+noise)*10)/10;
+  };
 
-  // frequência por mês do ano atual — barras (como matrículas por mês)
-  const BASE=[90.6,90.4,91.0,90.8,91.2,91.5,91.3,91.8,92.0];
-  const SERIE = BASE.map(v=> Math.round((v+dl)*10)/10);
-  const meses=['abr','mai','jun','jul','ago','set','out','nov','dez'];
-  const fb = document.getElementById('freqBars');
-  if(fb) fb.innerHTML = SERIE.map((v,i)=>
-    `<div class="acc-col" title="${meses[i]}: ${dec(v)}% de presença"><div class="acc-bar" style="height:${barH(v)}%"><span class="acc-bar-val">${dec(v)}%</span></div><span class="acc-lbl">${meses[i]}</span></div>`
-  ).join('');
+  // --- Frequência diária: últimos 15 dias letivos até a data do painel (06/08/2026) ---
+  (function(){
+    const host = document.getElementById('freqDiaBars'); if(!host) return;
+    const fim = new Date(ano,7,6), dias = []; let cur = new Date(fim);
+    while(dias.length < 15){ if(ehLetivo(cur)) dias.unshift(new Date(cur)); cur.setDate(cur.getDate()-1); }
+    host.innerHTML = dias.map(d=>{ const v = freqDia(d);
+      return `<div class="acc-col" title="${d.getDate()}/${MESCURTO[d.getMonth()]}: ${dec(v)}% de presença"><div class="acc-bar" style="height:${barH(v)}%"><span class="acc-bar-val">${dec(v)}%</span></div><span class="acc-lbl">${d.getDate()}/${d.getMonth()+1}</span></div>`;
+    }).join('');
+  })();
+
+  // --- Frequência mensal: dropdown de mês -> dias letivos do mês ---
+  (function(){
+    const sel = document.getElementById('mesSel'), host = document.getElementById('freqMesBars'); if(!sel||!host) return;
+    for(let m=3;m<=11;m++){ const o = document.createElement('option'); o.value = m; o.textContent = MESNOME[m].charAt(0).toUpperCase()+MESNOME[m].slice(1); sel.appendChild(o); }
+    const render = m => {
+      const d = new Date(ano,m,1), dias = [];
+      while(d.getMonth()===m){ if(ehLetivo(d)) dias.push(new Date(d)); d.setDate(d.getDate()+1); }
+      const vals = dias.map(freqDia), med = vals.reduce((s,v)=>s+v,0)/(vals.length||1);
+      document.getElementById('freqMesMed').textContent = dec(med)+'%';
+      document.getElementById('freqMesSub').textContent = `média de ${MESNOME[m]} · ${dias.length} dias letivos`;
+      host.innerHTML = dias.map((dd,i)=>{ const v = vals[i];
+        return `<div class="acc-col" title="${dd.getDate()}/${MESCURTO[m]}: ${dec(v)}% de presença"><div class="acc-bar" style="height:${barH(v)}%"></div><span class="acc-lbl">${dd.getDate()}</span></div>`;
+      }).join('');
+    };
+    sel.value = 7; render(7); // agosto (mês da data do painel)
+    sel.addEventListener('change', e => render(+e.target.value));
+  })();
+
   // por localidade (média ponderada por alunos)
   const loc = {'Urbana':{s:0,w:0},'Campo':{s:0,w:0},'Indígena':{s:0,w:0}};
   E.forEach(e=>{ const l = e.localidade || (e.modalidade==='Campo'?'Campo':e.modalidade==='Indígena'?'Indígena':'Urbana'); if(!loc[l]) loc[l]={s:0,w:0}; loc[l].s += e.freq*e.matriculas; loc[l].w += e.matriculas; });
