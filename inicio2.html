@@ -670,7 +670,7 @@ function abrirFicha(inep, keepTab){
   const semDocN = alunosEsc.filter(a=>a.doc==='Incompleta').length;
   // média de nota por disciplina (não se aplica à Educação Infantil)
   const ehInfantil = e.cmei || /Creche|Pré/.test(e.etapas);
-  const corNota = n => n>=7 ? '#16A34A' : n>=5 ? '#F0B429' : '#E24A3A';
+  const corNota = n => n>=5 ? '#16A34A' : '#E24A3A';
   let notaHtml;
   if(!ehInfantil){
     const discs = ['Língua Portuguesa','Matemática','Ciências','História','Geografia','Arte','Educação Física'];
@@ -727,6 +727,7 @@ function abrirFicha(inep, keepTab){
           <div><div class="n">${fmt(e.vagas)}</div><div class="k">Ofertadas</div></div>
           <div><div class="n">${fmt(e.matriculas)}</div><div class="k">Ocupadas</div></div>
           <div><div class="n verde">${fmt(disp)}</div><div class="k">Livres</div></div>
+          <div><div class="n" id="fichaHoje" style="color:var(--laranja);transition:transform .18s;">0</div><div class="k"><span class="live-dot"></span> Matrículas hoje · tempo real</div></div>
         </div>
         <div class="occ-track"><div class="occ-fill" style="width:${Math.min(100,ocup).toFixed(1)}%"></div></div>
         <div class="k" style="margin-top:8px;font-size:12px;color:var(--texto-suave);">Ocupação de ${pct1(ocup)}</div>
@@ -743,9 +744,6 @@ function abrirFicha(inep, keepTab){
         <div class="eq-row"><span>CEAME</span><b>${fmt(espCEAME)}</b></div>
         <div class="eq-row" style="border-top:1px solid var(--borda);margin-top:4px;padding-top:8px;"><span><b>Total em Educação Especial</b></span><b>${fmt(espEsc)}</b></div>
       </div>
-    </div>
-    <div class="card" style="margin-bottom:20px;"><div class="card-t">Alunos por etapa</div>
-      <div class="serie-list">${serieBars}</div>
     </div>
     <div class="two">
       <div class="card"><div class="card-t">Alunos por turno</div>${turnoRows}</div>
@@ -839,6 +837,14 @@ function abrirFicha(inep, keepTab){
   document.getElementById('sheetOverlay').classList.add('open');
   document.getElementById('sheet').classList.add('open');
   document.addEventListener('keydown', escHandler);
+  // matrículas hoje (tempo real, simulado) — por escola
+  const elFH = document.getElementById('fichaHoje');
+  if(elFH){
+    let mh = seedFrom(e.inep+'mh')%4;
+    elFH.textContent = mh;
+    if(window._fichaHojeTimer) clearInterval(window._fichaHojeTimer);
+    window._fichaHojeTimer = setInterval(()=>{ if(Math.random()<0.3){ mh++; elFH.textContent = mh; elFH.style.transform='scale(1.12)'; setTimeout(()=>elFH.style.transform='scale(1)',180); } }, 5000);
+  }
   // restaura a aba ativa (ex.: ao trocar o bimestre, mantém a aba em que estava)
   if(fichaTabAtual && fichaTabAtual!=='inicio'){
     const b = [...document.querySelectorAll('#sheet .sheet-tab')].find(x=>(x.getAttribute('onclick')||'').includes("'"+fichaTabAtual+"'"));
@@ -937,6 +943,7 @@ function fecharFicha(){
   document.getElementById('sheet').classList.remove('open');
   document.getElementById('sheetOverlay').classList.remove('open');
   document.removeEventListener('keydown', escHandler);
+  if(window._fichaHojeTimer){ clearInterval(window._fichaHojeTimer); window._fichaHojeTimer=null; }
   // embutida em iframe (modo bare): avisa a tela-pai para fechar a sobreposição
   if(document.body.classList.contains('bare')){ try{ parent.postMessage('eprof:fechar-ficha','*'); }catch(e){} }
 }

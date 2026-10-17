@@ -77,6 +77,7 @@
     .occ-track { height: 10px; border-radius: 5px; background: #ECEFF4; overflow: hidden; }
     .occ-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--laranja), var(--azul)); }
 
+
     .donut-wrap { display: flex; align-items: center; gap: 26px; flex-wrap: wrap; }
     .donut { position: relative; width: 190px; height: 190px; border-radius: 50%; flex-shrink: 0; }
     .donut::after { content: ''; position: absolute; inset: 42px; background: var(--bg); border-radius: 50%; }
@@ -290,6 +291,16 @@
         </div>
       </div>
 
+      <div class="panel" style="margin-top:20px;">
+        <div class="section-head"><div class="section-title">Acessos à plataforma</div><div class="section-hint">Entradas no sistema · últimos 30 dias</div></div>
+        <div class="vm" style="grid-template-columns:repeat(4,1fr);margin-bottom:0;">
+          <div class="vm-block"><div class="vm-label">Acessos nos últimos 30 dias</div><div class="vm-num" id="acc30Tot">—</div><div class="vm-sub">entradas no sistema</div></div>
+          <div class="vm-block"><div class="vm-label">Média por dia</div><div class="vm-num" id="acc30Dia">—</div><div class="vm-sub">acessos diários</div></div>
+          <div class="vm-block"><div class="vm-label"><span class="live-dot"></span> Pico em um dia</div><div class="vm-num orange" id="acc30Pico">—</div><div class="vm-sub" id="acc30PicoDia">maior movimento</div></div>
+          <div class="vm-block"><div class="vm-label">Usuários únicos</div><div class="vm-num verde" id="acc30Uniq">—</div><div class="vm-sub">entraram ao menos uma vez</div></div>
+        </div>
+      </div>
+
       <div class="grid-2" style="margin-top:20px;">
         <div class="panel">
           <div class="section-head"><div class="section-title">Vagas e matrículas</div><div class="section-hint">Rede municipal</div></div>
@@ -434,6 +445,32 @@ document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl
     const h = Math.round(v / maxV * 100);
     return `<div class="acc-col" title="${meses[i]}: ${fmt(v)} novas matrículas" onclick="(window.top||window).location.href='alunos.html'"><div class="acc-bar" style="height:${h}%"><span class="acc-bar-val">${fmt(v)}</span></div><span class="acc-lbl">${meses[i]}</span></div>`;
   }).join('');
+})();
+
+/* Acessos à plataforma — últimos 30 dias */
+(function(){
+  if(!document.getElementById('acc30Tot')) return;
+  const seedFrom = str => { let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; };
+  const base = Math.round(totUsuarios*0.9 + totResp*0.16 + totAlunos*0.05);
+  const hoje = new Date(2026,7,6); // data do painel: 06/08/2026
+  const MES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const dias = [];
+  for(let i=29;i>=0;i--){
+    const d = new Date(hoje); d.setDate(hoje.getDate()-i);
+    const dow = d.getDay();
+    let fac = 1; if(dow===0) fac=0.32; else if(dow===6) fac=0.48; else if(dow===5) fac=0.9; else if(dow===1) fac=1.08;
+    const noise = 0.86 + (seedFrom('acc'+d.getDate()+'_'+d.getMonth())%28)/100;
+    dias.push({ d, v: Math.max(0, Math.round(base*fac*noise)) });
+  }
+  const todos = dias.map(x=>x.v);
+  const tot = todos.reduce((s,v)=>s+v,0);
+  const picoDia = Math.max(...todos);
+  const picoD = dias[todos.indexOf(picoDia)].d;
+  const mediaDia = Math.round(tot/30);
+  const uniq = Math.round((totUsuarios + totResp*0.55) * 0.82);
+  const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('acc30Tot', fmt(tot)); set('acc30Dia', fmt(mediaDia)); set('acc30Pico', fmt(picoDia)); set('acc30Uniq', fmt(uniq));
+  set('acc30PicoDia', `em ${picoD.getDate()}/${MES[picoD.getMonth()]}`);
 })();
 
 /* Escolas por localidade — rosca clicável */
