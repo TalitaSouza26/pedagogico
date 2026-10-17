@@ -156,16 +156,16 @@
       <div class="idx-group sep">Frequência<small>Presença dos alunos na rede</small></div>
 
       <div class="panel">
-        <div class="section-head"><div class="section-title">Frequência diária</div><div class="section-hint">Últimos dias letivos da rede</div></div>
-        <div class="freq-head"><div class="fh-num" id="freqMed">—</div><div class="fh-sub">média diária da rede</div></div>
-        <div class="acc-bars" id="freqDiaBars"></div>
+        <div class="section-head"><div class="section-title">Frequência diária</div><select class="mes-select" id="mesSel" aria-label="Selecionar mês"></select></div>
+        <div class="freq-head"><div class="fh-num" id="freqDiaMed">—</div><div class="fh-sub" id="freqDiaSub">média do mês</div></div>
+        <div class="acc-bars dense" id="freqDiaBars"></div>
         <div class="freq-loc" id="freqLoc"></div>
       </div>
 
       <div class="panel" style="margin-top:20px;">
-        <div class="section-head"><div class="section-title">Frequência mensal</div><select class="mes-select" id="mesSel" aria-label="Selecionar mês"></select></div>
-        <div class="freq-head"><div class="fh-num" id="freqMesMed">—</div><div class="fh-sub" id="freqMesSub">média do mês</div></div>
-        <div class="acc-bars dense" id="freqMesBars"></div>
+        <div class="section-head"><div class="section-title">Frequência mensal</div><div class="section-hint">Média por mês · ano letivo</div></div>
+        <div class="freq-head"><div class="fh-num" id="freqMed">—</div><div class="fh-sub">média diária da rede em 2026</div></div>
+        <div class="acc-bars" id="freqMesBars"></div>
       </div>
     </div>
   </div>
@@ -276,32 +276,33 @@ const totUsuarios = cg.prof+cg.coord+cg.sec+cg.direcao;
     return Math.round((base+noise)*10)/10;
   };
 
-  // --- Frequência diária: últimos 15 dias letivos até a data do painel (06/08/2026) ---
-  (function(){
-    const host = document.getElementById('freqDiaBars'); if(!host) return;
-    const fim = new Date(ano,7,6), dias = []; let cur = new Date(fim);
-    while(dias.length < 15){ if(ehLetivo(cur)) dias.unshift(new Date(cur)); cur.setDate(cur.getDate()-1); }
-    host.innerHTML = dias.map(d=>{ const v = freqDia(d);
-      return `<div class="acc-col" title="${d.getDate()}/${MESCURTO[d.getMonth()]}: ${dec(v)}% de presença"><div class="acc-bar" style="height:${barH(v)}%"><span class="acc-bar-val">${dec(v)}%</span></div><span class="acc-lbl">${d.getDate()}/${d.getMonth()+1}</span></div>`;
-    }).join('');
-  })();
+  // dias letivos de um mês
+  const diasLetivosMes = m => { const d = new Date(ano,m,1), out = []; while(d.getMonth()===m){ if(ehLetivo(d)) out.push(new Date(d)); d.setDate(d.getDate()+1); } return out; };
+  const mediaMes = m => { const v = diasLetivosMes(m).map(freqDia); return v.reduce((s,x)=>s+x,0)/(v.length||1); };
 
-  // --- Frequência mensal: dropdown de mês -> dias letivos do mês ---
+  // --- Frequência diária: dropdown de mês -> dias letivos do mês ---
   (function(){
-    const sel = document.getElementById('mesSel'), host = document.getElementById('freqMesBars'); if(!sel||!host) return;
+    const sel = document.getElementById('mesSel'), host = document.getElementById('freqDiaBars'); if(!sel||!host) return;
     for(let m=3;m<=11;m++){ const o = document.createElement('option'); o.value = m; o.textContent = MESNOME[m].charAt(0).toUpperCase()+MESNOME[m].slice(1); sel.appendChild(o); }
     const render = m => {
-      const d = new Date(ano,m,1), dias = [];
-      while(d.getMonth()===m){ if(ehLetivo(d)) dias.push(new Date(d)); d.setDate(d.getDate()+1); }
-      const vals = dias.map(freqDia), med = vals.reduce((s,v)=>s+v,0)/(vals.length||1);
-      document.getElementById('freqMesMed').textContent = dec(med)+'%';
-      document.getElementById('freqMesSub').textContent = `média de ${MESNOME[m]} · ${dias.length} dias letivos`;
+      const dias = diasLetivosMes(m), vals = dias.map(freqDia), med = vals.reduce((s,v)=>s+v,0)/(vals.length||1);
+      document.getElementById('freqDiaMed').textContent = dec(med)+'%';
+      document.getElementById('freqDiaSub').textContent = `média de ${MESNOME[m]} · ${dias.length} dias letivos`;
       host.innerHTML = dias.map((dd,i)=>{ const v = vals[i];
         return `<div class="acc-col" title="${dd.getDate()}/${MESCURTO[m]}: ${dec(v)}% de presença"><div class="acc-bar" style="height:${barH(v)}%"></div><span class="acc-lbl">${dd.getDate()}</span></div>`;
       }).join('');
     };
     sel.value = 7; render(7); // agosto (mês da data do painel)
     sel.addEventListener('change', e => render(+e.target.value));
+  })();
+
+  // --- Frequência mensal: barras por mês (abr–dez) ---
+  (function(){
+    const host = document.getElementById('freqMesBars'); if(!host) return;
+    const meses = []; for(let m=3;m<=11;m++) meses.push(m);
+    host.innerHTML = meses.map(m=>{ const v = Math.round(mediaMes(m)*10)/10;
+      return `<div class="acc-col" title="${MESNOME[m]}: ${dec(v)}% de presença"><div class="acc-bar" style="height:${barH(v)}%"><span class="acc-bar-val">${dec(v)}%</span></div><span class="acc-lbl">${MESCURTO[m]}</span></div>`;
+    }).join('');
   })();
 
   // por localidade (média ponderada por alunos)
