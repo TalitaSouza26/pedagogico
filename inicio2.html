@@ -866,8 +866,7 @@ function abrirFicha(inep, keepTab){
       <div class="sheet-ic ${e.cmei?'cmei':''}">${svgP(ICON_ESC,24)}</div>
       <div><div class="sheet-name" id="sheetName">${e.nome}</div>
         <div class="sheet-subt">${e.bairro} · ${e.localidade} · ${e.modalidade} · INEP ${e.inep}</div></div>
-      <select class="bim-sel" onchange="setBim(this.value)" aria-label="Bimestre">${BIMS.map(b=>`<option ${b===fichaBim?'selected':''}>${b}</option>`).join('')}</select>
-      <button class="sheet-close" onclick="fecharFicha()" aria-label="Fechar" style="margin-left:10px;">${svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',18)}</button>
+      <button class="sheet-close" onclick="fecharFicha()" aria-label="Fechar" style="margin-left:auto;">${svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',18)}</button>
     </div>
     <div class="sheet-tabs">
       <button class="sheet-tab active" onclick="fichaTab(this,'inicio')">Início</button>
