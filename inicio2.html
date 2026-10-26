@@ -343,6 +343,29 @@
     .acc-bar { width: 100%; max-width: 48px; border-radius: 9px 9px 4px 4px; background: linear-gradient(180deg, #7FB0E8, #12509A); position: relative; }
     .acc-bar-val { position: absolute; top: -18px; left: 0; right: 0; text-align: center; font-family: var(--font-display); font-size: 11px; font-weight: 700; color: var(--texto-suave); }
     .acc-lbl { font-size: 11.5px; color: var(--texto-suave); }
+    .acc-bars.dense { gap: 5px; height: 150px; }
+    .acc-bars.dense .acc-bar { max-width: 22px; border-radius: 5px 5px 3px 3px; }
+    .acc-bars.dense .acc-lbl { font-size: 9px; }
+    .mes-select { font-family: inherit; font-size: 12px; font-weight: 600; color: var(--azul-escuro); border: 1px solid var(--borda); border-radius: 8px; padding: 5px 10px; background: var(--branco); cursor: pointer; }
+    /* mapa de calor (nota por disciplina x série) na ficha */
+    .fheat-scroll { overflow-x: auto; margin-top: 6px; }
+    .fheat { display: grid; gap: 4px; min-width: 520px; }
+    .fheat .hc { padding: 9px 5px; border-radius: 7px; font-size: 12px; }
+    .fheat .hc-gap { width: 12px; }
+    .fheat .hc-disc-head-cell { background: var(--laranja); color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 11.5px; border-radius: 9px; display: flex; align-items: center; padding: 8px 12px; }
+    .fheat .hc-group { font-family: var(--font-display); font-weight: 700; color: var(--texto); font-size: 11.5px; text-align: center; align-self: end; padding: 2px 4px 5px; }
+    .fheat .hc-head { font-weight: 600; color: var(--texto-suave); font-size: 10.5px; text-align: center; }
+    .fheat .hc-disc { font-size: 12px; color: var(--texto); display: flex; align-items: center; }
+    .fheat .hc-val { text-align: center; font-family: var(--font-display); font-weight: 700; }
+    .fheat .hc-na { text-align: center; color: #C2C8D0; }
+    /* frequência por etapa (cards com detalhamento) na ficha */
+    .fet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+    .fet-card { background: var(--bg); border: 1px solid var(--borda); border-top: 3px solid var(--azul); border-radius: 12px; padding: 14px 16px; }
+    .fet-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .fet-name { font-size: 12px; color: var(--texto-suave); font-weight: 700; line-height: 1.2; }
+    .fet-big { font-family: var(--font-display); font-weight: 800; font-size: 20px; line-height: 1; white-space: nowrap; }
+    .fet-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--texto-suave); padding: 5px 0; border-top: 1px solid var(--borda); }
+    .fet-row b { font-family: var(--font-display); font-weight: 700; color: var(--texto); }
     /* painel lateral (drawer) do servidor */
     .sp2-overlay { position: fixed; inset: 0; background: rgba(15,23,32,.45); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 60; }
     .sp2-overlay.open { opacity: 1; pointer-events: auto; }
@@ -632,6 +655,20 @@ function fichaTab(btn,name){
 const BIMS = ['1º bimestre','2º bimestre','3º bimestre','4º bimestre'];
 let fichaInep = null, fichaBim = '3º bimestre', fichaTabAtual = 'inicio';
 function setBim(v){ fichaBim = v; if(fichaInep) abrirFicha(fichaInep, true); }
+function _fichaDiaBars(freq, inep, m){
+  const sf = s => { let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; };
+  const MB = {0:91,1:91,2:90.4,3:90.6,4:90.4,5:91.0,6:90.8,7:91.2,8:91.5,9:91.3,10:91.8,11:92.0};
+  const dl = (freq||91)-91.2, floor=82, top=96;
+  const barH = v => Math.max(6, Math.min(100, Math.round((v-floor)/(top-floor)*100)));
+  const dim = new Date(2026,m+1,0).getDate(); let html='';
+  for(let day=1; day<=dim; day++){ const d=new Date(2026,m,day); const w=d.getDay(); const letivo = w>=1 && w<=5 && m>=2 && m<=9; let v=0;
+    if(letivo){ let fac=0; if(w===1)fac=-1; else if(w===5)fac=-1.6; const noise=((sf(inep+'fd'+m+'_'+day)%26)/10)-1.2; v=Math.round(((MB[m]||91)+dl+fac+noise)*10)/10; }
+    const p2 = String(day).padStart(2,'0');
+    html += `<div class="acc-col" title="${p2}/${m+1}: ${letivo? v.toFixed(1).replace('.',',')+'% de presença' : 'sem aula'}"><div class="acc-bar" style="height:${letivo?barH(v):0}%"></div><span class="acc-lbl">${p2}</span></div>`;
+  }
+  return html;
+}
+function fichaFreqDia(m){ const c = window._fichaDia; if(!c) return; const el = document.getElementById('fichaDiaBars'); if(el) el.innerHTML = _fichaDiaBars(c.freq, c.inep, +m); }
 function abrirFicha(inep, keepTab){
   const e = ESCOLAS.find(x=>x.inep===inep) || REDE.find(x=>x.inep===inep);
   if(!e) return;
@@ -713,10 +750,11 @@ function abrirFicha(inep, keepTab){
   const semDocN = alunosEsc.filter(a=>a.doc==='Incompleta').length;
   // média de nota por disciplina (não se aplica à Educação Infantil)
   const ehInfantil = e.cmei || /Creche|Pré/.test(e.etapas);
-  const corNota = n => n>=5 ? '#16A34A' : '#E24A3A';
+  const corNota = n => n>=5 ? '#12509A' : '#E24A3A';
   // disciplinas ofertadas pela escola (base comum + parte diversificada da rede)
   const _temFinais = /final|finais/i.test(e.etapas);
   const _temIniciais = /inicia/i.test(e.etapas) || !_temFinais;
+  const _temEJA = /EJA/i.test(e.etapas);
   const _campoInd = e.localidade==='Campo' || e.localidade==='Indígena';
   const ORDER_DISC = ['Língua Portuguesa','Leitura e Produção de Texto','Língua Inglesa','Língua Patxôhã','Matemática','Ciências','História','História de Porto Seguro','Geografia','Diversidade Afrodescendente e Indígena','Agroecologia','Arte','Educação Física','Ensino Religioso'];
   const discsEsc = ORDER_DISC.filter(d => {
@@ -762,13 +800,100 @@ function abrirFicha(inep, keepTab){
     const mx = Math.max(...rows.map(r=>r.n),1), tot = rows.reduce((s,r)=>s+r.n,0);
     return { tot, html:`<div class="serie-list">` + rows.map(r=>`<div class="srow"><span class="s-name">${r.d}</span><span class="s-track"><span class="s-fill" style="width:${(r.n/mx*100).toFixed(0)}%;background:#22A0C8"></span></span><span class="s-num">${fmt(r.n)}</span></div>`).join('') + `</div>` };
   })();
+  // Registro de aulas (escola)
+  const aulasAnoEsc = Math.max(200, (e.turmas||10) * (120 + seedFrom(e.inep+'aa')%80));
+  const pctValEsc = 80 + seedFrom(e.inep+'av')%18;
+  const validadasEsc = Math.round(aulasAnoEsc*pctValEsc/100);
+  const pendEsc = aulasAnoEsc - validadasEsc;
+  const registroAulasHtml = `<div class="card" style="margin-bottom:20px;"><div class="card-t">Registro de aulas · ano letivo</div><div class="aula-cards">
+    <div class="aula-card" style="border-top-color:#12509A"><div class="aula-top"><span class="aula-dot" style="background:#12509A"></span><span class="aula-lbl">Aulas no ano</span></div><div class="aula-val" style="color:#12509A">${fmt(aulasAnoEsc)}</div></div>
+    <div class="aula-card" style="border-top-color:#2E8B00"><div class="aula-top"><span class="aula-dot" style="background:#2E8B00"></span><span class="aula-lbl">Aulas validadas</span></div><div class="aula-val" style="color:#2E8B00">${fmt(validadasEsc)}</div></div>
+    <div class="aula-card" style="border-top-color:var(--laranja)"><div class="aula-top"><span class="aula-dot" style="background:var(--laranja)"></span><span class="aula-lbl">Pendentes de validação</span></div><div class="aula-val" style="color:var(--laranja)">${fmt(pendEsc)}</div></div>
+  </div></div>`;
+
+  // Média de nota por disciplina × série/etapa (matriz)
+  const matrizNotaHtml = (function(){
+    if(ehInfantil) return '';
+    const GR = [];
+    if(_temIniciais) GR.push({nome:'Fund. I', etapa:'Fundamental I', cols:['3º','4º','5º']});
+    if(_temFinais) GR.push({nome:'Fund. II', etapa:'Fundamental II', cols:['6º','7º','8º','9º']});
+    if(_temEJA){ GR.push({nome:'EJA I', etapa:'EJA I', cols:['1ª','2ª','3ª']}); GR.push({nome:'EJA II', etapa:'EJA II', cols:['4ª','5ª']}); }
+    if(!GR.length) return '';
+    const ofer = (etapa,d) => {
+      if(d==='Leitura e Produção de Texto') return etapa==='Fundamental I'||etapa==='EJA I';
+      if(d==='Língua Inglesa') return etapa==='Fundamental II'||etapa==='EJA II';
+      if(d==='Língua Patxôhã'||d==='Agroecologia') return _campoInd;
+      return true;
+    };
+    const pal = n => n>=5 ? {bg:'#E5EEFA',fg:'#12509A'} : {bg:'#FBE2DE',fg:'#C33A2D'};
+    const grade = (col,d) => Math.round((4.6 + (seedFrom(e.inep+col+d)%44)/10)*10)/10;
+    const gridCols = `minmax(140px,1.3fr) ` + GR.map(g=>`repeat(${g.cols.length},1fr)`).join(' 12px ');
+    const last = GR.length-1;
+    let html = `<div class="hc hc-disc-head-cell" style="grid-row:span 2;">Disciplina</div>`;
+    GR.forEach((g,gi)=>{ html+=`<div class="hc hc-group" style="grid-column:span ${g.cols.length}">${g.nome}</div>`; if(gi<last) html+=`<div class="hc-gap" style="grid-row:span 2"></div>`; });
+    GR.forEach(g=> g.cols.forEach(c=> html+=`<div class="hc hc-head">${c}</div>`));
+    discsEsc.forEach(d=>{
+      html += `<div class="hc hc-disc">${d}</div>`;
+      GR.forEach((g,gi)=>{ g.cols.forEach(col=>{ if(ofer(g.etapa,d)){ const n=grade(col+g.etapa,d); const p=pal(n); html+=`<div class="hc hc-val" style="background:${p.bg};color:${p.fg}">${n.toFixed(1).replace('.',',')}</div>`; } else html+=`<div class="hc hc-na">—</div>`; }); if(gi<last) html+=`<div class="hc-gap"></div>`; });
+    });
+    return `<div class="card" style="margin-bottom:20px;"><div class="card-t">Média de nota por disciplina e série</div><div class="fheat-scroll"><div class="fheat" style="grid-template-columns:${gridCols}">${html}</div></div></div>`;
+  })();
+
+  // Frequência por etapa (cards com detalhamento)
+  const freqEtapaEscHtml = (function(){
+    const fb = e.freq||91;
+    const GR = [];
+    if(ehInfantil) GR.push({nome:'Educação Infantil', cor:'#F0B429', off:-1.5, subs:['CN I','CN II','CN III','PN I','PN II']});
+    if(_temIniciais && !ehInfantil) GR.push({nome:'Fundamental I', cor:'#12509A', off:0.5, subs:['1º ano','2º ano','3º ano','4º ano','5º ano']});
+    if(_temFinais) GR.push({nome:'Fundamental II', cor:'#ED6939', off:-0.3, subs:['6º ano','7º ano','8º ano','9º ano']});
+    if(_temEJA){ GR.push({nome:'EJA I', cor:'#6B3FA0', off:-2.0, subs:['1ª etapa','2ª etapa','3ª etapa']}); GR.push({nome:'EJA II', cor:'#D6409F', off:-2.5, subs:['4ª etapa','5ª etapa']}); }
+    if(!GR.length) return '';
+    const inner = GR.map(g=>{
+      const rows = g.subs.map(s=>{ const v=Math.max(30,Math.min(100,Math.round((fb+g.off+((seedFrom(e.inep+g.nome+s)%180)/10-9))*10)/10)); return {s,v}; });
+      const med = rows.reduce((a,r)=>a+r.v,0)/rows.length;
+      return `<div class="fet-card" style="border-top-color:${g.cor}"><div class="fet-head"><span class="fet-name">${g.nome}</span><span class="fet-big" style="color:${g.cor}">${med.toFixed(1).replace('.',',')}%</span></div>${rows.map(r=>`<div class="fet-row"><span>${r.s}</span><b>${r.v.toFixed(1).replace('.',',')}%</b></div>`).join('')}</div>`;
+    }).join('');
+    return `<div class="card" style="margin-bottom:20px;"><div class="card-t">Frequência por etapa</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 10px;">Média do ano letivo de chamadas validadas</div><div class="fet-grid">${inner}</div></div>`;
+  })();
+
+  // Frequência diária (dropdown de mês)
+  window._fichaDia = { freq: e.freq, inep: e.inep };
+  const _mesNomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const freqDiaCard = `<div class="card" style="margin-bottom:20px;"><div class="pcard-head"><div class="card-t">Frequência diária</div><select class="mes-select" onchange="fichaFreqDia(this.value)">${_mesNomes.map((m,i)=>`<option value="${i}" ${i===9?'selected':''}>${m}</option>`).join('')}</select></div><div class="acc-bars dense" id="fichaDiaBars">${_fichaDiaBars(e.freq,e.inep,9)}</div></div>`;
+
+  // Acessos ao sistema (escola)
+  const acessosEscHtml = (function(){
+    const base = Math.max(4, Math.round((e.matriculas||50)*0.09));
+    const diaV = d => { const w=d.getDay(); let f=1; if(w===0)f=0.15; else if(w===6)f=0.3; else if(w===5)f=0.85; const noise=0.7+(seedFrom(e.inep+'ac'+d.getMonth()+'_'+d.getDate())%50)/100; return Math.max(0,Math.round(base*f*noise)); };
+    const fim=new Date(2026,9,25), dias=[]; for(let i=13;i>=0;i--){ const d=new Date(fim); d.setDate(fim.getDate()-i); dias.push(d); }
+    const vals=dias.map(diaV), mx=Math.max(...vals,1);
+    const bars = dias.map((d,i)=>`<div class="acc-col" title="${d.getDate()}/${d.getMonth()+1}: ${fmt(vals[i])} acessos"><div class="acc-bar" style="height:${Math.max(4,Math.round(vals[i]/mx*100))}%"></div><span class="acc-lbl">${d.getDate()}/${d.getMonth()+1}</span></div>`).join('');
+    const somaMes=(m,ate)=>{ let s=0; const d=new Date(2026,m,1); while(d.getMonth()===m){ if(!ate||d<=ate){ const w=d.getDay(); if(w>=1&&w<=5) s+=diaV(d);} d.setDate(d.getDate()+1);} return s; };
+    const setT=somaMes(8), outT=somaMes(9,new Date(2026,9,25)); let vit=setT+outT; for(const m of [2,3,4,5,6,7]) vit+=somaMes(m); vit=Math.round(vit*1.5);
+    const hojeN=Math.round(base*0.4)+seedFrom(e.inep+'ah')%5;
+    return `<div class="card" style="margin-bottom:20px;"><div class="card-t">Acessos ao sistema</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">Últimos 14 dias (12/10 a 25/10)</div>
+      <div class="acc-bars dense">${bars}</div>
+      <div class="aula-cards" style="grid-template-columns:repeat(4,1fr);margin-top:16px;">
+        <div class="aula-card" style="border-top-color:#12509A"><div class="aula-top"><span class="aula-dot" style="background:#12509A"></span><span class="aula-lbl">Setembro</span></div><div class="aula-val" style="color:#12509A">${fmt(setT)}</div></div>
+        <div class="aula-card" style="border-top-color:#2E8B00"><div class="aula-top"><span class="aula-dot" style="background:#2E8B00"></span><span class="aula-lbl">Outubro</span></div><div class="aula-val" style="color:#2E8B00">${fmt(outT)}</div></div>
+        <div class="aula-card" style="border-top-color:var(--laranja)"><div class="aula-top"><span class="aula-dot" style="background:var(--laranja)"></span><span class="aula-lbl">Contagem vitalícia</span></div><div class="aula-val" style="color:var(--laranja)">${fmt(vit)}</div></div>
+        <div class="aula-card" style="border-top-color:#2E8B00"><div class="aula-top"><span class="live-dot"></span><span class="aula-lbl">Acessos hoje</span></div><div class="aula-val" style="color:#2E8B00">${fmt(hojeN)}</div></div>
+      </div>
+    </div>`;
+  })();
+
   const paneDesempenho = `
+    ${registroAulasHtml}
     ${notaHtml}
+    ${matrizNotaHtml}
     <div class="card" style="margin-bottom:20px;"><div class="card-t">Frequência ao longo do ano</div>${freqAnoSvg}</div>
+    ${freqDiaCard}
+    ${freqEtapaEscHtml}
     <div class="two">
       <div class="card"><div class="card-t">Matrículas por mês</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">novas matrículas · últimos 6 meses</div>${matMesHtml}</div>
       <div class="card"><div class="card-t">Planos de aula por disciplina</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">${fmt(planoDados.tot)} planos no total</div>${planoDados.html}</div>
-    </div>`;
+    </div>
+    ${acessosEscHtml}`;
 
   const paneInicio = `
     <div class="sch-stats">${dash.map(k=>`<div class="kcard"><div class="kcard-l"><div class="kic ic-${k.c}">${svgP(k.p,21)}</div><div><div class="klbl">${k.l}</div><div class="ksub">${k.s}</div></div></div><div class="kval">${k.v}</div></div>`).join('')}</div>
