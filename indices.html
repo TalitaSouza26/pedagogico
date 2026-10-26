@@ -83,6 +83,7 @@
     .acc-bars.dense { gap: 5px; }
     .acc-bars.dense .acc-bar { border-radius: 5px 5px 3px 3px; }
     .acc-bars.dense .acc-lbl { font-size: 10px; }
+    .acc-bars.laranja .acc-bar { background: linear-gradient(180deg, #F3A977, #ED6939); }
     .mes-select { font-family: inherit; font-size: 13px; font-weight: 600; color: var(--azul-escuro); border: 1px solid var(--borda); border-radius: 8px; padding: 6px 12px; background: var(--branco); cursor: pointer; }
     .mes-select:focus { outline: none; border-color: var(--azul); }
     .fet-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 12px; }
@@ -207,7 +208,7 @@
 
       <div class="panel" style="margin-top:20px;">
         <div class="section-head"><div class="section-title">Frequência mensal da rede</div><div class="section-hint">Média por mês de chamadas validadas</div></div>
-        <div class="acc-bars" id="freqMesBars"></div>
+        <div class="acc-bars laranja" id="freqMesBars"></div>
         <div class="freq-nota">Os índices consideram apenas as chamadas validadas pelos professores. Chamadas não validadas não são contabilizadas. *</div>
       </div>
     </div>

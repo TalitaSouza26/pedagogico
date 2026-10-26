@@ -346,6 +346,7 @@
     .acc-bars.dense { gap: 5px; height: 150px; }
     .acc-bars.dense .acc-bar { max-width: 22px; border-radius: 5px 5px 3px 3px; }
     .acc-bars.dense .acc-lbl { font-size: 9px; }
+    .acc-bars.laranja .acc-bar { background: linear-gradient(180deg, #F3A977, #ED6939); }
     .mes-select { font-family: inherit; font-size: 12px; font-weight: 600; color: var(--azul-escuro); border: 1px solid var(--borda); border-radius: 8px; padding: 5px 10px; background: var(--branco); cursor: pointer; }
     .aln-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 4px; }
     .aln-sub { background: var(--branco); border: 1px solid var(--borda); border-radius: 12px; padding: 14px 16px; }
@@ -787,7 +788,7 @@ function abrirFicha(inep, keepTab){
     const floor=82, top=96;
     const decp=v=>(Math.round(v*10)/10).toString().replace('.',',');
     const barH=v=>Math.max(8,Math.min(100,Math.round((v-floor)/(top-floor)*100)));
-    return `<div class="acc-bars">`+idx.map((m,i)=>{ const v=Math.round((MB[m]+dl)*10)/10; return `<div class="acc-col" title="${meses[i]}: ${decp(v)}% de presença"><div class="acc-bar" style="height:${barH(v)}%"><span class="acc-bar-val">${decp(v)}%</span></div><span class="acc-lbl">${meses[i]}</span></div>`; }).join('')+`</div>`;
+    return `<div class="acc-bars laranja">`+idx.map((m,i)=>{ const v=Math.round((MB[m]+dl)*10)/10; return `<div class="acc-col" title="${meses[i]}: ${decp(v)}% de presença"><div class="acc-bar" style="height:${barH(v)}%"><span class="acc-bar-val">${decp(v)}%</span></div><span class="acc-lbl">${meses[i]}</span></div>`; }).join('')+`</div>`;
   })();
   // matrículas por mês (escola) — barras horizontais
   const matMesHtml = (function(){
