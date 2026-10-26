@@ -897,14 +897,12 @@ function abrirFicha(inep, keepTab){
     <div class="card" style="margin-bottom:20px;"><div class="card-t">Frequência mensal</div>${freqAnoSvg}</div>
     ${freqDiaCard}
     ${freqEtapaEscHtml}
-    <div class="two">
-      <div class="card"><div class="card-t">Matrículas por mês</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">novas matrículas · últimos 6 meses</div>${matMesHtml}</div>
-      <div class="card"><div class="card-t">Planos de aula por disciplina</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">${fmt(planoDados.tot)} planos no total</div>${planoDados.html}</div>
-    </div>
+    <div class="card" style="margin-bottom:20px;"><div class="card-t">Matrículas por mês</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">novas matrículas · últimos 6 meses</div>${matMesHtml}</div>
     ${acessosEscHtml}`;
 
   const paneInicio = `
     <div class="sch-stats">${dash.map(k=>`<div class="kcard"><div class="kcard-l"><div class="kic ic-${k.c}">${svgP(k.p,21)}</div><div><div class="klbl">${k.l}</div><div class="ksub">${k.s}</div></div></div><div class="kval">${k.v}</div></div>`).join('')}</div>
+    <div class="card" style="margin-bottom:20px;"><div class="card-t">Planos de aula por disciplina</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">${fmt(planoDados.tot)} planos no total</div>${planoDados.html}</div>
     <div class="two">
       <div class="card"><div class="card-t">Vagas e ocupação</div>
         <div class="vm">
