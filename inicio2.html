@@ -355,6 +355,9 @@
     .aln-sub .eq-row.tot span { font-weight: 700; color: var(--texto); }
     .aln-dot { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 8px; vertical-align: middle; }
     @media (max-width: 860px){ .aln-grid { grid-template-columns: repeat(2, 1fr); } }
+    .plan-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; margin-top: 6px; }
+    .plan-col-t { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--azul-escuro); padding-bottom: 8px; margin-bottom: 6px; border-bottom: 2px solid var(--azul-claro); }
+    .plan-col-tot { font-size: 12px; color: var(--texto-suave); font-weight: 600; }
     /* mapa de calor (nota por disciplina x série) na ficha */
     .fheat-scroll { overflow-x: auto; margin-top: 6px; }
     .fheat { display: grid; gap: 4px; min-width: 520px; }
@@ -799,14 +802,22 @@ function abrirFicha(inep, keepTab){
     const mx = Math.max(...vals,1);
     return `<div class="acc-bars">` + vals.map((v,i)=>`<div class="acc-col" title="${ms2[i]}: ${fmt(v)} novas matrículas"><div class="acc-bar" style="height:${Math.round(v/mx*100)}%"><span class="acc-bar-val">${fmt(v)}</span></div><span class="acc-lbl">${ms2[i]}</span></div>`).join('') + `</div>`;
   })();
-  // planos de aula por disciplina (escola)
+  // planos de aula por etapa (escola) — disciplinas diferem entre Fund I e Fund II
   const planoDados = (function(){
-    let discs;
-    if(ehInfantil) discs = ['(EO) O eu, o outro e o nós','(CG) Corpo, gestos e movimentos','(TS) Traços, sons, cores e formas','(EF) Escuta, fala, pensamento e imaginação','(ET) Espaços, tempos, quantidades, relações, transformações','(CR) Culturas regionais'];
-    else discs = discsEsc;
-    const rows = discs.map(d=>({ d, n: 8 + seedFrom(e.inep+'pa'+d)%60 })).sort((a,b)=>b.n-a.n);
-    const mx = Math.max(...rows.map(r=>r.n),1), tot = rows.reduce((s,r)=>s+r.n,0);
-    return { tot, html:`<div class="serie-list">` + rows.map(r=>`<div class="srow"><span class="s-name">${r.d}</span><span class="s-track"><span class="s-fill" style="width:${(r.n/mx*100).toFixed(0)}%;background:#22A0C8"></span></span><span class="s-num">${fmt(r.n)}</span></div>`).join('') + `</div>` };
+    const difOK = d => (d!=='Língua Patxôhã' && d!=='Agroecologia') || _campoInd;
+    const cols = [];
+    if(ehInfantil) cols.push({ nome:'Educação Infantil', discs:['(EO) O eu, o outro e o nós','(CG) Corpo, gestos e movimentos','(TS) Traços, sons, cores e formas','(EF) Escuta, fala, pensamento e imaginação','(ET) Espaços, tempos, quantidades, relações, transformações','(CR) Culturas regionais'] });
+    if(_temIniciais && !ehInfantil) cols.push({ nome:'Fundamental I', discs: ORDER_DISC.filter(d=> d!=='Língua Inglesa' && difOK(d)) });
+    if(_temFinais) cols.push({ nome:'Fundamental II', discs: ORDER_DISC.filter(d=> d!=='Leitura e Produção de Texto' && difOK(d)) });
+    if(_temEJA) cols.push({ nome:'EJA', discs: ORDER_DISC.filter(difOK) });
+    let tot = 0;
+    const html = `<div class="plan-cols">` + cols.map(col=>{
+      const rows = col.discs.map(d=>({ d, n: 8 + seedFrom(e.inep+'pa'+col.nome+d)%60 })).sort((a,b)=>b.n-a.n);
+      const sub = rows.reduce((s,r)=>s+r.n,0); tot += sub;
+      const mx = Math.max(...rows.map(r=>r.n),1);
+      return `<div class="plan-col"><div class="plan-col-t"><span>${col.nome}</span><span class="plan-col-tot">${fmt(sub)} planos</span></div>` + rows.map(r=>`<div class="srow"><span class="s-name">${r.d}</span><span class="s-track"><span class="s-fill" style="width:${(r.n/mx*100).toFixed(0)}%;background:#22A0C8"></span></span><span class="s-num">${fmt(r.n)}</span></div>`).join('') + `</div>`;
+    }).join('') + `</div>`;
+    return { tot, html };
   })();
   // Registro de aulas (escola)
   const aulasAnoEsc = Math.max(200, (e.turmas||10) * (120 + seedFrom(e.inep+'aa')%80));
