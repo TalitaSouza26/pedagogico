@@ -45,7 +45,7 @@
     .klbl { font-family: var(--font-display); font-weight: 600; font-size: 13.5px; color: var(--texto); }
     .ksub { font-size: 11.5px; color: var(--texto-suave); margin-top: 2px; }
     .kval { font-family: var(--font-display); font-weight: 800; font-size: 25px; color: var(--laranja-escuro); white-space: nowrap; }
-    .ic-azul{background:var(--azul-claro);color:var(--azul);} .ic-roxo{background:#EFEAF7;color:#6B3FA0;} .ic-verde{background:var(--verde-bg);color:#2E8B00;} .ic-laranja{background:var(--laranja-bg);color:var(--laranja-escuro);} .ic-ambar{background:#FDF3D9;color:var(--ambar-escuro);}
+    .ic-azul{background:var(--azul-claro);color:var(--azul);} .ic-roxo{background:#EFEAF7;color:#6B3FA0;} .ic-verde{background:var(--verde-bg);color:#2E8B00;} .ic-laranja{background:var(--laranja-bg);color:var(--laranja-escuro);} .ic-ambar{background:#FDF3D9;color:var(--ambar-escuro);} .ic-teal{background:#D9F2F5;color:#0E7E8C;}
     .vagas-panel { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 20px 22px; margin-bottom: 26px; }
     .vp-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
     .vp-title { font-family: var(--font-display); font-weight: 700; font-size: 16px; color: var(--texto); }
@@ -347,6 +347,13 @@
     .acc-bars.dense .acc-bar { max-width: 22px; border-radius: 5px 5px 3px 3px; }
     .acc-bars.dense .acc-lbl { font-size: 9px; }
     .mes-select { font-family: inherit; font-size: 12px; font-weight: 600; color: var(--azul-escuro); border: 1px solid var(--borda); border-radius: 8px; padding: 5px 10px; background: var(--branco); cursor: pointer; }
+    .aln-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 4px; }
+    .aln-sub { background: var(--branco); border: 1px solid var(--borda); border-radius: 12px; padding: 14px 16px; }
+    .aln-sub-t { font-family: var(--font-display); font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+    .aln-sub .eq-row.tot { border-bottom: 1px solid var(--borda); margin-bottom: 4px; padding-bottom: 8px; }
+    .aln-sub .eq-row.tot span { font-weight: 700; color: var(--texto); }
+    .aln-dot { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 8px; vertical-align: middle; }
+    @media (max-width: 860px){ .aln-grid { grid-template-columns: repeat(2, 1fr); } }
     /* mapa de calor (nota por disciplina x série) na ficha */
     .fheat-scroll { overflow-x: auto; margin-top: 6px; }
     .fheat { display: grid; gap: 4px; min-width: 520px; }
@@ -712,14 +719,14 @@ function abrirFicha(inep, keepTab){
     resp:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>',
   };
   const dash = [
-    { v:fmt(e.matriculas), l:'Alunos matriculados', s:'matrículas ativas', c:'roxo', p:IC.alunos },
-    { v:fmt(e.turmas), l:'Turmas', s:'na escola', c:'laranja', p:IC.turmas },
-    { v:fmt(servidoresN), l:'Servidores', s:'equipe da escola', c:'ambar', p:IC.users },
-    { v:fmt(disp), l:'Vagas disponíveis', s:'livres para matrícula', c:'verde', p:IC.vaga },
+    { v:fmt(e.matriculas), l:'Alunos', s:'ativos no sistema', c:'verde', p:IC.alunos },
+    { v:fmt(e.vagas), l:'Vagas ofertadas', s:'pela escola', c:'laranja', p:IC.vaga },
+    { v:fmt(e.responsaveis), l:'Responsáveis', s:'vinculados a alunos', c:'roxo', p:IC.resp },
+    { v:fmt(e.turmas), l:'Turmas', s:'cadastradas', c:'ambar', p:IC.turmas },
+    { v:fmt(servidoresN), l:'Servidores', s:'com acesso ao sistema', c:'teal', p:IC.users },
     { v:pct1(freqBim), l:'Frequência média', s:'presença dos alunos', c:'azul', p:IC.freq },
     { v:pct1(freqAcessoEsc), l:'Freq. média de acesso', s:'uso da plataforma', c:'verde', p:IC.clock },
     { v:fmt(espEsc), l:'Educação Especial', s:'AEE · APAE · CEAME', c:'roxo', p:IC.tea },
-    { v:fmt(e.responsaveis), l:'Responsáveis', s:'vinculados a alunos', c:'laranja', p:IC.resp },
   ];
   // Alunos por etapa (panorama compacto) — divide o total de matrículas da escola, somando sempre e.matriculas
   const ETAPA_ORD = ['Educação Infantil','Anos iniciais','Anos finais','EJA'];
@@ -886,7 +893,7 @@ function abrirFicha(inep, keepTab){
     ${registroAulasHtml}
     ${notaHtml}
     ${matrizNotaHtml}
-    <div class="card" style="margin-bottom:20px;"><div class="card-t">Frequência ao longo do ano</div>${freqAnoSvg}</div>
+    <div class="card" style="margin-bottom:20px;"><div class="card-t">Frequência mensal</div>${freqAnoSvg}</div>
     ${freqDiaCard}
     ${freqEtapaEscHtml}
     <div class="two">
@@ -914,19 +921,27 @@ function abrirFicha(inep, keepTab){
         <div class="eq-row"><span>Professores</span><b>${eqCount.prof}</b></div>
         <div class="eq-row"><span>Secretaria</span><b>${eqCount.sec}</b></div>
       </div>
-      <div class="card" style="grid-column:1/-1;"><div class="card-t">Educação Especial · acompanhamento</div>
-        <div class="eq-row"><span>AEE — sala de recursos</span><b>${fmt(espAEE)}</b></div>
-        <div class="eq-row"><span>APAE</span><b>${fmt(espAPAE)}</b></div>
-        <div class="eq-row"><span>CEAME</span><b>${fmt(espCEAME)}</b></div>
-        <div class="eq-row" style="border-top:1px solid var(--borda);margin-top:4px;padding-top:8px;"><span><b>Total em Educação Especial</b></span><b>${fmt(espEsc)}</b></div>
-      </div>
     </div>
-    <div class="two">
-      <div class="card"><div class="card-t">Alunos por turno</div>${turnoRows}</div>
-      <div class="card"><div class="card-t">Pendências de cadastro</div>
-        <div class="eq-row"><span>Sem turma</span><b>${fmt(semTurmaN)}</b></div>
-        <div class="eq-row"><span>Sem responsável</span><b>${fmt(semRespN)}</b></div>
-        <div class="eq-row"><span>Sem documentos</span><b>${fmt(semDocN)}</b></div>
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-t" style="display:flex;align-items:baseline;justify-content:space-between;">Alunos matriculados<span style="font-weight:400;font-size:12px;color:var(--texto-suave);">Total de alunos: <b style="color:var(--laranja);font-family:var(--font-display);">${fmt(e.matriculas)}</b></span></div>
+      <div class="aln-grid">
+        <div class="aln-sub"><div class="aln-sub-t">Por turno</div>${turnoRows}</div>
+        <div class="aln-sub"><div class="aln-sub-t">Educação Especial</div>
+          <div class="eq-row tot"><span>Total</span><b>${fmt(espEsc)}</b></div>
+          <div class="eq-row"><span>AEE</span><b>${fmt(espAEE)}</b></div>
+          <div class="eq-row"><span>APAE</span><b>${fmt(espAPAE)}</b></div>
+          <div class="eq-row"><span>CEAME</span><b>${fmt(espCEAME)}</b></div>
+        </div>
+        <div class="aln-sub"><div class="aln-sub-t">Por localidade</div>
+          <div class="eq-row tot"><span>Total</span><b>${fmt(e.matriculas)}</b></div>
+          ${['Urbana','Campo','Indígena'].map(l=>`<div class="eq-row"><span><span class="aln-dot" style="background:${({'Urbana':'#12509A','Campo':'#6E8FB3','Indígena':'#6B7A8F'})[l]}"></span>${l}</span><b>${fmt(e.localidade===l?e.matriculas:0)}</b></div>`).join('')}
+        </div>
+        <div class="aln-sub"><div class="aln-sub-t">Pendências de cadastro</div>
+          <div class="eq-row tot"><span>Total</span><b style="color:var(--laranja);">${fmt(semTurmaN+semRespN+semDocN)}</b></div>
+          <div class="eq-row"><span><span class="aln-dot" style="background:var(--laranja)"></span>Sem turma</span><b style="color:var(--laranja);">${fmt(semTurmaN)}</b></div>
+          <div class="eq-row"><span><span class="aln-dot" style="background:var(--laranja)"></span>Sem responsável</span><b style="color:var(--laranja);">${fmt(semRespN)}</b></div>
+          <div class="eq-row"><span><span class="aln-dot" style="background:var(--laranja)"></span>Sem documento</span><b style="color:var(--laranja);">${fmt(semDocN)}</b></div>
+        </div>
       </div>
     </div>
     <div class="fields">
