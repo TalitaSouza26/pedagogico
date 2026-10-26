@@ -358,6 +358,16 @@
     .plan-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; margin-top: 6px; }
     .plan-col-t { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--azul-escuro); padding-bottom: 8px; margin-bottom: 6px; border-bottom: 2px solid var(--azul-claro); }
     .plan-col-tot { font-size: 12px; color: var(--texto-suave); font-weight: 600; }
+    .donut-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+    .donut { width: 150px; height: 150px; border-radius: 50%; flex-shrink: 0; position: relative; }
+    .donut::after { content: ''; position: absolute; inset: 27px; background: var(--bg); border-radius: 50%; }
+    .donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; }
+    .dc-lbl { font-size: 10px; color: var(--texto-suave); }
+    .dc-val { font-family: var(--font-display); font-weight: 800; font-size: 26px; color: var(--texto); line-height: 1.1; }
+    .donut-legend { display: flex; flex-direction: column; gap: 9px; flex: 1; min-width: 150px; }
+    .dl-item { display: grid; grid-template-columns: 13px 1fr auto; align-items: center; gap: 10px; font-size: 13px; color: var(--texto); }
+    .dl-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dl-num { font-family: var(--font-display); font-weight: 700; }
     /* mapa de calor (nota por disciplina x série) na ficha */
     .fheat-scroll { overflow-x: auto; margin-top: 6px; }
     .fheat { display: grid; gap: 4px; min-width: 520px; }
@@ -694,6 +704,22 @@ function abrirFicha(inep, keepTab){
   const eqCount = { direcao:0, coord:0, prof:0, sec:0 };
   team.forEach(p=>{ const g=p.grupo; if(g==='Direção') eqCount.direcao++; else if(g==='Coordenação') eqCount.coord++; else if(g==='Professores') eqCount.prof++; else eqCount.sec++; });
   const servidoresN = team.length;
+  // servidores por cargo (rosca) — da escola
+  const cargoDonut = (function(){
+    const cont = { prof:0, coord:0, dir:0, sec:0, aux:0 };
+    team.forEach(p=>{ if(p.grupo==='Professores') cont.prof++; else if(p.grupo==='Coordenação') cont.coord++; else if(p.grupo==='Direção') cont.dir++; else if(/Auxiliar/i.test(p.cargo||'')) cont.aux++; else cont.sec++; });
+    const C = [
+      { nome:'Professores', n:cont.prof, cor:'#ED6939' },
+      { nome:'Coordenadores', n:cont.coord, cor:'#3DC200' },
+      { nome:'Secretários', n:cont.sec, cor:'#F0B429' },
+      { nome:'Auxiliares Adm', n:cont.aux, cor:'#12509A' },
+      { nome:'Diretores', n:cont.dir, cor:'#6B3FA0' },
+    ].filter(c=>c.n>0);
+    const tot = C.reduce((s,c)=>s+c.n,0) || 1;
+    let acc=0; const stops = C.map(c=>{ const a=acc/tot*100, b=(acc+c.n)/tot*100; acc+=c.n; return `${c.cor} ${a}% ${b}%`; }).join(', ');
+    const legend = C.map(c=>`<div class="dl-item"><span class="dl-dot" style="background:${c.cor}"></span><span class="dl-name">${c.nome}</span><span class="dl-num">${fmt(c.n)}</span></div>`).join('');
+    return `<div class="donut-wrap"><div class="donut" style="background:conic-gradient(${stops})"><div class="donut-center"><span class="dc-lbl">Servidores</span><span class="dc-val">${fmt(tot)}</span></div></div><div class="donut-legend">${legend}</div></div>`;
+  })();
   const turmas = turmasDaEscola(e);
   const ocs = ocorrenciasDaEscola(e);
   const stats = [
@@ -902,7 +928,6 @@ function abrirFicha(inep, keepTab){
   })();
 
   const paneDesempenho = `
-    ${registroAulasHtml}
     ${notaHtml}
     ${matrizNotaHtml}
     <div class="card" style="margin-bottom:20px;"><div class="card-t">Frequência mensal</div>${freqAnoSvg}</div>
@@ -913,6 +938,7 @@ function abrirFicha(inep, keepTab){
 
   const paneInicio = `
     <div class="sch-stats">${dash.map(k=>`<div class="kcard"><div class="kcard-l"><div class="kic ic-${k.c}">${svgP(k.p,21)}</div><div><div class="klbl">${k.l}</div><div class="ksub">${k.s}</div></div></div><div class="kval">${k.v}</div></div>`).join('')}</div>
+    ${registroAulasHtml}
     <div class="card" style="margin-bottom:20px;"><div class="card-t">Planos de aula por disciplina</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">${fmt(planoDados.tot)} planos no total</div>${planoDados.html}</div>
     <div class="two">
       <div class="card"><div class="card-t">Vagas e ocupação</div>
@@ -925,12 +951,7 @@ function abrirFicha(inep, keepTab){
         <div class="occ-track"><div class="occ-fill" style="width:${Math.min(100,ocup).toFixed(1)}%"></div></div>
         <div class="k" style="margin-top:8px;font-size:12px;color:var(--texto-suave);">Ocupação de ${pct1(ocup)}</div>
       </div>
-      <div class="card"><div class="card-t">Equipe</div>
-        <div class="eq-row"><span>Direção</span><b>${eqCount.direcao}</b></div>
-        <div class="eq-row"><span>Coordenação pedagógica</span><b>${eqCount.coord}</b></div>
-        <div class="eq-row"><span>Professores</span><b>${eqCount.prof}</b></div>
-        <div class="eq-row"><span>Secretaria</span><b>${eqCount.sec}</b></div>
-      </div>
+      <div class="card"><div class="card-t">Servidores por cargo</div>${cargoDonut}</div>
     </div>
     <div class="card" style="margin-bottom:20px;">
       <div class="card-t" style="display:flex;align-items:baseline;justify-content:space-between;">Alunos matriculados<span style="font-weight:400;font-size:12px;color:var(--texto-suave);">Total de alunos: <b style="color:var(--laranja);font-family:var(--font-display);">${fmt(e.matriculas)}</b></span></div>
