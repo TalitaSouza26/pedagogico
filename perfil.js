@@ -59,7 +59,8 @@
     const apoio = cmei ? 7 + Math.floor(r(11) * 6) : 4 + Math.floor(r(11) * 6);
     const prof = Math.max(5, servidores - direcao - coord - sec - apoio);
     const localidade = LOCS[Math.floor(r(13) * LOCS.length)];
-    const etapas = cmei ? 'Creche, Pré-escola' : ETAPAS_OPTS[Math.floor(r(14) * ETAPAS_OPTS.length)];
+    const _etr = r(14);
+    const etapas = cmei ? 'Creche, Pré-escola' : (_etr < 0.34 ? 'Anos iniciais' : _etr < 0.965 ? 'Anos iniciais, Anos finais' : 'Anos iniciais, Anos finais, EJA');
     const modalidade = localidade === 'Campo' ? 'Campo' : localidade === 'Indígena' ? 'Indígena' : 'Regular';
     const multisseriada = !cmei && localidade !== 'Urbana' && r(21) > 0.3;
     const salas = cmei ? 6 + Math.floor(r(7) * 6) : 9 + Math.floor(r(7) * 15);
