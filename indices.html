@@ -49,18 +49,20 @@
     .nota-legend span { display: inline-flex; align-items: center; gap: 6px; }
     .nota-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
     /* média de nota — mapa de calor */
-    .heat-sub { font-family: var(--font-display); font-weight: 800; font-size: 13px; color: var(--laranja); text-transform: uppercase; letter-spacing: .04em; margin-top: 14px; }
-    .heat { display: grid; grid-template-columns: minmax(170px, 1.7fr) repeat(5, 1fr) 20px repeat(4, 1fr); gap: 5px; margin-top: 10px; }
-    .heat .hc { padding: 10px 6px; border-radius: 7px; font-size: 12.5px; }
+    .heat-wrap { display: grid; grid-template-columns: 180px 1fr; gap: 14px; align-items: center; }
+    .heat-bubo { width: 100%; max-width: 180px; height: auto; display: block; }
+    .heat-scroll { min-width: 0; overflow-x: auto; }
+    .heat { display: grid; grid-template-columns: minmax(170px, 1.4fr) repeat(3,1fr) 14px repeat(4,1fr) 14px repeat(3,1fr) 14px repeat(2,1fr); gap: 5px; min-width: 760px; }
+    .heat .hc { padding: 11px 6px; border-radius: 9px; font-size: 12.5px; }
     .heat .hc-gap { position: relative; }
-    .heat .hc-gap::after { content: ''; position: absolute; top: 2px; bottom: 2px; left: 50%; transform: translateX(-50%); width: 1px; background: var(--borda); }
-    .heat .hc-group { font-family: var(--font-display); font-weight: 800; color: var(--azul-escuro); font-size: 11px; text-align: center; align-self: end; padding: 2px 6px 4px; border-bottom: 2px solid var(--azul-claro); }
-    .heat .hc-head { font-weight: 700; color: var(--texto-suave); font-size: 10.5px; text-align: center; padding: 3px 6px; }
-    .heat .hc-head.hc-disc-head { text-align: left; text-transform: uppercase; letter-spacing: .05em; }
-    .heat .hc-disc { font-weight: 600; color: var(--texto); display: flex; align-items: center; font-size: 12.5px; }
-    .heat .hc-val { text-align: center; font-family: var(--font-display); font-weight: 800; }
-    .heat .hc-na { text-align: center; color: #AEB6C0; background: var(--bg); }
-    @media (max-width: 920px){ .heat { overflow-x: auto; } }
+    .heat .hc-disc-head-cell { background: var(--laranja); color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 12px; border-radius: 10px; display: flex; align-items: center; padding: 10px 14px; }
+    .heat .hc-group { font-family: var(--font-display); font-weight: 700; color: var(--texto); font-size: 12px; text-align: center; align-self: end; padding: 2px 6px 6px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+    .heat .hc-group svg { width: 13px; height: 13px; color: var(--azul); }
+    .heat .hc-head { font-weight: 600; color: var(--texto-suave); font-size: 11px; text-align: center; padding: 3px 6px; }
+    .heat .hc-disc { font-weight: 500; color: var(--texto); display: flex; align-items: center; font-size: 12.5px; }
+    .heat .hc-disc.on { font-weight: 700; }
+    .heat .hc-val { text-align: center; font-family: var(--font-display); font-weight: 700; }
+    .heat .hc-na { text-align: center; color: #C2C8D0; }
     /* frequência geral */
     .freq-head { display: flex; align-items: baseline; gap: 12px; margin: 6px 0 14px; }
     .fh-num { font-family: var(--font-display); font-weight: 800; font-size: 40px; color: var(--azul); line-height: 1; }
@@ -85,11 +87,17 @@
     .mes-select:focus { outline: none; border-color: var(--azul); }
     .fet-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 12px; }
     .fet-card { background: var(--branco); border: 1px solid var(--borda); border-top: 3px solid var(--azul); border-radius: 12px; padding: 16px; }
-    .fet-top { display: flex; align-items: center; gap: 8px; }
-    .fet-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
-    .fet-lbl { font-size: 12px; color: var(--texto-suave); font-weight: 700; }
-    .fet-val { font-family: var(--font-display); font-weight: 800; font-size: 26px; margin-top: 12px; line-height: 1; }
-    @media (max-width: 720px){ .fet-grid { grid-template-columns: repeat(2, 1fr); } }
+    .fet-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+    .fet-name { font-size: 12.5px; color: var(--texto-suave); font-weight: 700; line-height: 1.2; }
+    .fet-big { font-family: var(--font-display); font-weight: 800; font-size: 22px; line-height: 1; white-space: nowrap; }
+    .fet-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--texto-suave); padding: 6px 0; border-top: 1px solid var(--borda); }
+    .fet-row b { font-family: var(--font-display); font-weight: 700; color: var(--texto); }
+    .fet-row b.na { color: #C2C8D0; }
+    @media (max-width: 920px){ .fet-grid { grid-template-columns: repeat(2, 1fr); } }
+    .freq-dia-wrap { display: grid; grid-template-columns: 1fr 230px; gap: 16px; align-items: end; }
+    .freq-dia-bubo { width: 100%; max-width: 230px; height: auto; display: block; align-self: center; }
+    .freq-nota { font-size: 11px; color: #9AA1AB; margin-top: 14px; line-height: 1.4; }
+    @media (max-width: 920px){ .freq-dia-wrap { grid-template-columns: 1fr; } .freq-dia-bubo { display: none; } }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
   </style>
   <link rel="stylesheet" href="theme.css" />
@@ -121,7 +129,7 @@
   <div class="topbar">
     <div class="topbar-left">
       <svg class="page-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      <div><div class="topbar-title">Índices</div><div class="topbar-sub">Rede Municipal de Ensino · Porto Seguro/BA</div></div>
+      <div><div class="topbar-title">Índices</div><div class="topbar-sub">Educação Municipal de Porto Seguro</div></div>
     </div>
     <div class="topbar-right">
       <div class="user-info"><div class="user-name">Ana Ribeiro</div><div class="user-role">Secretaria de Educação</div></div>
@@ -129,55 +137,78 @@
     </div>
   </div>
 
+  <style>
+    .idx-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 34px 0; flex-wrap: wrap; }
+    .idx-sync { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--texto-suave); }
+    .idx-sync .live { width: 9px; height: 9px; border-radius: 50%; background: var(--verde); flex-shrink: 0; }
+    .idx-view-sel { border: 1px solid var(--borda); background: var(--branco); border-radius: 10px; padding: 9px 16px; font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--texto); cursor: pointer; min-width: 180px; }
+    .idx-hbtns { display: flex; gap: 10px; }
+    .idx-bubo { display: inline-flex; align-items: center; gap: 8px; color: #fff; border: none; border-radius: 10px; padding: 9px 16px; font-family: var(--font-display); font-weight: 700; font-size: 13px; cursor: pointer; }
+    .idx-bubo.azul { background: var(--azul); } .idx-bubo.azul:hover { background: var(--azul-escuro); }
+    .idx-bubo.laranja { background: var(--laranja); } .idx-bubo.laranja:hover { background: var(--laranja-escuro); }
+    .idx-bubo svg { width: 16px; height: 16px; }
+    .idx-bubo-top { display: block; margin: 2px auto -8px; width: 140px; height: auto; position: relative; z-index: 2; }
+  </style>
+  <div class="idx-head">
+    <span class="idx-sync"><span class="live"></span> Dados de <b style="color:var(--laranja)">26/10/2026</b> atualizados <b style="color:var(--laranja)">diariamente</b></span>
+    <select class="idx-view-sel"><option>Visão Geral</option></select>
+    <div class="idx-hbtns">
+      <button class="idx-bubo azul"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2 5 5 .5-4 3.5 1.5 5L12 18l-4.5 3 1.5-5-4-3.5 5-.5z"/></svg> Análises do Bubo</button>
+      <button class="idx-bubo laranja"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Baixar PDF</button>
+    </div>
+  </div>
+
   <div class="view-wrap">
     <div class="content" id="content">
+      <img src="bubo.png" class="idx-bubo-top" alt="Bubo" onerror="this.src='bubo.webp'">
       <div class="idx-group">Notas<small>Desempenho por disciplina e etapa</small></div>
 
       <div class="panel">
         <div class="section-head"><div class="section-title">Média de nota por disciplina</div></div>
         <div class="nota-grid">
-          <div><div class="nota-etapa"><span>Fundamental I</span><span class="ne-med">1º ao 5º ano</span></div><div id="notaF1"></div></div>
+          <div><div class="nota-etapa"><span>Fundamental I</span><span class="ne-med">3º ao 5º ano</span></div><div id="notaF1"></div></div>
           <div><div class="nota-etapa"><span>Fundamental II</span><span class="ne-med">6º ao 9º ano</span></div><div id="notaF2"></div></div>
-          <div><div class="nota-etapa"><span>EJA I</span><span class="ne-med">anos iniciais · 1º ao 5º</span></div><div id="notaEJA1"></div></div>
-          <div><div class="nota-etapa"><span>EJA II</span><span class="ne-med">anos finais · 6º ao 9º</span></div><div id="notaEJA2"></div></div>
+          <div><div class="nota-etapa"><span>EJA I</span><span class="ne-med">1ª a 3ª etapa</span></div><div id="notaEJA1"></div></div>
+          <div><div class="nota-etapa"><span>EJA II</span><span class="ne-med">4ª e 5ª etapas</span></div><div id="notaEJA2"></div></div>
         </div>
         <div class="nota-legend">
-          <span><i style="background:#16A34A"></i> Bom · 5,0 ou mais</span>
-          <span><i style="background:#E24A3A"></i> Baixo · abaixo de 5,0</span>
+          <span><i style="background:#12509A"></i> Com nota · 5,0 ou mais</span>
+          <span><i style="background:#E24A3A"></i> Abaixo de 5,0</span>
         </div>
       </div>
 
       <div class="panel" style="margin-top:20px;">
-        <div class="section-head"><div class="section-title">Média de nota por disciplina e série</div></div>
-        <div class="heat-sub">Ensino Fundamental</div>
-        <div class="heat" id="notaHeatFund"></div>
-        <div class="heat-sub" style="margin-top:22px;">EJA — Educação de Jovens e Adultos</div>
-        <div class="heat" id="notaHeatEja"></div>
+        <div class="heat-wrap">
+          <img src="bubo-think.png" class="heat-bubo" alt="" onerror="this.style.display='none'">
+          <div class="heat-scroll"><div class="heat" id="notaHeat"></div></div>
+        </div>
         <div class="nota-legend" style="margin-top:16px;">
-          <span><i style="background:#16A34A"></i> Bom · 5,0 ou mais</span>
-          <span><i style="background:#E24A3A"></i> Baixo · abaixo de 5,0</span>
-          <span><i style="background:#C4CCD6"></i> Não ofertada na etapa</span>
+          <span><i style="background:#9CC0EC"></i> Com nota · 5,0 ou mais</span>
+          <span><i style="background:#E24A3A"></i> Abaixo de 5,0</span>
+          <span><i style="background:#E7EAEF"></i> Sem registro</span>
+          <span><i style="background:#F2F4F7"></i> Não ofertada</span>
         </div>
       </div>
 
       <div class="idx-group sep">Frequência<small>Presença dos alunos na rede</small></div>
 
       <div class="panel">
-        <div class="section-head"><div class="section-title">Frequência por etapa</div><div class="section-hint">Média do ano letivo</div></div>
+        <div class="section-head"><div class="section-title">Frequência por etapa</div><div class="section-hint">Média do ano letivo de chamadas validadas</div></div>
         <div class="fet-grid" id="freqEtapa"></div>
       </div>
 
       <div class="panel" style="margin-top:20px;">
-        <div class="section-head"><div class="section-title">Frequência diária</div><select class="mes-select" id="mesSel" aria-label="Selecionar mês"></select></div>
-        <div class="freq-head"><div class="fh-num" id="freqDiaMed">—</div><div class="fh-sub" id="freqDiaSub">média do mês</div></div>
-        <div class="acc-bars dense" id="freqDiaBars"></div>
-        <div class="freq-loc" id="freqLoc"></div>
+        <div class="section-head"><div class="section-title">Frequência diária da rede</div><select class="mes-select" id="mesSel" aria-label="Selecionar mês"></select></div>
+        <div class="freq-dia-wrap">
+          <div class="acc-bars dense" id="freqDiaBars"></div>
+          <img src="bubo-laptop.png" class="freq-dia-bubo" alt="" onerror="this.style.display='none'">
+        </div>
       </div>
 
       <div class="panel" style="margin-top:20px;">
-        <div class="section-head"><div class="section-title">Frequência mensal</div><div class="section-hint">Média por mês · ano letivo</div></div>
-        <div class="freq-head"><div class="fh-num" id="freqMed">—</div><div class="fh-sub">média diária da rede em 2026</div></div>
+        <div class="section-head"><div class="section-title">Frequência mensal da rede</div><div class="section-hint">Média por mês de chamadas validadas</div></div>
         <div class="acc-bars" id="freqMesBars"></div>
+        <div class="freq-nota">Os índices consideram apenas as chamadas validadas pelos professores. Chamadas não validadas não são contabilizadas. *</div>
       </div>
     </div>
   </div>
@@ -205,9 +236,9 @@ const totUsuarios = cg.prof+cg.coord+cg.sec+cg.direcao;
 (function(){
   const seedFrom = str => { let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; };
   const dec = v => (Math.round(v*10)/10).toString().replace('.',',');
-  const corNota = n => n>=5 ? '#16A34A' : '#E24A3A';
+  const corNota = n => n>=5 ? '#12509A' : '#E24A3A';
   const BASE_COMUM = ['Língua Portuguesa','Matemática','Ciências','História','História de Porto Seguro','Geografia','Diversidade Afrodescendente e Indígena','Arte','Educação Física','Ensino Religioso','Língua Patxôhã','Agroecologia'];
-  const ORDER = ['Língua Portuguesa','Leitura e Produção de Texto','Língua Inglesa','Língua Patxôhã','Matemática','Ciências','História','História de Porto Seguro','Geografia','Diversidade Afrodescendente e Indígena','Agroecologia','Arte','Educação Física','Ensino Religioso'];
+  const ORDER = ['Agroecologia','Arte','Ciências','Diversidade Afrodescendente e Indígena','Educação Física','Ensino Religioso','Geografia','Leitura e Produção de Texto','História de Porto Seguro','História','Língua Inglesa','Língua Patxôhã','Matemática','Língua Portuguesa'];
   const INICIAIS = ORDER.filter(d=> BASE_COMUM.includes(d) || d==='Leitura e Produção de Texto');
   const FINAIS = ORDER.filter(d=> BASE_COMUM.includes(d) || d==='Língua Inglesa');
   const ETAPAS = [
@@ -225,46 +256,43 @@ const totUsuarios = cg.prof+cg.coord+cg.sec+cg.direcao;
   });
 })();
 
-/* Índice 1 (forma alternativa) — nota por disciplina × série */
+/* Índice 1 (forma alternativa) — nota por disciplina × série/etapa (matriz única) */
 (function(){
+  const host = document.getElementById('notaHeat'); if(!host) return;
   const seedFrom = str => { let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; };
   const dec = v => (Math.round(v*10)/10).toString().replace('.',',');
-  const pal = n => n>=5 ? {bg:'#DEF4E6', fg:'#138A43'} : {bg:'#FBE2DE', fg:'#C33A2D'};
-  const grade = (serie,disc) => Math.round((4.6 + (seedFrom(serie+'|'+disc) % 44)/10) * 10) / 10;
+  const pal = n => n>=5 ? {bg:'#E5EEFA', fg:'#12509A'} : {bg:'#FBE2DE', fg:'#C33A2D'};
+  const grade = (col,disc) => Math.round((4.6 + (seedFrom(col+'|'+disc) % 44)/10) * 10) / 10;
   const BASE_COMUM = ['Língua Portuguesa','Matemática','Ciências','História','História de Porto Seguro','Geografia','Diversidade Afrodescendente e Indígena','Arte','Educação Física','Ensino Religioso','Língua Patxôhã','Agroecologia'];
   const INICIAIS = [...BASE_COMUM, 'Leitura e Produção de Texto'];
   const FINAIS = [...BASE_COMUM, 'Língua Inglesa'];
   const DISC_ETAPA = { 'Fundamental I':INICIAIS, 'Fundamental II':FINAIS, 'EJA I':INICIAIS, 'EJA II':FINAIS };
-  const ORDER = ['Língua Portuguesa','Leitura e Produção de Texto','Língua Inglesa','Língua Patxôhã','Matemática','Ciências','História','História de Porto Seguro','Geografia','Diversidade Afrodescendente e Indígena','Agroecologia','Arte','Educação Física','Ensino Religioso'];
-  const FUND = [
-    { nome:'Fundamental I', cols:[['1º','Fundamental I'],['2º','Fundamental I'],['3º','Fundamental I'],['4º','Fundamental I'],['5º','Fundamental I']] },
-    { nome:'Fundamental II', cols:[['6º','Fundamental II'],['7º','Fundamental II'],['8º','Fundamental II'],['9º','Fundamental II']] },
+  const ORDER = ['Agroecologia','Arte','Ciências','Diversidade Afrodescendente e Indígena','Educação Física','Ensino Religioso','Geografia','Leitura e Produção de Texto','História de Porto Seguro','História','Língua Inglesa','Língua Patxôhã','Matemática','Língua Portuguesa'];
+  const GRUPOS = [
+    { nome:'Fundamental I', etapa:'Fundamental I', cols:['3º','4º','5º'] },
+    { nome:'Fundamental II', etapa:'Fundamental II', cols:['6º','7º','8º','9º'] },
+    { nome:'EJA I', etapa:'EJA I', cols:['1ª','2ª','3ª'] },
+    { nome:'EJA II', etapa:'EJA II', cols:['4ª','5ª'] },
   ];
-  const EJA = [
-    { nome:'EJA I', cols:[['1º','EJA I'],['2º','EJA I'],['3º','EJA I'],['4º','EJA I'],['5º','EJA I']] },
-    { nome:'EJA II', cols:[['6º','EJA II'],['7º','EJA II'],['8º','EJA II'],['9º','EJA II']] },
-  ];
-  const buildHeat = groups => {
-    const last = groups.length-1;
-    let html = `<div class="hc hc-group"></div>`;
-    groups.forEach((g,gi)=>{ html += `<div class="hc hc-group" style="grid-column:span ${g.cols.length}">${g.nome}</div>`; if(gi<last) html += `<div class="hc-gap"></div>`; });
-    html += `<div class="hc hc-head hc-disc-head">Disciplina</div>`;
-    groups.forEach((g,gi)=>{ g.cols.forEach(c=> html += `<div class="hc hc-head">${c[0]}</div>`); if(gi<last) html += `<div class="hc-gap"></div>`; });
-    ORDER.forEach(disc=>{
-      html += `<div class="hc hc-disc">${disc}</div>`;
-      groups.forEach((g,gi)=>{
-        g.cols.forEach(c=>{
-          const etapa = c[1];
-          if(DISC_ETAPA[etapa].includes(disc)){ const n = grade(c[0]+'·'+etapa, disc); const p = pal(n); html += `<div class="hc hc-val" style="background:${p.bg};color:${p.fg}" title="${disc} · ${etapa} · ${c[0]} ano">${dec(n)}</div>`; }
-          else { html += `<div class="hc hc-na">—</div>`; }
-        });
-        if(gi<last) html += `<div class="hc-gap"></div>`;
+  const eye = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const last = GRUPOS.length-1;
+  // linha de grupos (orange "Disciplinas" ocupando 2 linhas)
+  let html = `<div class="hc hc-disc-head-cell" style="grid-row:span 2;">Disciplinas da rede municipal</div>`;
+  GRUPOS.forEach((g,gi)=>{ html += `<div class="hc hc-group" style="grid-column:span ${g.cols.length}">${g.nome} ${eye}</div>`; if(gi<last) html += `<div class="hc-gap" style="grid-row:span 2;"></div>`; });
+  // linha de séries/etapas
+  GRUPOS.forEach(g=>{ g.cols.forEach(c=> html += `<div class="hc hc-head">${c}</div>`); });
+  // linhas de disciplinas
+  ORDER.forEach(disc=>{
+    html += `<div class="hc hc-disc">${disc}</div>`;
+    GRUPOS.forEach((g,gi)=>{
+      g.cols.forEach(serie=>{
+        if(DISC_ETAPA[g.etapa].includes(disc)){ const n = grade(serie+'·'+g.etapa, disc); const p = pal(n); html += `<div class="hc hc-val" style="background:${p.bg};color:${p.fg}" title="${disc} · ${g.nome} ${serie}">${dec(n)}</div>`; }
+        else { html += `<div class="hc hc-na">—</div>`; }
       });
+      if(gi<last) html += `<div class="hc-gap"></div>`;
     });
-    return html;
-  };
-  const ef = document.getElementById('notaHeatFund'); if(ef) ef.innerHTML = buildHeat(FUND);
-  const ee = document.getElementById('notaHeatEja'); if(ee) ee.innerHTML = buildHeat(EJA);
+  });
+  host.innerHTML = html;
 })();
 
 /* Índice 2 — Frequência: diária + mensal (por mês selecionado) */
@@ -292,55 +320,53 @@ const totUsuarios = cg.prof+cg.coord+cg.sec+cg.direcao;
   const diasLetivosMes = m => { const d = new Date(ano,m,1), out = []; while(d.getMonth()===m){ if(ehLetivo(d)) out.push(new Date(d)); d.setDate(d.getDate()+1); } return out; };
   const mediaMes = m => { const v = diasLetivosMes(m).map(freqDia); return v.reduce((s,x)=>s+x,0)/(v.length||1); };
 
-  // --- Frequência diária: dropdown de mês -> dias letivos do mês ---
+  const pad2 = n => String(n).padStart(2,'0');
+
+  // --- Frequência diária da rede: dropdown de mês -> todos os dias do mês ---
   (function(){
     const sel = document.getElementById('mesSel'), host = document.getElementById('freqDiaBars'); if(!sel||!host) return;
-    for(let m=3;m<=11;m++){ const o = document.createElement('option'); o.value = m; o.textContent = MESNOME[m].charAt(0).toUpperCase()+MESNOME[m].slice(1); sel.appendChild(o); }
+    for(let m=0;m<=11;m++){ const o = document.createElement('option'); o.value = m; o.textContent = MESNOME[m].charAt(0).toUpperCase()+MESNOME[m].slice(1); sel.appendChild(o); }
     const render = m => {
-      const dias = diasLetivosMes(m), vals = dias.map(freqDia), med = vals.reduce((s,v)=>s+v,0)/(vals.length||1);
-      document.getElementById('freqDiaMed').textContent = dec(med)+'%';
-      document.getElementById('freqDiaSub').textContent = `média de ${MESNOME[m]} · ${dias.length} dias letivos`;
-      host.innerHTML = dias.map((dd,i)=>{ const v = vals[i];
-        return `<div class="acc-col" title="${dd.getDate()}/${MESCURTO[m]}: ${dec(v)}% de presença"><div class="acc-bar" style="height:${barH(v)}%"></div><span class="acc-lbl">${dd.getDate()}</span></div>`;
-      }).join('');
+      const dim = new Date(ano, m+1, 0).getDate();
+      let html = '';
+      for(let day=1; day<=dim; day++){ const d = new Date(ano,m,day); const letivo = ehLetivo(d) && m>=2 && m<=9; const v = letivo ? freqDia(d) : 0;
+        html += `<div class="acc-col" title="${pad2(day)}/${MESCURTO[m]}: ${letivo?dec(v)+'% de presença':'sem aula'}"><div class="acc-bar" style="height:${letivo?barH(v):0}%"></div><span class="acc-lbl">${pad2(day)}</span></div>`;
+      }
+      host.innerHTML = html;
     };
-    sel.value = 7; render(7); // agosto (mês da data do painel)
+    sel.value = 9; render(9); // outubro (mês da data do painel)
     sel.addEventListener('change', e => render(+e.target.value));
   })();
 
-  // --- Frequência mensal: barras por mês (abr–dez) ---
+  // --- Frequência mensal da rede: barras por mês (Jan–Dez) ---
   (function(){
     const host = document.getElementById('freqMesBars'); if(!host) return;
-    const meses = []; for(let m=3;m<=11;m++) meses.push(m);
-    host.innerHTML = meses.map(m=>{ const v = Math.round(mediaMes(m)*10)/10;
-      return `<div class="acc-col" title="${MESNOME[m]}: ${dec(v)}% de presença"><div class="acc-bar" style="height:${barH(v)}%"><span class="acc-bar-val">${dec(v)}%</span></div><span class="acc-lbl">${MESCURTO[m]}</span></div>`;
-    }).join('');
+    let html = '';
+    for(let m=0;m<=11;m++){ const temDado = m>=2 && m<=9; const v = temDado ? Math.round(mediaMes(m)*10)/10 : 0;
+      html += `<div class="acc-col" title="${MESNOME[m]}: ${temDado?dec(v)+'% de presença':'sem dados'}"><div class="acc-bar" style="height:${temDado?barH(v):0}%">${temDado?`<span class="acc-bar-val">${dec(v)}%</span>`:''}</div><span class="acc-lbl">${MESCURTO[m]}</span></div>`;
+    }
+    host.innerHTML = html;
   })();
 
-  // --- Frequência por etapa (média do ano) ---
+  // --- Frequência por etapa (cards com detalhamento por série/etapa) ---
   (function(){
     const host = document.getElementById('freqEtapa'); if(!host) return;
     const ET = [
-      { nome:'Educação Infantil', off:-1.4, cor:'#6B3FA0' },
-      { nome:'Fundamental I', off:0.6, cor:'#12509A' },
-      { nome:'Fundamental II', off:-0.4, cor:'#2E8B00' },
-      { nome:'EJA I', off:-2.0, cor:'#F0B429' },
-      { nome:'EJA II', off:-2.7, cor:'#E8952A' },
+      { nome:'Educação Infantil', cor:'#F0B429', off:-1.5, subs:['CN I','CN II','CN III','PN I','PN II'] },
+      { nome:'Ensino Fundamental I', cor:'#12509A', off:0.6, subs:['1º ano','2º ano','3º ano','4º ano','5º ano'] },
+      { nome:'Ensino Fundamental II', cor:'#ED6939', off:-0.3, subs:['6º ano','7º ano','8º ano','9º ano'] },
+      { nome:'EJA I', cor:'#6B3FA0', off:-2.0, subs:['1ª etapa','2ª etapa','3ª etapa'] },
+      { nome:'EJA II', cor:'#D6409F', off:-2.6, subs:['4ª etapa','5ª etapa'] },
     ];
-    host.innerHTML = ET.map(e=>{ const v = Math.round((freqMedia + e.off)*10)/10;
-      return `<div class="fet-card" style="border-top-color:${e.cor}"><div class="fet-top"><span class="fet-dot" style="background:${e.cor}"></span><span class="fet-lbl">${e.nome}</span></div><div class="fet-val" style="color:${e.cor}">${dec(v)}%</div></div>`;
+    host.innerHTML = ET.map(e=>{
+      const rows = e.subs.map(s=>{ const v = Math.max(30, Math.min(100, Math.round((freqMedia + e.off + ((seedFrom(e.nome+'·'+s)%180)/10 - 9))*10)/10)); return { s, v }; });
+      const med = rows.reduce((a,r)=>a+r.v,0)/rows.length;
+      return `<div class="fet-card" style="border-top-color:${e.cor}">
+        <div class="fet-head"><span class="fet-name">${e.nome}</span><span class="fet-big" style="color:${e.cor}">${dec(med)}%</span></div>
+        ${rows.map(r=>`<div class="fet-row"><span>${r.s}</span><b>${dec(r.v)}%</b></div>`).join('')}
+      </div>`;
     }).join('');
   })();
-
-  // por localidade (média ponderada por alunos)
-  const loc = {'Urbana':{s:0,w:0},'Campo':{s:0,w:0},'Indígena':{s:0,w:0}};
-  E.forEach(e=>{ const l = e.localidade || (e.modalidade==='Campo'?'Campo':e.modalidade==='Indígena'?'Indígena':'Urbana'); if(!loc[l]) loc[l]={s:0,w:0}; loc[l].s += e.freq*e.matriculas; loc[l].w += e.matriculas; });
-  const COR = {'Urbana':'#12509A','Campo':'#6E8FB3','Indígena':'#6B7A8F'};
-  const fo = document.getElementById('freqLoc');
-  if(fo) fo.innerHTML = Object.keys(loc).map(l=>{
-    const v = loc[l].w ? loc[l].s/loc[l].w : 0;
-    return `<div class="floc-card"><div class="floc-top"><span class="floc-dot" style="background:${COR[l]}"></span><span class="floc-lbl">${l}</span></div><div class="floc-val" style="color:${COR[l]}">${dec(v)}%</div></div>`;
-  }).join('');
 })();
 </script>
 
