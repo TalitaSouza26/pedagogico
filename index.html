@@ -103,6 +103,31 @@
     .acc-col:hover .acc-bar { filter: brightness(1.06); }
     .acc-bar-val { position: absolute; top: -17px; left: 0; right: 0; text-align: center; font-family: var(--font-display); font-size: 11.5px; font-weight: 700; color: var(--texto-suave); }
     .acc-lbl { font-size: 12px; color: var(--texto-suave); }
+    .acc-bars.dense14 { gap: 6px; height: 170px; }
+    .acc-bars.dense14 .acc-bar { max-width: 38px; }
+    .acc-bars.dense14 .acc-bar-val { font-size: 9px; top: -14px; }
+    .acc-bars.dense14 .acc-lbl { font-size: 9.5px; }
+    /* Bubo mascote */
+    .bubo-top { display: block; margin: -6px auto 2px; width: 150px; height: auto; }
+    .sec-bubo { position: relative; }
+    .bubo-float { position: absolute; z-index: 2; pointer-events: none; height: auto; }
+    .hdr-btns { display: flex; align-items: center; gap: 10px; }
+    .btn-bubo { display: inline-flex; align-items: center; gap: 8px; background: var(--azul); color: #fff; border: none; border-radius: 10px; padding: 9px 16px; font-family: var(--font-display); font-weight: 700; font-size: 13px; cursor: pointer; }
+    .btn-bubo:hover { background: var(--azul-escuro); }
+    .btn-pdf { display: inline-flex; align-items: center; gap: 8px; background: var(--laranja); color: #fff; border: none; border-radius: 10px; padding: 9px 16px; font-family: var(--font-display); font-weight: 700; font-size: 13px; cursor: pointer; }
+    .btn-pdf:hover { background: var(--laranja-escuro); }
+    .btn-bubo svg, .btn-pdf svg { width: 16px; height: 16px; }
+    /* Acessos ao sistema */
+    .acesso-top { display: grid; grid-template-columns: 150px 1fr; gap: 18px; align-items: center; }
+    .acesso-bubo { width: 100%; max-width: 150px; height: auto; display: block; }
+    .acesso-chart { min-width: 0; }
+    .acesso-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+    .astat { background: var(--branco); border: 1px solid var(--borda); border-radius: 12px; padding: 14px 10px; text-align: center; }
+    .astat-lbl { font-size: 12px; color: var(--texto-suave); display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .astat-n { font-family: var(--font-display); font-weight: 800; font-size: 28px; line-height: 1; margin: 9px 0 4px; color: var(--azul); }
+    .astat-n.verde { color: #2E8B00; } .astat-n.orange { color: var(--laranja); }
+    .astat-sub { font-size: 10.5px; color: #9AA1AB; }
+    @media (max-width: 1000px){ .acesso-top { grid-template-columns: 1fr; } .acesso-bubo { display: none; } .acesso-stats { grid-template-columns: 1fr 1fr; } }
     /* Escolas por localidade — barras horizontais */
     .locbar { display: grid; grid-template-columns: 120px 1fr 110px; align-items: center; gap: 14px; padding: 9px 0; cursor: pointer; }
     .locbar + .locbar { border-top: 1px solid var(--borda); }
@@ -233,21 +258,22 @@
       <div><div class="topbar-title">Visão geral</div><div class="topbar-sub">Rede Municipal de Ensino · Porto Seguro/BA</div></div>
     </div>
     <div class="topbar-right">
-      <div class="user-info"><div class="user-name">Ana Ribeiro</div><div class="user-role">Secretaria de Educação</div></div>
-      <div class="avatar">AR</div>
+      <div class="user-info"><div class="user-name">Prefeito EProf</div><div class="user-role">Prefeito</div></div>
+      <div class="avatar" style="background:var(--laranja);">PE</div>
     </div>
   </div>
 
   <div class="cal-header">
-    <div></div>
-    <div class="ctx-right">
-      <button class="rel-btn" onclick="abrirRelatorio()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg> Relatório</button>
-      <span class="sync-stamp"><span class="live"></span> Dados de 06/08/2026</span>
+    <span class="sync-stamp"><span class="live"></span> Dados de <b style="color:var(--laranja);">26/10/2026</b> atualizados em <b style="color:var(--laranja);">tempo real</b></span>
+    <div class="hdr-btns">
+      <button class="btn-bubo" onclick="abrirRelatorio()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2 5 5 .5-4 3.5 1.5 5L12 18l-4.5 3 1.5-5-4-3.5 5-.5z"/></svg> Análises do Bubo</button>
+      <button class="btn-pdf" onclick="abrirRelatorio()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Baixar PDF</button>
     </div>
   </div>
 
   <div class="view-wrap">
     <div class="content">
+      <img src="bubo.png" class="bubo-top" alt="Bubo" onerror="this.src='bubo.webp'">
       <div class="kpi-row" id="kpiRow"></div>
 
       <div class="panel" style="margin-top:4px;">
@@ -274,14 +300,7 @@
         </div>
       </div>
 
-      <div class="grid-2" style="margin-top:20px;">
-        <div class="panel">
-          <div class="section-head"><div class="section-title">Servidores por cargo</div><div class="section-hint">Com acesso ao sistema</div></div>
-          <div class="donut-wrap">
-            <div class="donut" id="donut"><div class="donut-center"><span class="dc-lbl">Servidores</span><span class="dc-val" id="donutTotal"></span></div></div>
-            <div class="donut-legend" id="donutLegend"></div>
-          </div>
-        </div>
+      <div style="display:grid;grid-template-columns:1fr 190px 1fr;gap:16px;align-items:center;margin-top:20px;">
         <div class="panel">
           <div class="section-head"><div class="section-title">Servidores por localidade</div><div class="section-hint">Distribuição na rede</div></div>
           <div class="donut-wrap">
@@ -289,17 +308,17 @@
             <div class="donut-legend" id="donutLocLegend"></div>
           </div>
         </div>
-      </div>
-
-      <div class="panel" style="margin-top:20px;">
-        <div class="section-head"><div class="section-title">Acessos à plataforma</div><div class="section-hint">Entradas no sistema · últimos 30 dias</div></div>
-        <div class="vm" style="grid-template-columns:repeat(4,1fr);margin-bottom:0;">
-          <div class="vm-block"><div class="vm-label">Acessos nos últimos 30 dias</div><div class="vm-num" id="acc30Tot">—</div><div class="vm-sub">entradas no sistema</div></div>
-          <div class="vm-block"><div class="vm-label">Média por dia</div><div class="vm-num" id="acc30Dia">—</div><div class="vm-sub">acessos diários</div></div>
-          <div class="vm-block"><div class="vm-label"><span class="live-dot"></span> Pico em um dia</div><div class="vm-num orange" id="acc30Pico">—</div><div class="vm-sub" id="acc30PicoDia">maior movimento</div></div>
-          <div class="vm-block"><div class="vm-label">Usuários únicos</div><div class="vm-num verde" id="acc30Uniq">—</div><div class="vm-sub">entraram ao menos uma vez</div></div>
+        <img src="bubo-up.png" alt="Bubo" style="width:100%;max-width:190px;height:auto;display:block;margin:0 auto;" onerror="this.style.display='none'">
+        <div class="panel">
+          <div class="section-head"><div class="section-title">Servidores por cargo</div><div class="section-hint">Com acesso ao sistema</div></div>
+          <div class="donut-wrap">
+            <div class="donut" id="donut"><div class="donut-center"><span class="dc-lbl">Servidores</span><span class="dc-val" id="donutTotal"></span></div></div>
+            <div class="donut-legend" id="donutLegend"></div>
+          </div>
         </div>
       </div>
+      <style>@media (max-width:1000px){ .content > div[style*="190px"]{ grid-template-columns:1fr !important; } .content > div[style*="190px"] img{ display:none; } }</style>
+
 
       <div class="grid-2" style="margin-top:20px;">
         <div class="panel">
@@ -315,8 +334,8 @@
           </div>
         </div>
         <div class="panel">
-          <div class="section-head"><div class="section-title">Matrículas por mês</div><div class="section-hint">Novas matrículas · últimos 6 meses</div></div>
-          <div class="acc-bars" id="matBars" style="margin-top:8px;"></div>
+          <div class="section-head"><div class="section-title">Matrículas por mês</div><select id="matAno" onchange="renderMatMes()" style="border:1px solid var(--borda);border-radius:8px;padding:5px 10px;font-family:var(--font-display);font-size:12px;font-weight:600;color:var(--texto);background:var(--branco);cursor:pointer;"><option>2026</option><option>2025</option></select></div>
+          <div class="acc-bars dense14" id="matBars" style="margin-top:8px;"></div>
         </div>
       </div>
 
@@ -337,13 +356,29 @@
         </div>
       </div>
 
-      <div class="panel" style="margin-top:20px;">
+      <div class="panel sec-bubo" style="margin-top:20px;overflow:hidden;">
         <div class="section-head"><div class="section-title">Planos de aula</div><div class="section-hint">Gerados pelos professores · <b id="planTot">—</b> no total</div></div>
-        <div class="plan-grid">
-          <div><div class="plan-etapa"><span>Educação Infantil</span><span class="pe-tot" id="planInfTot"></span></div><div id="planInf"></div></div>
+        <div class="plan-grid" style="grid-template-columns:repeat(5,1fr);">
+          <div><div class="plan-etapa"><span>Infantil</span><span class="pe-tot" id="planInfTot"></span></div><div id="planInf"></div><div style="font-size:10.5px;color:#9AA1AB;margin-top:10px;line-height:1.4;">Na Educação Infantil um mesmo plano pode abordar mais de um campo de experiência, por isso a soma dos campos ultrapassa o total de planos.</div></div>
           <div><div class="plan-etapa"><span>Fundamental I</span><span class="pe-tot" id="planF1Tot"></span></div><div id="planF1"></div></div>
           <div><div class="plan-etapa"><span>Fundamental II</span><span class="pe-tot" id="planF2Tot"></span></div><div id="planF2"></div></div>
-          <div><div class="plan-etapa"><span>EJA</span><span class="pe-tot" id="planEJATot"></span></div><div id="planEJA"></div></div>
+          <div><div class="plan-etapa"><span>EJA I</span><span class="pe-tot" id="planEJA1Tot"></span></div><div id="planEJA1"></div></div>
+          <div><div class="plan-etapa"><span>EJA II</span><span class="pe-tot" id="planEJA2Tot"></span></div><div id="planEJA2"></div></div>
+        </div>
+        <img src="bubo-think.png" class="bubo-float" alt="" style="right:-18px;bottom:-10px;height:200px;" onerror="this.style.display='none'">
+      </div>
+
+      <div class="panel" style="margin-top:20px;">
+        <div class="section-head" style="margin-bottom:6px;"><div class="section-title">Acessos ao sistema</div><div class="section-hint" id="accPeriodo">Últimos 14 dias</div></div>
+        <div class="acesso-top">
+          <img src="bubo-laptop.png" class="acesso-bubo" alt="" onerror="this.style.display='none'">
+          <div class="acesso-chart"><div class="acc-bars dense14" id="acc14Bars"></div></div>
+        </div>
+        <div class="acesso-stats">
+            <div class="astat"><div class="astat-lbl">Setembro</div><div class="astat-n" id="accSet">—</div><div class="astat-sub">acessos no total</div></div>
+            <div class="astat"><div class="astat-lbl">Outubro</div><div class="astat-n verde" id="accOut">—</div><div class="astat-sub">acessos no total</div></div>
+            <div class="astat"><div class="astat-lbl">Contagem vitalícia</div><div class="astat-n orange" id="accVit">—</div><div class="astat-sub">acessos no total</div></div>
+            <div class="astat"><div class="astat-lbl"><span class="live-dot"></span> Acessos hoje</div><div class="astat-n verde" id="accHoje">—</div><div class="astat-sub">em tempo real</div></div>
         </div>
       </div>
 
@@ -397,7 +432,7 @@ const KPIS = [
 const KPI_COR = { azul:'#12509A', laranja:'#ED6939', roxo:'#6B3FA0', verde:'#2E8B00', ambar:'#F0B429', teal:'#0E9DAE' };
 document.getElementById('kpiRow').innerHTML = KPIS.map((k,i)=>{
   const c = KPI_COR[k.ic] || '#12509A';
-  const style = ` style="background:linear-gradient(135deg, ${c}22, ${c}0a); border-color:${c}33;"`;
+  const style = ` style="background:linear-gradient(135deg, ${c}1a, ${c}08); border-color:${c}2e;"`;
   return `<div class="kpi-card"${style}><div class="kpi-left"><div class="kpi-ic ic-${k.ic}">${svgIc(k.p)}</div>
     <div><div class="kpi-label">${k.label}</div><div class="kpi-sub">${k.sub}</div></div></div>
     <div class="kpi-value">${k.valor}</div></div>`;
@@ -434,43 +469,51 @@ const stops = CARGOS.map(c=>{ const a=acc/totCargo*100, b=(acc+c.n)/totCargo*100
 document.getElementById('donut').style.background = `conic-gradient(${stops})`;
 document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl-item"><span class="dl-dot" style="background:${c.cor}"></span><span class="dl-name">${c.nome}</span><span class="dl-num">${c.n}</span></div>`).join('');
 
-/* Matrículas — hoje (tempo real) + novas por mês (últimos 6 meses) */
-(function(){
-  const meses = ['mar','abr','mai','jun','jul','ago'];
-  const baseN = Math.max(60, Math.round(totAlunos * 0.011));
-  const fac = [0.84, 0.90, 0.95, 1.0, 1.07, 1.16];
-  const vals = fac.map(f=> Math.round(baseN * f));
+/* Matrículas — novas por mês (jan–dez, por ano) */
+const _seedMM = str => { let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; };
+function renderMatMes(){
+  const host = document.getElementById('matBars'); if(!host) return;
+  const ano = (document.getElementById('matAno')||{}).value || '2026';
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const baseN = Math.max(40, Math.round(totAlunos * 0.011));
+  const vals = meses.map((m,i)=>{
+    let fac = i<=1 ? 1.15 : i===2 ? 0.95 : (0.55 + (i*0.05)); // concentra no início do ano letivo
+    const noise = 0.75 + (_seedMM(ano+'mm'+i)%50)/100;
+    return Math.round(baseN * fac * noise);
+  });
   const maxV = Math.max(...vals, 1);
-  document.getElementById('matBars').innerHTML = vals.map((v,i)=>{
-    const h = Math.round(v / maxV * 100);
-    return `<div class="acc-col" title="${meses[i]}: ${fmt(v)} novas matrículas" onclick="(window.top||window).location.href='alunos.html'"><div class="acc-bar" style="height:${h}%"><span class="acc-bar-val">${fmt(v)}</span></div><span class="acc-lbl">${meses[i]}</span></div>`;
+  host.innerHTML = vals.map((v,i)=>{
+    const h = Math.max(3, Math.round(v / maxV * 100));
+    return `<div class="acc-col" title="${meses[i]}/${ano}: ${fmt(v)} novas matrículas" onclick="(window.top||window).location.href='alunos.html'"><div class="acc-bar" style="height:${h}%"><span class="acc-bar-val">${fmt(v)}</span></div><span class="acc-lbl">${meses[i]}</span></div>`;
   }).join('');
-})();
+}
+renderMatMes();
 
-/* Acessos à plataforma — últimos 30 dias */
+/* Acessos ao sistema — barras dos últimos 14 dias + totais mensais */
 (function(){
-  if(!document.getElementById('acc30Tot')) return;
+  const host = document.getElementById('acc14Bars'); if(!host) return;
   const seedFrom = str => { let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; };
-  const base = Math.round(totUsuarios*0.9 + totResp*0.16 + totAlunos*0.05);
-  const hoje = new Date(2026,7,6); // data do painel: 06/08/2026
-  const MES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-  const dias = [];
-  for(let i=29;i>=0;i--){
-    const d = new Date(hoje); d.setDate(hoje.getDate()-i);
-    const dow = d.getDay();
-    let fac = 1; if(dow===0) fac=0.32; else if(dow===6) fac=0.48; else if(dow===5) fac=0.9; else if(dow===1) fac=1.08;
-    const noise = 0.86 + (seedFrom('acc'+d.getDate()+'_'+d.getMonth())%28)/100;
-    dias.push({ d, v: Math.max(0, Math.round(base*fac*noise)) });
-  }
-  const todos = dias.map(x=>x.v);
-  const tot = todos.reduce((s,v)=>s+v,0);
-  const picoDia = Math.max(...todos);
-  const picoD = dias[todos.indexOf(picoDia)].d;
-  const mediaDia = Math.round(tot/30);
-  const uniq = Math.round((totUsuarios + totResp*0.55) * 0.82);
-  const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
-  set('acc30Tot', fmt(tot)); set('acc30Dia', fmt(mediaDia)); set('acc30Pico', fmt(picoDia)); set('acc30Uniq', fmt(uniq));
-  set('acc30PicoDia', `em ${picoD.getDate()}/${MES[picoD.getMonth()]}`);
+  const base = Math.round(totUsuarios*0.4 + totResp*0.01);
+  const diaVal = d => {
+    const dow = d.getDay(); let f = 1; if(dow===0) f=0.15; else if(dow===6) f=0.32; else if(dow===5) f=0.85;
+    const noise = 0.75 + (seedFrom('ac'+d.getFullYear()+'_'+d.getMonth()+'_'+d.getDate())%45)/100;
+    return Math.max(0, Math.round(base*f*noise));
+  };
+  // 14 dias terminando em 25/10/2026
+  const fim = new Date(2026,9,25), dias = [];
+  for(let i=13;i>=0;i--){ const d = new Date(fim); d.setDate(fim.getDate()-i); dias.push(d); }
+  const vals = dias.map(diaVal), mx = Math.max(...vals,1);
+  host.innerHTML = dias.map((d,i)=>`<div class="acc-col" title="${d.getDate()}/${d.getMonth()+1}: ${fmt(vals[i])} acessos"><div class="acc-bar" style="height:${Math.max(4,Math.round(vals[i]/mx*100))}%"><span class="acc-bar-val">${fmt(vals[i])}</span></div><span class="acc-lbl">${d.getDate()}/${d.getMonth()+1}</span></div>`).join('');
+  const p = document.getElementById('accPeriodo'); if(p) p.textContent = `Últimos 14 dias (${dias[0].getDate()}/${dias[0].getMonth()+1} a ${dias[13].getDate()}/${dias[13].getMonth()+1})`;
+  // totais mensais (dias letivos)
+  const somaMes = (m, ate) => { let s=0; const d=new Date(2026,m,1); while(d.getMonth()===m){ if((!ate||d<=ate)){ const w=d.getDay(); if(w>=1&&w<=5) s+=diaVal(d); } d.setDate(d.getDate()+1); } return s; };
+  const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=fmt(v); };
+  const setT = somaMes(8), outT = somaMes(9, new Date(2026,9,25));
+  let vit = outT+setT; for(const m of [2,3,4,5,6,7]) vit += somaMes(m); vit = Math.round(vit*1.6);
+  set('accSet', setT); set('accOut', outT); set('accVit', vit);
+  let hojeN = Math.round(base*0.35) + seedFrom('ach')%20;
+  const elH = document.getElementById('accHoje');
+  if(elH){ elH.textContent = fmt(hojeN); setInterval(()=>{ if(Math.random()<0.5){ hojeN++; elH.textContent = fmt(hojeN); } }, 5000); }
 })();
 
 /* Escolas por localidade — rosca clicável */
@@ -594,7 +637,8 @@ document.getElementById('donutLegend').innerHTML = CARGOS.map(c=>`<div class="dl
     { id:'planInf', tot:'planInfTot', nome:'Educação Infantil', discs:['(EO) O eu, o outro e o nós','(CG) Corpo, gestos e movimentos','(TS) Traços, sons, cores e formas','(EF) Escuta, fala, pensamento e imaginação','(ET) Espaços, tempos, quantidades, relações, transformações','(CR) Culturas regionais'] },
     { id:'planF1', tot:'planF1Tot', nome:'Fundamental I', discs:[...BASE_COMUM,'Leitura e Produção de Texto'] },
     { id:'planF2', tot:'planF2Tot', nome:'Fundamental II', discs:[...BASE_COMUM,'Língua Inglesa'] },
-    { id:'planEJA', tot:'planEJATot', nome:'EJA', discs:[...BASE_COMUM,'Leitura e Produção de Texto','Língua Inglesa'] },
+    { id:'planEJA1', tot:'planEJA1Tot', nome:'EJA I', discs:[...BASE_COMUM,'Leitura e Produção de Texto'] },
+    { id:'planEJA2', tot:'planEJA2Tot', nome:'EJA II', discs:[...BASE_COMUM,'Língua Inglesa'] },
   ];
   let total = 0;
   ETAPAS.forEach(E2=>{
