@@ -803,7 +803,7 @@ function abrirFicha(inep, keepTab){
   let notaHtml;
   if(!ehInfantil){
     notaHtml = `<div class="card" style="margin-bottom:20px;"><div class="card-t">Média de nota por disciplina</div><div class="serie-list">` +
-      discsEsc.map(dn=>{ const nota=Math.round((4.6 + (seedFrom(e.inep+'nt'+dn)%44)/10)*10)/10; const c=corNota(nota); return `<div class="srow"><span class="s-name">${dn}</span><span class="s-track"><span class="s-fill" style="width:${(nota/10*100).toFixed(0)}%;background:${c}"></span></span><span class="s-num" style="color:${c}">${nota.toFixed(1).replace('.',',')}</span></div>`; }).join('') +
+      discsEsc.map(dn=>{ const nota=Math.round((4.6 + (seedFrom(e.inep+'nt'+fichaBim+dn)%44)/10)*10)/10; const c=corNota(nota); return `<div class="srow"><span class="s-name">${dn}</span><span class="s-track"><span class="s-fill" style="width:${(nota/10*100).toFixed(0)}%;background:${c}"></span></span><span class="s-num" style="color:${c}">${nota.toFixed(1).replace('.',',')}</span></div>`; }).join('') +
       `</div></div>`;
   } else {
     notaHtml = `<div class="card" style="margin-bottom:20px;"><div class="card-t">Avaliação — Educação Infantil</div><div style="font-size:13px;color:var(--texto-suave);">Avaliação por campos de experiência (sem nota numérica).</div></div>`;
@@ -871,7 +871,7 @@ function abrirFicha(inep, keepTab){
       return true;
     };
     const pal = n => n>=5 ? {bg:'#E5EEFA',fg:'#12509A'} : {bg:'#FBE2DE',fg:'#C33A2D'};
-    const grade = (col,d) => Math.round((4.6 + (seedFrom(e.inep+col+d)%44)/10)*10)/10;
+    const grade = (col,d) => Math.round((4.6 + (seedFrom(e.inep+fichaBim+col+d)%44)/10)*10)/10;
     const gridCols = `minmax(140px,1.3fr) ` + GR.map(g=>`repeat(${g.cols.length},1fr)`).join(' 12px ');
     const last = GR.length-1;
     let html = `<div class="hc hc-disc-head-cell" style="grid-row:span 2;">Disciplina</div>`;
@@ -928,6 +928,7 @@ function abrirFicha(inep, keepTab){
   })();
 
   const paneDesempenho = `
+    <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:14px;"><span style="font-size:12px;color:var(--texto-suave);">Bimestre</span><select class="mes-select" onchange="setBim(this.value)" aria-label="Bimestre">${BIMS.map(b=>`<option ${b===fichaBim?'selected':''}>${b}</option>`).join('')}</select></div>
     ${notaHtml}
     ${matrizNotaHtml}
     <div class="card" style="margin-bottom:20px;"><div class="card-t">Frequência mensal</div>${freqAnoSvg}</div>
