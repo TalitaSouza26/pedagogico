@@ -857,18 +857,25 @@ function abrirFicha(inep, keepTab){
     if(d==='Língua Patxôhã'||d==='Agroecologia') return _campoInd;
     return true;
   };
+  const CAMPOS_EI = ['(EO) O eu, o outro e o nós','(CG) Corpo, gestos e movimentos','(TS) Traços, sons, cores e formas','(EF) Escuta, fala, pensamento e imaginação','(ET) Espaços, tempos, quantidades, relações, transformações','(CR) Culturas regionais'];
+  const NIVEL_EI = [{t:'Inicial',c:'#E8A317'},{t:'Em desenvolvimento',c:'#12509A'},{t:'Consolidado',c:'#2E8B00'}];
   let notaHtml;
   if(!ehInfantil){
     const gr = [];
+    if(_temInfantil) gr.push({ nome:'Educação Infantil', sub:'campos de experiência', infantil:true });
     if(_temIniciais) gr.push({ nome:'Fundamental I', sub:'3º ao 5º ano', etapa:'Fundamental I' });
     if(_temFinais) gr.push({ nome:'Fundamental II', sub:'6º ao 9º ano', etapa:'Fundamental II' });
     if(_temEJA){ gr.push({ nome:'EJA I', sub:'1ª a 3ª etapa', etapa:'EJA I' }); gr.push({ nome:'EJA II', sub:'4ª e 5ª etapas', etapa:'EJA II' }); }
     notaHtml = `<div class="card" style="margin-bottom:20px;"><div class="card-t">Média de nota por disciplina</div><div class="plan-cols">` +
       gr.map(g=>{
-        const rows = discsEsc.filter(d=>_oferNota(g.etapa,d)).map(d=>{ const n=Math.round((4.6 + (seedFrom(e.inep+'nt'+fichaBim+g.etapa+d)%44)/10)*10)/10; return {d,n}; });
-        return `<div class="plan-col"><div class="plan-col-t"><span>${g.nome}</span><span class="plan-col-tot">${g.sub}</span></div>` +
-          rows.map(r=>{ const c=corNota(r.n); return `<div class="nota-row"><div class="nota-top"><span class="nt-n">${r.d}</span><span class="nt-v" style="color:${c}">${r.n.toFixed(1).replace('.',',')}</span></div><div class="nota-bar"><div class="nota-fill" style="width:${(r.n/10*100).toFixed(0)}%;background:${c}"></div></div></div>`; }).join('') +
-          `</div>`;
+        let rowsHtml;
+        if(g.infantil){
+          rowsHtml = CAMPOS_EI.map(cp=>{ const nv=NIVEL_EI[seedFrom(e.inep+'ei'+fichaBim+cp)%3]; return `<div class="nota-row"><div class="nota-top"><span class="nt-n">${cp}</span><span class="nt-v" style="color:${nv.c};font-size:11px;font-weight:700;">${nv.t}</span></div><div class="nota-bar"><div class="nota-fill" style="width:${((NIVEL_EI.indexOf(nv)+1)/3*100).toFixed(0)}%;background:${nv.c}"></div></div></div>`; }).join('');
+        } else {
+          const rows = discsEsc.filter(d=>_oferNota(g.etapa,d)).map(d=>{ const n=Math.round((4.6 + (seedFrom(e.inep+'nt'+fichaBim+g.etapa+d)%44)/10)*10)/10; return {d,n}; });
+          rowsHtml = rows.map(r=>{ const c=corNota(r.n); return `<div class="nota-row"><div class="nota-top"><span class="nt-n">${r.d}</span><span class="nt-v" style="color:${c}">${r.n.toFixed(1).replace('.',',')}</span></div><div class="nota-bar"><div class="nota-fill" style="width:${(r.n/10*100).toFixed(0)}%;background:${c}"></div></div></div>`; }).join('');
+        }
+        return `<div class="plan-col"><div class="plan-col-t"><span>${g.nome}</span><span class="plan-col-tot">${g.sub}</span></div>${rowsHtml}</div>`;
       }).join('') + `</div></div>`;
   } else {
     notaHtml = `<div class="card" style="margin-bottom:20px;"><div class="card-t">Avaliação — Educação Infantil</div><div style="font-size:13px;color:var(--texto-suave);">Avaliação por campos de experiência (sem nota numérica).</div></div>`;
