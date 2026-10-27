@@ -271,6 +271,38 @@
     .sinfo-lbl { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); font-family: var(--font-display); margin-bottom: 3px; }
     .sinfo-v { font-size: 13.5px; color: var(--texto); font-weight: 600; line-height: 1.25; }
     @media (max-width: 760px){ .sch-info { grid-template-columns: 1fr; } }
+    /* perfil do aluno */
+    .al-click { cursor: pointer; }
+    .al-click:hover td b { color: var(--azul); }
+    .alp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio); padding: 18px 22px; margin-bottom: 20px; }
+    .alp-kv { display: grid; grid-template-columns: auto 1fr; gap: 11px 18px; font-size: 13px; align-items: center; }
+    .alp-kv .k { color: var(--texto-suave); display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+    .alp-kv .k svg { width: 15px; height: 15px; }
+    .alp-kv .v { color: var(--texto); font-weight: 600; }
+    .alp-side { display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
+    .alp-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+    .alp-btn { display: inline-flex; align-items: center; gap: 7px; border: none; border-radius: 10px; padding: 9px 15px; font-family: var(--font-display); font-weight: 700; font-size: 12.5px; color: #fff; cursor: pointer; }
+    .alp-btn svg { width: 14px; height: 14px; }
+    .alp-ringbox { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .alp-ring { width: 88px; height: 88px; border-radius: 50%; display: grid; place-items: center; position: relative; }
+    .alp-ring::after { content: ''; position: absolute; inset: 7px; background: var(--bg); border-radius: 50%; }
+    .alp-ring-v { position: relative; z-index: 1; font-family: var(--font-display); font-weight: 800; font-size: 26px; }
+    .alp-ring-lbl { font-size: 11px; color: var(--texto-suave); max-width: 100px; text-align: center; line-height: 1.3; }
+    .alp-grid { display: grid; grid-template-columns: 1.15fr 1fr 0.85fr; gap: 16px; }
+    @media (max-width: 900px){ .alp-grid { grid-template-columns: 1fr; } }
+    .al-cal { display: grid; grid-template-columns: repeat(8, 1fr); gap: 12px 4px; margin-top: 14px; }
+    .al-cday { text-align: center; }
+    .al-cday .cn { font-size: 11px; color: var(--texto-suave); font-family: var(--font-display); margin-bottom: 6px; }
+    .al-cday .cdot { width: 13px; height: 13px; border-radius: 50%; margin: 0 auto; }
+    .al-med { display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--borda); border-radius: 10px; overflow: hidden; margin-top: 16px; font-size: 13px; }
+    .al-med .ml { padding: 10px 14px; color: var(--texto-suave); }
+    .al-med .mv { padding: 10px 16px; font-family: var(--font-display); font-weight: 800; }
+    .al-leg { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: 11.5px; color: var(--texto-suave); }
+    .al-leg span { display: flex; align-items: center; gap: 6px; }
+    .al-leg i { width: 10px; height: 10px; border-radius: 50%; }
+    .alp-pts { background: #FDF3D9; border-radius: var(--raio); padding: 18px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; }
+    .alp-pts-n { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 800; font-size: 22px; color: var(--azul-escuro); background: #F6C945; border-radius: 12px; padding: 14px 22px; }
+    .alp-pts img { width: 140px; height: auto; margin-top: 14px; }
     .sheet-cta { display: inline-flex; align-items: center; gap: 8px; background: var(--azul); color: #fff; border: none; border-radius: 12px; padding: 12px 20px; font-family: var(--font-display); font-weight: 600; font-size: 14px; cursor: pointer; text-decoration: none; }
     .sheet-cta:hover { background: var(--azul-escuro); }
     .sheet-cta svg { width: 16px; height: 16px; }
@@ -1024,8 +1056,9 @@ function abrirFicha(inep, keepTab){
 
   /* aba Alunos — lista de alunos */
   const alunos = alunosDaEscola(e);
+  window._fichaAlunos = alunos; window._fichaEscolaAluno = e;
   const teaN = alunos.filter(a=>a.tea).length;
-  const alRows = alunos.map(a=>`<tr data-s="${(a.nome+' '+a.turma).toLowerCase()}" data-nivel="${a.nivel}" data-serie="${a.serie}" data-turno="${a.turno}" data-doc="${a.doc}" data-status="${a.status}" data-entur="${a.enturmado?'Enturmado':'Sem turma'}" data-cpf="${a.cpf?'Com CPF':'Sem CPF'}" data-resp="${a.resp?'Com responsável':'Sem responsável'}" data-ee="${a.tea?'Sim':'Não'}"><td><b>${a.nome}</b>${a.tea?' <span class="al-tea">Ed. Especial</span>':''}</td><td class="muted">${a.turma}</td><td>${a.turno}</td></tr>`).join('');
+  const alRows = alunos.map((a,i)=>`<tr class="al-click" onclick="abrirAluno(${i})" tabindex="0" onkeydown="if(event.key==='Enter'){abrirAluno(${i})}" data-s="${(a.nome+' '+a.turma).toLowerCase()}" data-nivel="${a.nivel}" data-serie="${a.serie}" data-turno="${a.turno}" data-doc="${a.doc}" data-status="${a.status}" data-entur="${a.enturmado?'Enturmado':'Sem turma'}" data-cpf="${a.cpf?'Com CPF':'Sem CPF'}" data-resp="${a.resp?'Com responsável':'Sem responsável'}" data-ee="${a.tea?'Sim':'Não'}"><td><b>${a.nome}</b>${a.tea?' <span class="al-tea">Ed. Especial</span>':''}</td><td class="muted">${a.turma}</td><td>${a.turno}</td></tr>`).join('');
   const uniq = k => [...new Set(alunos.map(a=>a[k]))];
   const FFLT = [
     ['fnivel','Nível de ensino', uniq('nivel')],
@@ -1129,6 +1162,79 @@ function abrirPainelServidor(narrow, s, esc, bodyHtml){
 function abrirServidor(inep, m){
   const s = (window.gerarEquipe ? gerarEquipe(inep) : []).find(x=>x.m===m); if(!s) return;
   if(s.grupo==='Professores') abrirProfessor(inep, m); else abrirUsuario(inep, m);
+}
+
+/* ---- perfil do aluno ---- */
+const _AL_COR = { presenca:'#3DC200', parcial:'#F0B429', falta:'#E24A3A', sem:'#CBD2DB' };
+function _alunoFreq(seed, m){
+  const sf = s => { let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; };
+  const dim = new Date(2026, m+1, 0).getDate(); const dias = []; let pres=0, letiv=0;
+  for(let d=1; d<=dim; d++){ const dt=new Date(2026,m,d), w=dt.getDay(); const letivo = w>=1 && w<=5 && m>=2 && m<=9; let st='sem';
+    if(letivo){ letiv++; const r = sf(seed+'fd'+m+'_'+d)%14; st = r===0 ? 'falta' : r===1 ? 'parcial' : 'presenca'; pres += st==='presenca'?1:(st==='parcial'?0.5:0); }
+    dias.push({ d, st });
+  }
+  return { dias, med: letiv ? Math.round(pres/letiv*1000)/10 : 0 };
+}
+function _alunoCalHtml(seed, m){
+  const { dias, med } = _alunoFreq(seed, m);
+  const cells = dias.map(x=>`<div class="al-cday"><div class="cn">${String(x.d).padStart(2,'0')}</div><div class="cdot" style="background:${_AL_COR[x.st]}"></div></div>`).join('');
+  const c = med>=90 ? '#2E8B00' : med>=75 ? '#B5790F' : '#C33A2D';
+  const bg = med>=90 ? 'var(--verde-bg)' : med>=75 ? '#FDF3D9' : '#FBE2DE';
+  return `<div class="al-cal">${cells}</div><div class="al-med"><span class="ml">Frequência média do mês</span><span class="mv" style="background:${bg};color:${c}">${med.toFixed(1).replace('.',',')}%</span></div>`;
+}
+function alunoFreqMes(m){ const c=window._alunoCtx; if(!c) return; const el=document.getElementById('alCalWrap'); if(el) el.innerHTML = _alunoCalHtml(c.seed, +m); }
+function abrirAluno(i){
+  const a = (window._fichaAlunos||[])[i], e = window._fichaEscolaAluno; if(!a||!e) return;
+  const sf = s => { let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; };
+  const escNome = (window.REDE_NOME && REDE_NOME[e.inep]) || e.nome;
+  const seed = e.inep+'·'+a.nome+'·'+a.turma;
+  window._alunoCtx = { seed };
+  const freqGeral = 68 + sf(seed+'fg')%30;
+  const rc = freqGeral>=85 ? '#2E8B00' : freqGeral>=72 ? '#E8A317' : '#E24A3A';
+  const pontos = sf(seed+'pt')%3===0 ? 0 : 10 + sf(seed+'pt2')%240;
+  const ativo = a.status==='Ativo';
+  const stBadge = ativo ? 'background:var(--verde-bg);color:#2E8B00;border:1px solid #BCE6A8;' : 'background:#FDF3D9;color:var(--ambar-escuro);border:1px solid #F0DDA8;';
+  const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const kic = p => svgP(p,15);
+  const close = svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',17);
+  const sp = document.getElementById('sp2'); sp.classList.remove('narrow');
+  sp.innerHTML = `
+    <div class="sp2-head"><div class="sp2-av">${_ini(a.nome)}</div><div><div class="sp2-name">${a.nome}</div><div class="sp2-sub">Aluno(a) · ${escNome}</div></div><button class="sp2-close" onclick="fecharServidor()" aria-label="Fechar">${close}</button></div>
+    <div class="sp2-body">
+      <div class="alp-head">
+        <div class="alp-kv">
+          <span class="k">${kic('<circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.2 4.2l2.8 2.8M17 17l2.8 2.8M1 12h4M19 12h4M4.2 19.8l2.8-2.8M17 7l2.8-2.8"/>')} Status</span><span class="v"><span class="pchip" style="${stBadge}">${a.status}</span></span>
+          <span class="k">${kic('<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/>')} Turma</span><span class="v">${a.turma}</span>
+          <span class="k">${kic('<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/>')} Escola</span><span class="v">${escNome}</span>
+          <span class="k">${kic('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>')} Turno</span><span class="v">${a.turno}</span>
+          <span class="k">${kic('<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>')} Série</span><span class="v">${a.serie} · ${a.nivel}</span>
+        </div>
+        <div class="alp-side">
+          <div class="alp-btns">
+            <button class="alp-btn" style="background:var(--laranja)">${svgP('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',14)} Matrícula</button>
+            <button class="alp-btn" style="background:var(--azul)">${svgP('<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>',14)} Fichas</button>
+            <button class="alp-btn" style="background:var(--azul-escuro)">${svgP('<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',14)} Relatórios</button>
+          </div>
+          <div class="alp-ringbox">
+            <div class="alp-ring" style="background:conic-gradient(${rc} ${(freqGeral*3.6).toFixed(0)}deg, #EAECF0 0)"><span class="alp-ring-v" style="color:${rc}">${freqGeral}</span></div>
+            <div class="alp-ring-lbl">Frequência média geral (%)</div>
+          </div>
+        </div>
+      </div>
+      <div class="alp-grid">
+        <div class="card">
+          <div class="pcard-head"><div class="card-t">${svgP('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',17)} Frequência do mês</div><select class="mes-select" onchange="alunoFreqMes(this.value)">${MESES.map((m,mi)=>`<option value="${mi}" ${mi===9?'selected':''}>${m}</option>`).join('')}</select></div>
+          <div id="alCalWrap">${_alunoCalHtml(seed,9)}</div>
+          <div class="al-leg"><span><i style="background:#3DC200"></i>Presença</span><span><i style="background:#F0B429"></i>Presença parcial</span><span><i style="background:#E24A3A"></i>Falta</span><span><i style="background:#CBD2DB"></i>Sem aula</span></div>
+        </div>
+        <div class="card"><div class="card-t" style="display:flex;align-items:center;gap:8px;">${svgP('<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',17)} Registro de ocorrências</div><div class="p-empty">${svgP('<circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/>',40)}<div>Nenhum registro encontrado</div></div></div>
+        <div class="alp-pts"><div class="alp-pts-n">${svgP('<path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/>',22)} ${fmt(pontos)} pontos</div><img src="bubo-up.png" alt="" onerror="this.style.display='none'"></div>
+      </div>
+    </div>
+    <div class="sp2-foot">${AUDIT}</div>`;
+  document.getElementById('sp2Overlay').classList.add('open');
+  sp.classList.add('open');
+  document.addEventListener('keydown', escHandler);
 }
 
 function abrirUsuario(inep, m){
