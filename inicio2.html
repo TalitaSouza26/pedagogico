@@ -271,6 +271,13 @@
     .sinfo-lbl { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); font-family: var(--font-display); margin-bottom: 3px; }
     .sinfo-v { font-size: 13.5px; color: var(--texto); font-weight: 600; line-height: 1.25; }
     @media (max-width: 760px){ .sch-info { grid-template-columns: 1fr; } }
+    .tet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-top: 4px; }
+    .tet-card { background: var(--branco); border: 1px solid var(--borda); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+    .tet-ic { width: 38px; height: 38px; border-radius: 10px; background: #EEF1F5; color: var(--texto-suave); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .tet-ic svg { width: 18px; height: 18px; }
+    .tet-lbl { font-size: 12px; color: var(--texto-suave); font-weight: 600; line-height: 1.2; flex: 1; }
+    .tet-n { font-family: var(--font-display); font-weight: 800; font-size: 24px; color: var(--laranja); line-height: 1; text-align: right; }
+    .tet-sub { font-size: 10px; color: #9AA1AB; text-align: right; margin-top: 2px; }
     /* perfil do aluno */
     .al-click { cursor: pointer; }
     .al-click:hover td b { color: var(--azul); }
@@ -918,6 +925,21 @@ function abrirFicha(inep, keepTab){
     }).join('') + `</div>`;
     return { tot, html };
   })();
+  // turmas por etapa (escola)
+  const turmasEtapaHtml = (function(){
+    const usersIc = '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/>';
+    const ET = [];
+    if(ehInfantil || _temInfantil) ET.push({ nome:'Educação Infantil', w:18 });
+    if(_temIniciais && !ehInfantil) ET.push({ nome:'Ensino Fundamental I', w:42 });
+    if(_temFinais) ET.push({ nome:'Ensino Fundamental II', w:30 });
+    if(_temEJA){ ET.push({ nome:'Educação de Jovens e Adultos I', w:6 }); ET.push({ nome:'Educação de Jovens e Adultos II', w:6 }); }
+    if(!ET.length) ET.push({ nome:'Educação Infantil', w:1 });
+    const totW = ET.reduce((s,t)=>s+t.w,0); let acc=0;
+    ET.forEach((t,i)=>{ if(i<ET.length-1){ t.n = Math.max(1, Math.round(e.turmas*t.w/totW)); acc+=t.n; } else { t.n = Math.max(1, e.turmas-acc); } });
+    return `<div class="card" style="margin-bottom:20px;"><div class="card-t" style="display:flex;align-items:baseline;justify-content:space-between;">Turmas por etapa<span style="font-weight:400;font-size:12px;color:var(--texto-suave);">Total de turmas: <b style="color:var(--laranja);font-family:var(--font-display);">${fmt(e.turmas)}</b></span></div><div class="tet-grid">` +
+      ET.map(t=>`<div class="tet-card"><div class="tet-ic">${svgP(usersIc,18)}</div><div class="tet-lbl">${t.nome}</div><div><div class="tet-n">${fmt(t.n)}</div><div class="tet-sub">turmas</div></div></div>`).join('') +
+      `</div></div>`;
+  })();
   // Registro de aulas (escola)
   const aulasAnoEsc = Math.max(200, (e.turmas||10) * (120 + seedFrom(e.inep+'aa')%80));
   const pctValEsc = 80 + seedFrom(e.inep+'av')%18;
@@ -1048,6 +1070,7 @@ function abrirFicha(inep, keepTab){
         </div>
       </div>
     </div>
+    ${turmasEtapaHtml}
     <div class="card" style="margin-bottom:20px;"><div class="card-t">Matrículas por mês</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">novas matrículas · últimos 6 meses</div>${matMesHtml}</div>
     <div class="card" style="margin-bottom:20px;"><div class="card-t">Planos de aula por disciplina</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">${fmt(planoDados.tot)} planos no total</div>${planoDados.html}</div>
     ${acessosEscHtml}`;
