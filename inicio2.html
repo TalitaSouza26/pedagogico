@@ -358,6 +358,12 @@
     .plan-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; margin-top: 6px; }
     .plan-col-t { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--azul-escuro); padding-bottom: 8px; margin-bottom: 6px; border-bottom: 2px solid var(--azul-claro); }
     .plan-col-tot { font-size: 12px; color: var(--texto-suave); font-weight: 600; }
+    .nota-row { padding: 8px 2px; }
+    .nota-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; gap: 10px; }
+    .nota-top .nt-n { color: var(--texto); }
+    .nota-top .nt-v { font-family: var(--font-display); font-weight: 800; font-size: 15px; flex-shrink: 0; }
+    .nota-bar { height: 6px; background: #E9EDF2; border-radius: 4px; margin-top: 6px; overflow: hidden; }
+    .nota-fill { height: 100%; border-radius: 4px; }
     .donut-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
     .donut { width: 150px; height: 150px; border-radius: 50%; flex-shrink: 0; position: relative; }
     .donut::after { content: ''; position: absolute; inset: 27px; background: var(--bg); border-radius: 50%; }
@@ -816,7 +822,7 @@ function abrirFicha(inep, keepTab){
       gr.map(g=>{
         const rows = discsEsc.filter(d=>_oferNota(g.etapa,d)).map(d=>{ const n=Math.round((4.6 + (seedFrom(e.inep+'nt'+fichaBim+g.etapa+d)%44)/10)*10)/10; return {d,n}; });
         return `<div class="plan-col"><div class="plan-col-t"><span>${g.nome}</span><span class="plan-col-tot">${g.sub}</span></div>` +
-          rows.map(r=>{ const c=corNota(r.n); return `<div class="srow"><span class="s-name">${r.d}</span><span class="s-track"><span class="s-fill" style="width:${(r.n/10*100).toFixed(0)}%;background:${c}"></span></span><span class="s-num" style="color:${c}">${r.n.toFixed(1).replace('.',',')}</span></div>`; }).join('') +
+          rows.map(r=>{ const c=corNota(r.n); return `<div class="nota-row"><div class="nota-top"><span class="nt-n">${r.d}</span><span class="nt-v" style="color:${c}">${r.n.toFixed(1).replace('.',',')}</span></div><div class="nota-bar"><div class="nota-fill" style="width:${(r.n/10*100).toFixed(0)}%;background:${c}"></div></div></div>`; }).join('') +
           `</div>`;
       }).join('') + `</div></div>`;
   } else {
