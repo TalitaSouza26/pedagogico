@@ -264,6 +264,13 @@
     .fld { background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio-sm); padding: 12px 14px; }
     .fld .fl { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); margin-bottom: 5px; font-family: var(--font-display); }
     .fld .fv { font-size: 13.5px; color: var(--texto); font-weight: 500; }
+    .sch-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+    .sinfo-item { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio); padding: 14px 16px; }
+    .sinfo-ic { width: 40px; height: 40px; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .sinfo-ic svg { width: 20px; height: 20px; }
+    .sinfo-lbl { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); font-family: var(--font-display); margin-bottom: 3px; }
+    .sinfo-v { font-size: 13.5px; color: var(--texto); font-weight: 600; line-height: 1.25; }
+    @media (max-width: 760px){ .sch-info { grid-template-columns: 1fr; } }
     .sheet-cta { display: inline-flex; align-items: center; gap: 8px; background: var(--azul); color: #fff; border: none; border-radius: 12px; padding: 12px 20px; font-family: var(--font-display); font-weight: 600; font-size: 14px; cursor: pointer; text-decoration: none; }
     .sheet-cta:hover { background: var(--azul-escuro); }
     .sheet-cta svg { width: 16px; height: 16px; }
@@ -962,6 +969,11 @@ function abrirFicha(inep, keepTab){
 
   const paneInicio = `
     <div class="sch-stats">${dash.map(k=>`<div class="kcard"><div class="kcard-l"><div class="kic ic-${k.c}">${svgP(k.p,21)}</div><div><div class="klbl">${k.l}</div><div class="ksub">${k.s}</div></div></div><div class="kval">${k.v}</div></div>`).join('')}</div>
+    <div class="sch-info">
+      <div class="sinfo-item"><div class="sinfo-ic ic-azul">${svgP('<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',20)}</div><div><div class="sinfo-lbl">Etapas atendidas</div><div class="sinfo-v">${_temInfantil ? 'Educação Infantil, '+e.etapas : e.etapas}</div></div></div>
+      <div class="sinfo-item"><div class="sinfo-ic ic-roxo">${svgP('<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',20)}</div><div><div class="sinfo-lbl">Organização das turmas</div><div class="sinfo-v">${e.multisseriada ? 'Seriada e multisseriada' : 'Seriada (regular)'}</div></div></div>
+      <div class="sinfo-item"><div class="sinfo-ic ic-laranja">${svgP('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>',20)}</div><div><div class="sinfo-lbl">Localidade</div><div class="sinfo-v">${e.localidade} · ${e.bairro}</div></div></div>
+    </div>
     ${registroAulasHtml}
     <div class="two">
       <div class="card"><div class="card-t">Vagas e ocupação</div>
@@ -996,12 +1008,7 @@ function abrirFicha(inep, keepTab){
     </div>
     <div class="card" style="margin-bottom:20px;"><div class="card-t">Matrículas por mês</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">novas matrículas · últimos 6 meses</div>${matMesHtml}</div>
     <div class="card" style="margin-bottom:20px;"><div class="card-t">Planos de aula por disciplina</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">${fmt(planoDados.tot)} planos no total</div>${planoDados.html}</div>
-    ${acessosEscHtml}
-    <div class="fields">
-      <div class="fld"><div class="fl">Etapas atendidas</div><div class="fv">${_temInfantil ? 'Educação Infantil, '+e.etapas : e.etapas}</div></div>
-      <div class="fld"><div class="fl">Organização das turmas</div><div class="fv">${e.multisseriada ? 'Seriada e multisseriada' : 'Seriada (regular)'}</div></div>
-      <div class="fld"><div class="fl">Localidade</div><div class="fv">${e.localidade} · ${e.bairro}</div></div>
-    </div>`;
+    ${acessosEscHtml}`;
 
   /* aba Servidores */
   const paneServidores = `
