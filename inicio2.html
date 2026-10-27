@@ -234,7 +234,7 @@
     .btn-redef3:hover { border-color: var(--azul); color: var(--azul); }
     .al-tea { display: inline-block; font-family: var(--font-display); font-size: 10px; font-weight: 700; color: #6B3FA0; background: #EFEAF7; border-radius: 20px; padding: 2px 8px; margin-left: 6px; vertical-align: 1px; }
     .stat-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 20px; }
-    .sch-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .sch-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
     .serie-list { display: flex; flex-direction: column; gap: 7px; }
     .srow { display: grid; grid-template-columns: 140px 1fr 40px; align-items: center; gap: 12px; font-size: 12px; }
     .srow .s-name { font-weight: 500; color: var(--texto); }
@@ -805,14 +805,12 @@ function abrirFicha(inep, keepTab){
     resp:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>',
   };
   const dash = [
-    { v:fmt(e.matriculas), l:'Alunos', s:'ativos no sistema', c:'verde', p:IC.alunos },
+    { v:pct1(freqBim), l:'Frequência média', s:'presença dos alunos', c:'azul', p:IC.freq },
     { v:fmt(e.vagas), l:'Vagas ofertadas', s:'pela escola', c:'laranja', p:IC.vaga },
     { v:fmt(e.responsaveis), l:'Responsáveis', s:'vinculados a alunos', c:'roxo', p:IC.resp },
+    { v:fmt(e.matriculas), l:'Alunos', s:'ativos no sistema', c:'verde', p:IC.alunos },
     { v:fmt(e.turmas), l:'Turmas', s:'cadastradas', c:'ambar', p:IC.turmas },
     { v:fmt(servidoresN), l:'Servidores', s:'com acesso ao sistema', c:'teal', p:IC.users },
-    { v:pct1(freqBim), l:'Frequência média', s:'presença dos alunos', c:'azul', p:IC.freq },
-    { v:pct1(freqAcessoEsc), l:'Freq. média de acesso', s:'uso da plataforma', c:'verde', p:IC.clock },
-    { v:fmt(espEsc), l:'Educação Especial', s:'AEE · APAE · CEAME', c:'roxo', p:IC.tea },
   ];
   // Alunos por etapa (panorama compacto) — divide o total de matrículas da escola, somando sempre e.matriculas
   const ETAPA_ORD = ['Educação Infantil','Anos iniciais','Anos finais','EJA'];
