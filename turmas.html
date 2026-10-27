@@ -353,7 +353,6 @@ function verLista(){
     <div class="filtros">
       <label class="fsel">Modalidade <select id="fMod" onchange="onModChange()"><option value="">Todas</option><option>Urbana</option><option>Campo</option><option>Indígena</option></select></label>
       <label class="fsel">Núcleo <select id="fNucleo" onchange="filtrarEscolas()"><option value="">Todos</option></select></label>
-      <label class="fsel">Status <select id="fStatus" onchange="filtrarEscolas()"><option value="">Todos</option><option value="ativa">Apenas ativas</option><option value="inativa">Apenas inativas</option></select></label>
       <button class="btn-redef" onclick="redefinir()">Redefinir buscas</button>
     </div>
     <div class="tbl-wrap"><table class="tbl">
@@ -389,20 +388,17 @@ function filtrarEscolas(){
   const q = (document.getElementById('buscaEsc').value||'').toLowerCase().trim();
   const mod = (document.getElementById('fMod')||{}).value || '';
   const nuc = (document.getElementById('fNucleo')||{}).value || '';
-  const st = (document.getElementById('fStatus')||{}).value || '';
   const base = ESCOLAS.filter(e=> PERFIL.emEscopo(e));
   const lista = base.filter(e=>{
     if(q && !(e.nome.toLowerCase().includes(q) || e.localidade.toLowerCase().includes(q) || e.nucleo.toLowerCase().includes(q) || e.inep.includes(q))) return false;
     if(mod && e.localidade !== mod) return false;
     if(nuc && e.nucleo !== nuc) return false;
-    if(st==='ativa' && !e.ativa) return false;
-    if(st==='inativa' && e.ativa) return false;
     return true;
   });
   document.getElementById('escBody').innerHTML = lista.map(linhaEscola).join('') || `<tr><td colspan="8" class="muted" style="text-align:center;padding:26px;">Nenhuma escola encontrada.</td></tr>`;
   const c = document.getElementById('escCount'); if(c) c.textContent = `· ${lista.length} de ${base.length}`;
 }
-function redefinir(){ document.getElementById('buscaEsc').value=''; document.getElementById('fMod').value=''; document.getElementById('fStatus').value=''; popularNucleos(); filtrarEscolas(); }
+function redefinir(){ document.getElementById('buscaEsc').value=''; document.getElementById('fMod').value=''; popularNucleos(); filtrarEscolas(); }
 
 /* ---------- FICHA DA ESCOLA (mesma do Início, embutida sobre esta tela) ---------- */
 function verFichaEscola(inep){
