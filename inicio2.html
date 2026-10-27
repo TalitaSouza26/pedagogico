@@ -235,12 +235,12 @@
     .al-tea { display: inline-block; font-family: var(--font-display); font-size: 10px; font-weight: 700; color: #6B3FA0; background: #EFEAF7; border-radius: 20px; padding: 2px 8px; margin-left: 6px; vertical-align: 1px; }
     .stat-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 20px; }
     .sch-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
-    .serie-list { display: flex; flex-direction: column; gap: 9px; }
-    .srow { display: grid; grid-template-columns: 140px 1fr 52px; align-items: center; gap: 12px; font-size: 12.5px; }
-    .srow .s-name { font-family: var(--font-display); font-weight: 600; color: var(--texto); }
-    .srow .s-track { height: 13px; border-radius: 7px; background: #EEF1F5; overflow: hidden; }
-    .srow .s-fill { display: block; height: 100%; border-radius: 7px; background: linear-gradient(90deg, var(--azul), var(--azul-escuro)); }
-    .srow .s-num { text-align: right; font-family: var(--font-display); font-weight: 700; color: var(--texto); }
+    .serie-list { display: flex; flex-direction: column; gap: 7px; }
+    .srow { display: grid; grid-template-columns: 140px 1fr 40px; align-items: center; gap: 12px; font-size: 12px; }
+    .srow .s-name { font-weight: 500; color: var(--texto); }
+    .srow .s-track { height: 7px; border-radius: 4px; background: #EEF1F5; overflow: hidden; }
+    .srow .s-fill { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--azul), var(--azul-escuro)); }
+    .srow .s-num { text-align: right; font-family: var(--font-display); font-weight: 700; color: var(--texto); font-size: 13px; }
     @media (max-width: 820px){ .sch-stats { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 1100px){ .stat-grid { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 560px){ .stat-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -865,7 +865,7 @@ function abrirFicha(inep, keepTab){
       const sub = rows.reduce((s,r)=>s+r.n,0); tot += sub;
       const mx = Math.max(...rows.map(r=>r.n),1);
       const nota = col.infantil ? `<div style="font-size:10.5px;color:#9AA1AB;margin-top:10px;line-height:1.4;">Na Educação Infantil um mesmo plano pode abordar mais de um campo de experiência, por isso a soma dos campos ultrapassa o total de planos. *</div>` : '';
-      return `<div class="plan-col"><div class="plan-col-t"><span>${col.nome}</span><span class="plan-col-tot">${fmt(sub)} planos</span></div>` + rows.map(r=>`<div class="srow"><span class="s-name">${r.d}</span><span class="s-track"><span class="s-fill" style="width:${(r.n/mx*100).toFixed(0)}%;background:#22A0C8"></span></span><span class="s-num">${fmt(r.n)}</span></div>`).join('') + nota + `</div>`;
+      return `<div class="plan-col"><div class="plan-col-t"><span>${col.nome}</span><span class="plan-col-tot">${fmt(sub)} planos</span></div>` + rows.map(r=>`<div class="nota-row"><div class="nota-top"><span class="nt-n">${r.d}</span><span class="nt-v">${fmt(r.n)}</span></div><div class="nota-bar"><div class="nota-fill" style="width:${(r.n/mx*100).toFixed(0)}%;background:#22A0C8"></div></div></div>`).join('') + nota + `</div>`;
     }).join('') + `</div>`;
     return { tot, html };
   })();
