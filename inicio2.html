@@ -799,6 +799,8 @@ function abrirFicha(inep, keepTab){
   const _temFinais = /final|finais/i.test(e.etapas);
   const _temIniciais = /inicia/i.test(e.etapas) || !_temFinais;
   const _temEJA = /EJA/i.test(e.etapas);
+  // escola de Fundamental que também oferta pré-escola (Educação Infantil)
+  const _temInfantil = !ehInfantil && _temIniciais;
   const _campoInd = e.localidade==='Campo' || e.localidade==='Indígena';
   const ORDER_DISC = ['Língua Portuguesa','Leitura e Produção de Texto','Língua Inglesa','Língua Patxôhã','Matemática','Ciências','História','História de Porto Seguro','Geografia','Diversidade Afrodescendente e Indígena','Agroecologia','Arte','Educação Física','Ensino Religioso'];
   const discsEsc = ORDER_DISC.filter(d => {
@@ -853,7 +855,7 @@ function abrirFicha(inep, keepTab){
   const planoDados = (function(){
     const difOK = d => (d!=='Língua Patxôhã' && d!=='Agroecologia') || _campoInd;
     const cols = [];
-    if(ehInfantil) cols.push({ nome:'Educação Infantil', discs:['(EO) O eu, o outro e o nós','(CG) Corpo, gestos e movimentos','(TS) Traços, sons, cores e formas','(EF) Escuta, fala, pensamento e imaginação','(ET) Espaços, tempos, quantidades, relações, transformações','(CR) Culturas regionais'] });
+    if(ehInfantil || _temInfantil) cols.push({ nome:'Educação Infantil', infantil:true, discs:['(EO) O eu, o outro e o nós','(CG) Corpo, gestos e movimentos','(TS) Traços, sons, cores e formas','(EF) Escuta, fala, pensamento e imaginação','(ET) Espaços, tempos, quantidades, relações, transformações','(CR) Culturas regionais'] });
     if(_temIniciais && !ehInfantil) cols.push({ nome:'Fundamental I', discs: ORDER_DISC.filter(d=> d!=='Língua Inglesa' && difOK(d)) });
     if(_temFinais) cols.push({ nome:'Fundamental II', discs: ORDER_DISC.filter(d=> d!=='Leitura e Produção de Texto' && difOK(d)) });
     if(_temEJA) cols.push({ nome:'EJA', discs: ORDER_DISC.filter(difOK) });
@@ -862,7 +864,8 @@ function abrirFicha(inep, keepTab){
       const rows = col.discs.map(d=>({ d, n: 8 + seedFrom(e.inep+'pa'+col.nome+d)%60 })).sort((a,b)=>b.n-a.n);
       const sub = rows.reduce((s,r)=>s+r.n,0); tot += sub;
       const mx = Math.max(...rows.map(r=>r.n),1);
-      return `<div class="plan-col"><div class="plan-col-t"><span>${col.nome}</span><span class="plan-col-tot">${fmt(sub)} planos</span></div>` + rows.map(r=>`<div class="srow"><span class="s-name">${r.d}</span><span class="s-track"><span class="s-fill" style="width:${(r.n/mx*100).toFixed(0)}%;background:#22A0C8"></span></span><span class="s-num">${fmt(r.n)}</span></div>`).join('') + `</div>`;
+      const nota = col.infantil ? `<div style="font-size:10.5px;color:#9AA1AB;margin-top:10px;line-height:1.4;">Na Educação Infantil um mesmo plano pode abordar mais de um campo de experiência, por isso a soma dos campos ultrapassa o total de planos. *</div>` : '';
+      return `<div class="plan-col"><div class="plan-col-t"><span>${col.nome}</span><span class="plan-col-tot">${fmt(sub)} planos</span></div>` + rows.map(r=>`<div class="srow"><span class="s-name">${r.d}</span><span class="s-track"><span class="s-fill" style="width:${(r.n/mx*100).toFixed(0)}%;background:#22A0C8"></span></span><span class="s-num">${fmt(r.n)}</span></div>`).join('') + nota + `</div>`;
     }).join('') + `</div>`;
     return { tot, html };
   })();
@@ -910,6 +913,7 @@ function abrirFicha(inep, keepTab){
     const fb = e.freq||91;
     const GR = [];
     if(ehInfantil) GR.push({nome:'Educação Infantil', cor:'#F0B429', off:-1.5, subs:['CN I','CN II','CN III','PN I','PN II']});
+    else if(_temInfantil) GR.push({nome:'Educação Infantil', cor:'#F0B429', off:-1.5, subs:['Pré I','Pré II']});
     if(_temIniciais && !ehInfantil) GR.push({nome:'Fundamental I', cor:'#12509A', off:0.5, subs:['1º ano','2º ano','3º ano','4º ano','5º ano']});
     if(_temFinais) GR.push({nome:'Fundamental II', cor:'#ED6939', off:-0.3, subs:['6º ano','7º ano','8º ano','9º ano']});
     if(_temEJA){ GR.push({nome:'EJA I', cor:'#6B3FA0', off:-2.0, subs:['1ª etapa','2ª etapa','3ª etapa']}); GR.push({nome:'EJA II', cor:'#D6409F', off:-2.5, subs:['4ª etapa','5ª etapa']}); }
@@ -994,7 +998,7 @@ function abrirFicha(inep, keepTab){
     <div class="card" style="margin-bottom:20px;"><div class="card-t">Planos de aula por disciplina</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">${fmt(planoDados.tot)} planos no total</div>${planoDados.html}</div>
     ${acessosEscHtml}
     <div class="fields">
-      <div class="fld"><div class="fl">Etapas atendidas</div><div class="fv">${e.etapas}</div></div>
+      <div class="fld"><div class="fl">Etapas atendidas</div><div class="fv">${_temInfantil ? 'Educação Infantil, '+e.etapas : e.etapas}</div></div>
       <div class="fld"><div class="fl">Organização das turmas</div><div class="fv">${e.multisseriada ? 'Seriada e multisseriada' : 'Seriada (regular)'}</div></div>
       <div class="fld"><div class="fl">Localidade</div><div class="fv">${e.localidade} · ${e.bairro}</div></div>
     </div>`;
