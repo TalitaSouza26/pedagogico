@@ -800,11 +800,25 @@ function abrirFicha(inep, keepTab){
     if(d==='Língua Patxôhã' || d==='Agroecologia') return _campoInd;
     return true;
   });
+  const _oferNota = (etapa,d) => {
+    if(d==='Leitura e Produção de Texto') return etapa==='Fundamental I'||etapa==='EJA I';
+    if(d==='Língua Inglesa') return etapa==='Fundamental II'||etapa==='EJA II';
+    if(d==='Língua Patxôhã'||d==='Agroecologia') return _campoInd;
+    return true;
+  };
   let notaHtml;
   if(!ehInfantil){
-    notaHtml = `<div class="card" style="margin-bottom:20px;"><div class="card-t">Média de nota por disciplina</div><div class="serie-list">` +
-      discsEsc.map(dn=>{ const nota=Math.round((4.6 + (seedFrom(e.inep+'nt'+fichaBim+dn)%44)/10)*10)/10; const c=corNota(nota); return `<div class="srow"><span class="s-name">${dn}</span><span class="s-track"><span class="s-fill" style="width:${(nota/10*100).toFixed(0)}%;background:${c}"></span></span><span class="s-num" style="color:${c}">${nota.toFixed(1).replace('.',',')}</span></div>`; }).join('') +
-      `</div></div>`;
+    const gr = [];
+    if(_temIniciais) gr.push({ nome:'Fundamental I', sub:'3º ao 5º ano', etapa:'Fundamental I' });
+    if(_temFinais) gr.push({ nome:'Fundamental II', sub:'6º ao 9º ano', etapa:'Fundamental II' });
+    if(_temEJA){ gr.push({ nome:'EJA I', sub:'1ª a 3ª etapa', etapa:'EJA I' }); gr.push({ nome:'EJA II', sub:'4ª e 5ª etapas', etapa:'EJA II' }); }
+    notaHtml = `<div class="card" style="margin-bottom:20px;"><div class="card-t">Média de nota por disciplina</div><div class="plan-cols">` +
+      gr.map(g=>{
+        const rows = discsEsc.filter(d=>_oferNota(g.etapa,d)).map(d=>{ const n=Math.round((4.6 + (seedFrom(e.inep+'nt'+fichaBim+g.etapa+d)%44)/10)*10)/10; return {d,n}; });
+        return `<div class="plan-col"><div class="plan-col-t"><span>${g.nome}</span><span class="plan-col-tot">${g.sub}</span></div>` +
+          rows.map(r=>{ const c=corNota(r.n); return `<div class="srow"><span class="s-name">${r.d}</span><span class="s-track"><span class="s-fill" style="width:${(r.n/10*100).toFixed(0)}%;background:${c}"></span></span><span class="s-num" style="color:${c}">${r.n.toFixed(1).replace('.',',')}</span></div>`; }).join('') +
+          `</div>`;
+      }).join('') + `</div></div>`;
   } else {
     notaHtml = `<div class="card" style="margin-bottom:20px;"><div class="card-t">Avaliação — Educação Infantil</div><div style="font-size:13px;color:var(--texto-suave);">Avaliação por campos de experiência (sem nota numérica).</div></div>`;
   }
