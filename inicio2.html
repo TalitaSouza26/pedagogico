@@ -925,7 +925,7 @@ function abrirFicha(inep, keepTab){
   // Frequência diária (dropdown de mês)
   window._fichaDia = { freq: e.freq, inep: e.inep };
   const _mesNomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const freqDiaCard = `<div class="card" style="margin-bottom:20px;"><div class="pcard-head"><div class="card-t">Frequência diária</div><select class="mes-select" onchange="fichaFreqDia(this.value)">${_mesNomes.map((m,i)=>`<option value="${i}" ${i===9?'selected':''}>${m}</option>`).join('')}</select></div><div class="acc-bars dense" id="fichaDiaBars">${_fichaDiaBars(e.freq,e.inep,9)}</div></div>`;
+  const freqDiaCard = `<div class="card" style="margin-bottom:20px;"><div class="pcard-head"><div class="card-t">Frequência diária da escola</div><select class="mes-select" onchange="fichaFreqDia(this.value)">${_mesNomes.map((m,i)=>`<option value="${i}" ${i===9?'selected':''}>${m}</option>`).join('')}</select></div><div class="acc-bars dense" id="fichaDiaBars">${_fichaDiaBars(e.freq,e.inep,9)}</div></div>`;
 
   // Acessos ao sistema (escola)
   const acessosEscHtml = (function(){
@@ -954,7 +954,7 @@ function abrirFicha(inep, keepTab){
     ${matrizNotaHtml}
     ${freqEtapaEscHtml}
     ${freqDiaCard}
-    <div class="card" style="margin-bottom:20px;"><div class="card-t">Frequência mensal</div>${freqAnoSvg}</div>`;
+    <div class="card" style="margin-bottom:20px;"><div class="card-t">Frequência mensal da escola</div>${freqAnoSvg}</div>`;
 
   const paneInicio = `
     <div class="sch-stats">${dash.map(k=>`<div class="kcard"><div class="kcard-l"><div class="kic ic-${k.c}">${svgP(k.p,21)}</div><div><div class="klbl">${k.l}</div><div class="ksub">${k.s}</div></div></div><div class="kval">${k.v}</div></div>`).join('')}</div>
