@@ -1061,7 +1061,7 @@ function abrirFicha(inep, keepTab){
   const alunos = alunosDaEscola(e);
   window._fichaAlunos = alunos; window._fichaEscolaAluno = e;
   const teaN = alunos.filter(a=>a.tea).length;
-  const alRows = alunos.map((a,i)=>`<tr class="al-click" onclick="abrirAluno(${i})" tabindex="0" onkeydown="if(event.key==='Enter'){abrirAluno(${i})}" data-s="${(a.nome+' '+a.turma).toLowerCase()}" data-nivel="${a.nivel}" data-serie="${a.serie}" data-turno="${a.turno}" data-doc="${a.doc}" data-status="${a.status}" data-entur="${a.enturmado?'Enturmado':'Sem turma'}" data-cpf="${a.cpf?'Com CPF':'Sem CPF'}" data-resp="${a.resp?'Com responsável':'Sem responsável'}" data-ee="${a.tea?'Sim':'Não'}"><td><b>${a.nome}</b>${a.tea?' <span class="al-tea">Ed. Especial</span>':''}</td><td class="muted">${a.turma}</td><td>${a.turno}</td></tr>`).join('');
+  const alRows = alunos.map((a,i)=>`<tr class="al-click" onclick="abrirAluno(${i})" tabindex="0" onkeydown="if(event.key==='Enter'){abrirAluno(${i})}" data-s="${(a.nome+' '+a.turma).toLowerCase()}" data-nivel="${a.nivel}" data-serie="${a.serie}" data-turno="${a.turno}" data-doc="${a.doc}" data-status="${a.status}" data-entur="${a.enturmado?'Enturmado':'Sem turma'}" data-cpf="${a.cpf?'Com CPF':'Sem CPF'}" data-resp="${a.resp?'Com responsável':'Sem responsável'}" data-ee="${a.tea?'Sim':'Não'}"><td><b>${a.nome}</b>${a.tea?' <span class="al-tea">Ed. Especial</span>':''}</td><td class="muted">${a.turma}</td><td>${a.turno}</td><td style="text-align:right"><button class="el-eye" onclick="event.stopPropagation();abrirAluno(${i})" title="Ver aluno" aria-label="Ver ${a.nome}">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',16)}</button></td></tr>`).join('');
   const uniq = k => [...new Set(alunos.map(a=>a[k]))];
   const FFLT = [
     ['fnivel','Nível de ensino', uniq('nivel')],
@@ -1091,7 +1091,7 @@ function abrirFicha(inep, keepTab){
         <div class="fflt-foot"><button class="btn-fechar2" onclick="toggleFichaFiltros()">Fechar</button><button class="btn-redef3" onclick="redefinirFichaFiltros()">Redefinir</button></div>
       </div>
     </div>
-    <table class="pt-tbl"><thead><tr><th>Aluno</th><th>Turma</th><th>Turno</th></tr></thead><tbody id="alunosTbody">${alRows}</tbody></table>`;
+    <table class="pt-tbl"><thead><tr><th>Aluno</th><th>Turma</th><th>Turno</th><th style="text-align:right">Visualização</th></tr></thead><tbody id="alunosTbody">${alRows}</tbody></table>`;
 
   /* aba Ocorrências */
   const paneOcor = ocs.length ? `<table class="pt-tbl"><thead><tr><th>Envolvido(a)</th><th>Turma</th><th>Tipo</th><th>Data</th></tr></thead><tbody>${ocs.map(o=>`<tr><td><b>${o.al}</b></td><td class="muted">${o.t}</td><td>${o.tipo}</td><td class="muted">${o.data}</td></tr>`).join('')}</tbody></table>` : `<div class="p-empty">Nenhuma ocorrência registrada</div>`;
