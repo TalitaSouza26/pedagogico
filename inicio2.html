@@ -358,12 +358,13 @@
     .plan-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; margin-top: 6px; }
     .plan-col-t { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--azul-escuro); padding-bottom: 8px; margin-bottom: 6px; border-bottom: 2px solid var(--azul-claro); }
     .plan-col-tot { font-size: 12px; color: var(--texto-suave); font-weight: 600; }
-    .nota-row { padding: 8px 2px; }
+    .nota-row { padding: 8px 2px 7px; border-bottom: 1px solid var(--borda); }
+    .nota-row:last-child { border-bottom: none; }
     .nota-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; gap: 10px; }
     .nota-top .nt-n { color: var(--texto); }
-    .nota-top .nt-v { font-family: var(--font-display); font-weight: 800; font-size: 15px; flex-shrink: 0; }
-    .nota-bar { height: 6px; background: #E9EDF2; border-radius: 4px; margin-top: 6px; overflow: hidden; }
-    .nota-fill { height: 100%; border-radius: 4px; }
+    .nota-top .nt-v { font-family: var(--font-display); font-weight: 700; font-size: 14px; flex-shrink: 0; }
+    .nota-bar { height: 3px; background: transparent; border-radius: 2px; margin-top: 6px; overflow: hidden; }
+    .nota-fill { height: 100%; border-radius: 2px; }
     .donut-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
     .donut { width: 150px; height: 150px; border-radius: 50%; flex-shrink: 0; position: relative; }
     .donut::after { content: ''; position: absolute; inset: 27px; background: var(--bg); border-radius: 50%; }
