@@ -348,7 +348,7 @@
     .acc-bars.dense .acc-lbl { font-size: 9px; }
     .acc-bars.laranja .acc-bar { background: linear-gradient(180deg, #F3A977, #ED6939); }
     .mes-select { font-family: inherit; font-size: 12px; font-weight: 600; color: var(--azul-escuro); border: 1px solid var(--borda); border-radius: 8px; padding: 5px 10px; background: var(--branco); cursor: pointer; }
-    .aln-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 4px; }
+    .aln-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 4px; }
     .aln-sub { background: var(--branco); border: 1px solid var(--borda); border-radius: 12px; padding: 14px 16px; }
     .aln-sub-t { font-family: var(--font-display); font-weight: 700; font-size: 13px; margin-bottom: 8px; }
     .aln-sub .eq-row.tot { border-bottom: 1px solid var(--borda); margin-bottom: 4px; padding-bottom: 8px; }
@@ -981,10 +981,6 @@ function abrirFicha(inep, keepTab){
           <div class="eq-row"><span>AEE</span><b>${fmt(espAEE)}</b></div>
           <div class="eq-row"><span>APAE</span><b>${fmt(espAPAE)}</b></div>
           <div class="eq-row"><span>CEAME</span><b>${fmt(espCEAME)}</b></div>
-        </div>
-        <div class="aln-sub"><div class="aln-sub-t">Por localidade</div>
-          <div class="eq-row tot"><span>Total</span><b>${fmt(e.matriculas)}</b></div>
-          ${['Urbana','Campo','Indígena'].map(l=>`<div class="eq-row"><span><span class="aln-dot" style="background:${({'Urbana':'#12509A','Campo':'#6E8FB3','Indígena':'#6B7A8F'})[l]}"></span>${l}</span><b>${fmt(e.localidade===l?e.matriculas:0)}</b></div>`).join('')}
         </div>
         <div class="aln-sub"><div class="aln-sub-t">Pendências de cadastro</div>
           <div class="eq-row tot"><span>Total</span><b style="color:var(--laranja);">${fmt(semTurmaN+semRespN+semDocN)}</b></div>
