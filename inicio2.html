@@ -931,12 +931,9 @@ function abrirFicha(inep, keepTab){
     <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:14px;"><span style="font-size:12px;color:var(--texto-suave);">Bimestre</span><select class="mes-select" onchange="setBim(this.value)" aria-label="Bimestre">${BIMS.map(b=>`<option ${b===fichaBim?'selected':''}>${b}</option>`).join('')}</select></div>
     ${notaHtml}
     ${matrizNotaHtml}
-    <div class="card" style="margin-bottom:20px;"><div class="card-t">Frequência mensal</div>${freqAnoSvg}</div>
-    ${freqDiaCard}
     ${freqEtapaEscHtml}
-    <div class="card" style="margin-bottom:20px;"><div class="card-t">Matrículas por mês</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">novas matrículas · últimos 6 meses</div>${matMesHtml}</div>
-    <div class="card" style="margin-bottom:20px;"><div class="card-t">Planos de aula por disciplina</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">${fmt(planoDados.tot)} planos no total</div>${planoDados.html}</div>
-    ${acessosEscHtml}`;
+    ${freqDiaCard}
+    <div class="card" style="margin-bottom:20px;"><div class="card-t">Frequência mensal</div>${freqAnoSvg}</div>`;
 
   const paneInicio = `
     <div class="sch-stats">${dash.map(k=>`<div class="kcard"><div class="kcard-l"><div class="kic ic-${k.c}">${svgP(k.p,21)}</div><div><div class="klbl">${k.l}</div><div class="ksub">${k.s}</div></div></div><div class="kval">${k.v}</div></div>`).join('')}</div>
@@ -976,6 +973,9 @@ function abrirFicha(inep, keepTab){
         </div>
       </div>
     </div>
+    <div class="card" style="margin-bottom:20px;"><div class="card-t">Matrículas por mês</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">novas matrículas · últimos 6 meses</div>${matMesHtml}</div>
+    <div class="card" style="margin-bottom:20px;"><div class="card-t">Planos de aula por disciplina</div><div style="font-size:12px;color:var(--texto-suave);margin:-2px 0 8px;">${fmt(planoDados.tot)} planos no total</div>${planoDados.html}</div>
+    ${acessosEscHtml}
     <div class="fields">
       <div class="fld"><div class="fl">Etapas atendidas</div><div class="fv">${e.etapas}</div></div>
       <div class="fld"><div class="fl">Organização das turmas</div><div class="fv">${e.multisseriada ? 'Seriada e multisseriada' : 'Seriada (regular)'}</div></div>
