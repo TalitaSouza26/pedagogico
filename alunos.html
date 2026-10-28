@@ -413,10 +413,10 @@ function _alunoNotasHtml(a, seed){
     const comps = [0,0,0,0,0,0];                    // 4 atividades + 2 avaliações
     for(let t=0;t<target;t++){ comps[sf(seed+'pt'+d+'_'+t)%6]++; }
     const pills = comps.map((v,k)=>`<span class="npill ${k<4?'np-at':'np-av'}">${f2(v)}</span>`).join('');
-    return `<div class="nrow"><div class="nrow-badge">${d[0]}</div><div class="nrow-disc">${d}</div><div class="nrow-pills">${pills}<span class="npill np-soma">${f2(target)}</span><span class="npill np-empty"></span><span class="npill np-media">${f2(target)}</span></div></div>`;
+    return `<div class="nrow"><div class="nrow-badge">${d[0]}</div><div class="nrow-disc">${d}</div><div class="nrow-pills">${pills}<span class="npill-sep"></span><span class="npill np-media">${f2(target)}</span></div></div>`;
   };
   return `<div class="card"><div class="card-t">Notas por disciplina</div>
-    <div class="nleg"><span><i class="np-at"></i>Atividades</span><span><i class="np-av"></i>Avaliações</span><span><i class="np-soma"></i>Soma</span><span><i class="np-media"></i>Média</span></div>
+    <div class="nleg"><span><i class="np-at"></i>Atividades</span><span><i class="np-av"></i>Avaliações</span><span><i class="np-media"></i>Média</span></div>
     <div class="nlist">${discs.map(row).join('')}</div></div>`;
 }
 function _matriculaModalHtml(a, seed){
@@ -717,23 +717,21 @@ function abrirAluno(i, view){
 .mx-doc-dt { color: #A9B0BA; font-size: 12px; }
 /* notas por disciplina (pílulas) */
 .nlist { display: flex; flex-direction: column; }
-.nrow { display: flex; align-items: center; gap: 14px; padding: 11px 4px; border-bottom: 1px solid var(--borda); }
+.nrow { display: flex; align-items: center; gap: 14px; padding: 12px 4px; border-bottom: 1px solid var(--borda); }
 .nrow:last-child { border-bottom: none; }
-.nrow-badge { width: 34px; height: 34px; border-radius: 50%; background: var(--azul-claro); color: var(--azul); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 14px; flex-shrink: 0; }
+.nrow-badge { width: 32px; height: 32px; border-radius: 50%; background: var(--azul-claro); color: var(--azul); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 13px; flex-shrink: 0; }
 .nrow-disc { font-weight: 600; font-size: 13.5px; color: var(--texto); flex: 1; min-width: 130px; }
-.nrow-pills { display: flex; gap: 7px; flex-wrap: wrap; justify-content: flex-end; }
-.npill { min-width: 50px; text-align: center; padding: 7px 11px; border-radius: 10px; font-family: var(--font-display); font-weight: 700; font-size: 13px; line-height: 1; }
-.npill.np-at { background: var(--branco); border: 1.5px solid #F4C9B4; color: #ED6939; }
-.npill.np-av { background: var(--branco); border: 1.5px solid #BBCCE6; color: #12509A; }
-.npill.np-soma { background: #E7E9ED; color: #5A6472; }
-.npill.np-media { background: #ECE3F5; color: #6B3FA0; }
-.npill.np-empty { background: #F6D9C9; }
-.nleg { display: flex; gap: 16px; font-size: 11.5px; color: var(--texto-suave); margin: -2px 0 12px; flex-wrap: wrap; }
-.nleg i { width: 14px; height: 14px; border-radius: 5px; display: inline-block; margin-right: 5px; vertical-align: -3px; border: 1.5px solid transparent; }
-.nleg .np-at { background: var(--branco); border-color: #F4C9B4; }
-.nleg .np-av { background: var(--branco); border-color: #BBCCE6; }
-.nleg .np-soma { background: #E7E9ED; }
-.nleg .np-media { background: #ECE3F5; }
+.nrow-pills { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.npill { min-width: 46px; text-align: center; padding: 6px 10px; border-radius: 9px; font-family: var(--font-display); font-weight: 700; font-size: 12.5px; line-height: 1; }
+.npill.np-at { background: #FFF1E8; color: #DD5E2A; }
+.npill.np-av { background: #EBF1FA; color: #12509A; }
+.npill.np-media { background: #6B3FA0; color: #fff; min-width: 54px; box-shadow: 0 2px 6px rgba(107,63,160,.25); }
+.npill-sep { width: 1px; align-self: stretch; min-height: 22px; background: var(--borda); margin: 0 3px; }
+.nleg { display: flex; gap: 16px; font-size: 11.5px; color: var(--texto-suave); margin: -2px 0 14px; flex-wrap: wrap; }
+.nleg i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; margin-right: 5px; vertical-align: -2px; }
+.nleg .np-at { background: #FFF1E8; }
+.nleg .np-av { background: #EBF1FA; }
+.nleg .np-media { background: #6B3FA0; }
 .fld { background:var(--branco); border:1px solid var(--borda); border-radius:10px; padding:11px 14px; }
 .fld .fl { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--texto-suave); margin-bottom:5px; font-family:var(--font-display); }
 .fld .fv { font-size:13.5px; color:var(--texto); font-weight:500; }
