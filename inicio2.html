@@ -1288,7 +1288,8 @@ function alunoTab(v){
   document.querySelectorAll('#sp2 .al-tab').forEach(b=>b.classList.toggle('active', b.dataset.v===v));
   document.querySelectorAll('#sp2 .al-pane').forEach(p=>{ p.hidden = p.dataset.v!==v; });
 }
-function _alunoNotasHtml(a, seed){
+function _alunoNotasHtml(a, seed, bim){
+  bim = bim || 1;
   const sf = s => { let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; };
   const dec = n => n.toFixed(1).replace('.',',');
   const infantil = /Infantil/i.test(a.nivel||'') || /CN|Pré/.test(a.serie||'');
@@ -1302,15 +1303,21 @@ function _alunoNotasHtml(a, seed){
   const discs = /finais/i.test(a.nivel||'') ? [...BASE,'Língua Inglesa'] : /EJA/i.test(a.nivel||'') ? [...BASE,'Leitura e Produção de Texto','Língua Inglesa'] : [...BASE,'Leitura e Produção de Texto'];
   const f2 = n => n.toFixed(2).replace('.',',');
   const row = d => {
-    const target = 3 + sf(seed+'tg'+d)%8;          // nota do bimestre 3..10
-    const comps = [0,0,0,0,0,0];                    // 4 atividades + 2 avaliações
-    for(let t=0;t<target;t++){ comps[sf(seed+'pt'+d+'_'+t)%6]++; }
+    const target = 3 + sf(seed+'tg'+bim+d)%8;       // nota do bimestre 3..10
+    const comps = [0,0,0,0,0,0];                     // 4 atividades + 2 avaliações
+    for(let t=0;t<target;t++){ comps[sf(seed+'pt'+bim+d+'_'+t)%6]++; }
     const pills = comps.map((v,k)=>`<span class="npill ${k<4?'np-at':'np-av'}">${f2(v)}</span>`).join('');
     return `<div class="nrow"><div class="nrow-badge">${d[0]}</div><div class="nrow-disc">${d}</div><div class="nrow-pills">${pills}<span class="npill-sep"></span><span class="npill np-media">${f2(target)}</span></div></div>`;
   };
-  return `<div class="card"><div class="card-t">Notas por disciplina</div>
+  const sel = `<select class="mes-select" onchange="alunoNotasBim(this.value)">${[1,2,3,4].map(b=>`<option value="${b}" ${b==bim?'selected':''}>${b}º bimestre</option>`).join('')}</select>`;
+  return `<div class="card"><div class="pcard-head"><div class="card-t">Notas por disciplina</div>${sel}</div>
     <div class="nleg"><span><i class="np-at"></i>Atividades</span><span><i class="np-av"></i>Avaliações</span><span><i class="np-media"></i>Média</span></div>
     <div class="nlist">${discs.map(row).join('')}</div></div>`;
+}
+function alunoNotasBim(b){
+  const c = window._alunoCtx; if(!c||!c.a) return;
+  const wrap = document.getElementById('alNotasWrap');
+  if(wrap) wrap.innerHTML = _alunoNotasHtml(c.a, c.seed, +b);
 }
 function _matriculaModalHtml(a, escNome, seed){
   const sf = s => { let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; };
@@ -1462,7 +1469,7 @@ function abrirAluno(i, view){
   const sf = s => { let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; };
   const escNome = (window.REDE_NOME && REDE_NOME[e.inep]) || e.nome;
   const seed = e.inep+'·'+a.nome+'·'+a.turma;
-  window._alunoCtx = { seed };
+  window._alunoCtx = { seed, a };
   const freqGeral = 68 + sf(seed+'fg')%30;
   const rc = freqGeral>=85 ? '#2E8B00' : freqGeral>=72 ? '#E8A317' : '#E24A3A';
   const pontos = sf(seed+'pt')%3===0 ? 0 : 10 + sf(seed+'pt2')%240;
@@ -1496,7 +1503,7 @@ function abrirAluno(i, view){
           <div class="alp-pts"><div class="alp-pts-n">${svgP('<path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/>',22)} ${fmt(pontos)} pontos</div><img src="bubo-up.png" alt="" onerror="this.style.display='none'"></div>
         </div>
       </div>
-      <div class="al-pane" data-v="notas" hidden>${_alunoNotasHtml(a, seed)}</div>
+      <div class="al-pane" data-v="notas" hidden><div id="alNotasWrap">${_alunoNotasHtml(a, seed, 1)}</div></div>
     </div>
     <div class="sp2-foot">${AUDIT}</div>`;
   document.getElementById('sp2Overlay').classList.add('open');
