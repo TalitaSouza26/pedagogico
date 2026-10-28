@@ -410,15 +410,11 @@ function _alunoNotasHtml(a, seed, bim){
   const discs = /finais/i.test(a.nivel||'') ? [...BASE,'Língua Inglesa'] : /EJA/i.test(a.nivel||'') ? [...BASE,'Leitura e Produção de Texto','Língua Inglesa'] : [...BASE,'Leitura e Produção de Texto'];
   const f2 = n => n.toFixed(2).replace('.',',');
   const row = d => {
-    const target = 3 + sf(seed+'tg'+bim+d)%8;       // nota do bimestre 3..10
-    const comps = [0,0,0,0,0,0];                     // 4 atividades + 2 avaliações
-    for(let t=0;t<target;t++){ comps[sf(seed+'pt'+bim+d+'_'+t)%6]++; }
-    const pills = comps.map((v,k)=>`<span class="npill ${k<4?'np-at':'np-av'}">${f2(v)}</span>`).join('');
-    return `<div class="nrow"><div class="nrow-badge">${d[0]}</div><div class="nrow-disc">${d}</div><div class="nrow-pills">${pills}<span class="npill-sep"></span><span class="npill np-media">${f2(target)}</span></div></div>`;
+    const target = 3 + sf(seed+'tg'+bim+d)%8;       // média do bimestre 3..10
+    return `<div class="nrow"><div class="nrow-badge">${d[0]}</div><div class="nrow-disc">${d}</div><div class="nrow-pills"><span class="npill np-media">${f2(target)}</span></div></div>`;
   };
   const sel = `<select class="mes-select" onchange="alunoNotasBim(this.value)">${[1,2,3,4].map(b=>`<option value="${b}" ${b==bim?'selected':''}>${b}º bimestre</option>`).join('')}</select>`;
-  return `<div class="card"><div class="pcard-head"><div class="card-t">Notas por disciplina</div>${sel}</div>
-    <div class="nleg"><span><i class="np-at"></i>Atividades</span><span><i class="np-av"></i>Avaliações</span><span><i class="np-media"></i>Média</span></div>
+  return `<div class="card"><div class="pcard-head"><div class="card-t">Média por disciplina</div>${sel}</div>
     <div class="nlist">${discs.map(row).join('')}</div></div>`;
 }
 function alunoNotasBim(b){
