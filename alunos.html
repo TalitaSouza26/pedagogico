@@ -360,7 +360,7 @@ function render(){
       <td><span class="tag ${a.doc==='Completa'?'t-comp':'t-incomp'}">${a.doc}</span></td>
       <td>${a.resp ? '<span class="muted">Sim</span>' : '<span class="tag t-no">Sem responsável</span>'}</td>
       <td>${tagStatus(a.status)}</td>
-      <td><span class="al-acts"><button class="al-act" onclick="abrirAluno(${a._i},'matricula')" title="Ficha de matrícula" aria-label="Matrícula">${svgP('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',15)}</button><button class="al-act" onclick="abrirAluno(${a._i},'notas')" title="Notas" aria-label="Notas">${svgP('<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>',15)}</button><button class="al-act" onclick="abrirAluno(${a._i},'freq')" title="Frequência" aria-label="Frequência">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',15)}</button></span></td>
+      <td><span class="al-acts"><button class="al-act" onclick="abrirMatricula(${a._i})" title="Ficha de matrícula" aria-label="Matrícula">${svgP('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',15)}</button><button class="al-act" onclick="abrirAluno(${a._i},'notas')" title="Notas" aria-label="Notas">${svgP('<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>',15)}</button><button class="al-act" onclick="abrirAluno(${a._i},'freq')" title="Frequência" aria-label="Frequência">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',15)}</button></span></td>
     </tr>`).join('') || `<tr><td colspan="7" class="empty">Nenhum aluno encontrado com os filtros atuais.</td></tr>`;
   document.getElementById('pagerInfo').textContent = total ? `Mostrando ${fmt(ini+1)}–${fmt(Math.min(ini+POR_PAGINA,total))} de ${fmt(total)}` : '';
   document.getElementById('pgPos').textContent = `${pagina} / ${max}`;
@@ -413,8 +413,10 @@ function _alunoNotasHtml(a, seed){
     <table class="pt-tbl"><thead><tr><th>Disciplina</th><th style="text-align:center">1º bim</th><th style="text-align:center">2º bim</th><th style="text-align:center">3º bim</th><th style="text-align:center">4º bim</th><th style="text-align:right">Média</th></tr></thead>
     <tbody>${rows.map(r=>`<tr><td><b>${r.d}</b></td>${r.bims.map(v=>`<td style="text-align:center;color:${cor(v)};font-weight:600;">${dec(v)}</td>`).join('')}<td style="text-align:right;font-family:var(--font-display);font-weight:800;color:${cor(r.med)};">${dec(r.med)}</td></tr>`).join('')}</tbody></table></div>`;
 }
-function _alunoMatriculaHtml(a, seed){
+function _matriculaModalHtml(a, seed){
   const sf = s => { let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; };
+  const pick = (arr,k)=>arr[sf(seed+k)%arr.length];
+  const ic = p => svgP(p,15);
   let idade; const sn = parseInt(a.serie);
   if(/CN/.test(a.serie||'')) idade = /II/.test(a.serie)?3:2;
   else if(/Pré/.test(a.serie||'')) idade = /II/.test(a.serie)?5:4;
@@ -422,17 +424,133 @@ function _alunoMatriculaHtml(a, seed){
   else idade = isNaN(sn) ? 10 : 5 + sn;
   const anoN = 2026 - idade, dd = 1+sf(seed+'dd')%28, mm = 1+sf(seed+'mm')%12;
   const nasc = `${String(dd).padStart(2,'0')}/${String(mm).padStart(2,'0')}/${anoN}`;
-  const respNome = `${['Maria','Ana','Joana','Patrícia','Cláudia','Fernanda','Rosângela','Sandra'][sf(seed+'rn')%8]} ${(a.nome||'').split(' ').slice(-1)[0]}`;
-  const parent = ['Mãe','Pai','Avó','Responsável legal'][sf(seed+'pa')%4];
-  const contato = `(73) 9 ${String(1000+sf(seed+'ct')%9000)}-${String(4000+sf(seed+'ct2')%5000).padStart(4,'0')}`;
+  const turma = a.enturmado ? `${a.serie} ${pick(['A','B','C'],'tm')}` : 'Sem turma';
+  const sexo = pick(['Feminino','Masculino'],'sx');
+  const raca = pick(['Parda','Branca','Preta','Indígena','Amarela'],'rc');
+  const natCidade = pick(['Porto Seguro','Eunápolis','Santa Cruz Cabrália','Itabela','Teixeira de Freitas'],'nat');
+  const cpf = a.cpf || '';
+  const rg = `${10+sf(seed+'rg')%89}.${String(100+sf(seed+'rg2')%900)}.${String(100+sf(seed+'rg3')%900)}-${sf(seed+'rg4')%10}`;
+  const contato = a.resp ? `(73) 9 ${String(1000+sf(seed+'ct')%9000)}-${String(4000+sf(seed+'ct2')%5000).padStart(4,'0')}` : '';
+  const sus = Array.from({length:3},(_,k)=>String(100+sf(seed+'sus'+k)%900)).join(' ')+' '+String(1000+sf(seed+'sus3')%9000);
+  const nis = `${String(100+sf(seed+'nis')%900)}.${String(10000+sf(seed+'nis2')%90000)}.${String(10+sf(seed+'nis3')%90)}-${sf(seed+'nis4')%10}`;
+  const bolsa = pick(['Sim','Não','Não','Não'],'bf');
+  const cep = `45810-${String(sf(seed+'cep')%1000).padStart(3,'0')}`;
+  const distrito = pick(['Sede','Arraial d\'Ajuda','Trancoso','Caraíva','Vale Verde'],'dt');
+  const bairro = pick(['Baianão','Centro','Frei Calixto','Cambolo','Vila Jardim','Mercado do Povo','Paraguai'],'br');
+  const endereco = pick(['Rua das Flores','Avenida dos Navegantes','Rua do Cajueiro','Travessa São Pedro','Rua da Praia','Avenida Beira-Mar','Rua Pau Brasil'],'ru');
+  const numero = String(1+sf(seed+'nu')%998);
+  const complemento = pick(['','Casa','Apto 101','Fundos','Bloco B'],'cp');
+  const ponto = pick(['Próximo à escola','Em frente à praça','Perto do mercado da feira','',''],'pr');
+  const possuiDef = a.ee || sf(seed+'df')%12===0;
+  const qualDef = a.ee ? 'Transtorno do Espectro Autista (TEA)' : pick(['Deficiência auditiva','Deficiência visual','Deficiência intelectual','Deficiência física'],'qd');
+  const aee = possuiDef ? 'Sim' : 'Não';
+  const possuiCond = sf(seed+'cs')%6===0;
+  const qualCond = pick(['Asma','Rinite alérgica','Alergia a lactose','Diabetes tipo 1','Epilepsia'],'qc');
   const matNum = `2026${String(100000+sf(seed+'mn')%899999)}`;
-  const matData = `${String(1+sf(seed+'md')%20).padStart(2,'0')}/02/2026`;
-  const fld = (l,v)=>`<div class="fld"><div class="fl">${l}</div><div class="fv">${v}</div></div>`;
+  const matData = `${String(1+sf(seed+'md')%25).padStart(2,'0')}/02/2026`;
+  const femN = ['Maria','Ana','Joana','Patrícia','Cláudia','Fernanda','Rosângela','Sandra','Luiza','Jaqueline'];
+  const mascN = ['José','João','Antônio','Carlos','Paulo','Marcos','Luiz','Rafael','Edvaldo','Gilberto'];
+  const last = (a.nome||'').split(' ').slice(-1)[0] || 'Santos';
+  const resps = [];
+  if(a.resp){
+    resps.push({ nome: `${femN[sf(seed+'r0')%femN.length]} ${last}`, parent: 'Mãe' });
+    if(sf(seed+'nr')%2){ const pr = pick(['Pai','Avó','Avô','Madrasta/Padrasto','Tia/Tio','Responsável legal'],'rp1'); const fem = /ó|ã|Tia|Madrasta/.test(pr); resps.push({ nome: `${(fem?femN:mascN)[sf(seed+'r1')%10]} ${last}`, parent: pr }); }
+  }
+  const fld = (label,value,iconP,hint,full)=>{
+    const h = hint ? `<span class="${hint==='o'?'req':'opt'}">(${hint==='o'?'obrigatório':'opcional'})</span>` : '';
+    const v = value ? `<div class="mx-val">${iconP?ic(iconP):''}<span>${value}</span></div>` : `<div class="mx-val empty">${iconP?ic(iconP):''}<span>Não informado</span></div>`;
+    return `<div class="mx-field${full?' full':''}"><span class="mx-lbl">${label} ${h}</span>${v}</div>`;
+  };
+  const yn = (label,val)=>`<div class="mx-opt"><span>${label}</span><span class="mx-yn"><span class="yn ${val==='Sim'?'on':''}"><i class="dot"></i>Sim</span><span class="yn ${val!=='Sim'?'on':''}"><i class="dot"></i>Não</span></span></div>`;
+  const I = { pin:'<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/>', book:'<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>', sun:'<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>', users:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>', check:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>', user:'<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>', cake:'<path d="M3 21h18"/><path d="M4 21V10h16v11"/><path d="M12 10V6M12 6a2 2 0 100-4 2 2 0 000 4z"/>', card:'<rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>', phone:'<path d="M22 16.92v3a2 2 0 01-2.18 2 19.8 19.8 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.8 19.8 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/>', heart:'<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 10-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/>', home:'<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>', file:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>' };
+  const docs = ['Certidão de nascimento','Comprovante de residência','Foto 3x4','Identidade','Laudo médico'];
+  const respCards = resps.length ? resps.map(r=>`<div class="mx-resp-card"><div class="mx-resp-av">${_ini(r.nome)}</div><div><div class="mx-resp-n">${r.nome}</div><div class="mx-resp-p">${r.parent}</div></div></div>`).join('') : `<div class="mx-resp-card" style="justify-content:center;color:var(--texto-suave);font-size:12px;">Sem responsável cadastrado</div>`;
+  const close = svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',16);
   return `
-    <div class="card" style="margin-bottom:16px;"><div class="card-t">Dados do aluno</div><div class="mat-grid">${fld('Nome completo', a.nome)}${fld('CPF', a.cpf || '—')}${fld('Data de nascimento', nasc)}${fld('Educação Especial', a.ee?'Sim':'Não')}</div></div>
-    <div class="card" style="margin-bottom:16px;"><div class="card-t">Matrícula</div><div class="mat-grid">${fld('Nº de matrícula', matNum)}${fld('Data da matrícula', matData)}${fld('Situação', a.status)}${fld('Documentação', a.doc)}${fld('Série · Nível', a.serie+' · '+a.nivel)}${fld('Turno', a.turno)}${fld('Escola', a.escola)}</div></div>
-    <div class="card"><div class="card-t">Responsável</div><div class="mat-grid">${fld('Nome', a.resp ? respNome : '—')}${fld('Parentesco', a.resp ? parent : '—')}${fld('Contato', a.resp ? contato : '—')}</div></div>`;
+  <div class="mx-modal" onclick="event.stopPropagation()">
+    <div class="mx-top">
+      <button class="mx-back" onclick="fecharMatricula()">${svgP('<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',15)} Voltar para tela anterior</button>
+      <button class="mx-x" onclick="fecharMatricula()" aria-label="Fechar">${close}</button>
+    </div>
+    <div class="mx-wrap">
+      <div class="mx-side">
+        <div class="mx-matlbl">Número de matrícula</div>
+        <div class="mx-matnum">${matNum}</div>
+        <div class="mx-foto">${svgP(I.user,60)}</div>
+        <div style="font-size:12.5px;font-weight:700;text-align:left;margin-bottom:9px;color:var(--texto);">Responsáveis</div>
+        <div class="mx-resp">${respCards}</div>
+        <div class="mx-mat-foot">Matriculado em ${matData}<br>por secretaria@eprof.app</div>
+      </div>
+      <div>
+        <div class="mx-sec">
+          <div class="mx-sec-t">Informações de ensino</div>
+          <div class="mx-grid">
+            ${fld('Instituição de ensino', a.escola, I.pin, 'o')}
+            ${fld('Nível de ensino', a.nivel, I.book, 'o')}
+            ${fld('Série', a.serie, I.book, 'o')}
+            ${fld('Turno', a.turno, I.sun, 'o')}
+            ${fld('Turma', turma, I.users, 'o')}
+            ${fld('Status da matrícula', a.status, I.check, 'o')}
+          </div>
+        </div>
+        <div class="mx-sec">
+          <div class="mx-sec-t">Informações do aluno</div>
+          <div class="mx-grid">
+            ${fld('Nome completo', a.nome, I.user, 'o', true)}
+            ${fld('Sexo', sexo, I.user, 'o')}
+            ${fld('Raça / Cor', raca, I.user, 'o')}
+            ${fld('Data de nascimento', nasc, I.cake, 'o')}
+            ${fld('Naturalidade', natCidade, I.pin, 'o')}
+            ${fld('UF de nascimento', 'Bahia (BA)', I.pin, 'o')}
+            ${fld('CPF', cpf, I.card, 'o')}
+            ${fld('RG', rg, I.card, 'c')}
+            ${fld('Contato', contato, I.phone, 'c')}
+            ${fld('Cartão SUS', sus, I.heart, 'c')}
+            ${fld('Número do NIS', nis, I.card, 'c')}
+            ${fld('Bolsa Família', bolsa, I.card, 'c')}
+          </div>
+        </div>
+        <div class="mx-sec">
+          <div class="mx-sec-t">Endereço do aluno</div>
+          <div class="mx-grid">
+            ${fld('CEP', cep, I.home, 'o')}
+            ${fld('Distrito', distrito, I.pin, 'o')}
+            ${fld('Bairro', bairro, I.pin, 'o')}
+            ${fld('Endereço', endereco, I.home, 'o')}
+            ${fld('Número', numero, I.home, 'o')}
+            ${fld('Complemento', complemento, I.home, 'c')}
+            ${fld('Ponto de referência', ponto, I.pin, 'c', true)}
+          </div>
+        </div>
+        <div class="mx-sec">
+          <div class="mx-sec-t">Informações médicas</div>
+          ${yn('O aluno possui algum tipo de deficiência?', possuiDef?'Sim':'Não')}
+          ${possuiDef ? `<div class="mx-grid" style="margin-bottom:10px;">${fld('Qual deficiência?', qualDef, I.heart)}${fld('Possui atendimento educacional especializado (AEE)?', aee, I.check)}</div>` : ''}
+          ${yn('O aluno possui alguma condição de saúde ou alergia?', possuiCond?'Sim':'Não')}
+          ${possuiCond ? `<div class="mx-grid">${fld('Qual condição ou alergia?', qualCond, I.heart)}</div>` : ''}
+        </div>
+        <div class="mx-sec">
+          <div class="mx-sec-t">Documentos do aluno</div>
+          ${docs.map(d=>`<div class="mx-doc"><span class="mx-doc-ic">${svgP(I.file,20)}</span><span class="mx-doc-nome">${d}</span><span class="mx-doc-st">Nenhum arquivo anexado</span><span class="mx-doc-dt">Sem data de envio</span></div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>`;
 }
+function abrirMatricula(i){
+  const a = (window.ALUNOS||[])[i]; if(!a) return;
+  const seed = (a.escola||'')+'·'+a.nome+'·'+a.serie;
+  const ov = document.getElementById('mxOverlay');
+  ov.innerHTML = _matriculaModalHtml(a, seed);
+  ov.classList.add('open');
+  document.addEventListener('keydown', mxEsc);
+}
+function fecharMatricula(){
+  const ov = document.getElementById('mxOverlay');
+  if(ov){ ov.classList.remove('open'); ov.innerHTML=''; }
+  document.removeEventListener('keydown', mxEsc);
+}
+function mxEsc(ev){ if(ev.key==='Escape') fecharMatricula(); }
 function abrirAluno(i, view){
   const a = (window.ALUNOS||[])[i]; if(!a) return;
   view = view || 'freq';
@@ -463,7 +581,6 @@ function abrirAluno(i, view){
       <div class="al-tabs">
         <button class="al-tab" data-v="freq" onclick="alunoTab('freq')">Frequência</button>
         <button class="al-tab" data-v="notas" onclick="alunoTab('notas')">Notas</button>
-        <button class="al-tab" data-v="matricula" onclick="alunoTab('matricula')">Ficha de matrícula</button>
       </div>
       <div class="al-pane" data-v="freq">
         <div class="alp-grid">
@@ -473,7 +590,6 @@ function abrirAluno(i, view){
         </div>
       </div>
       <div class="al-pane" data-v="notas" hidden>${_alunoNotasHtml(a, seed)}</div>
-      <div class="al-pane" data-v="matricula" hidden>${_alunoMatriculaHtml(a, seed)}</div>
     </div>
     <div class="sp2-foot">${AUD}</div>`;
   document.getElementById('sp2Overlay').classList.add('open');
@@ -548,6 +664,50 @@ function abrirAluno(i, view){
 .al-pane[hidden] { display:none; }
 .mat-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
 @media (max-width:700px){ .mat-grid { grid-template-columns:1fr; } }
+/* modal de matrícula (leitura) */
+.mx-overlay { position: fixed; inset: 0; background: rgba(15,23,32,.5); z-index: 70; display: none; justify-content: center; padding: 22px; overflow-y: auto; }
+.mx-overlay.open { display: flex; align-items: flex-start; }
+.mx-modal { background: #F3F4F7; border-radius: 16px; width: 1180px; max-width: 100%; box-shadow: 0 22px 60px rgba(15,23,32,.28); overflow: hidden; }
+.mx-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; position: sticky; top: 0; background: #F3F4F7; z-index: 2; }
+.mx-back { background: var(--laranja); color: #fff; border: none; border-radius: 10px; padding: 9px 18px; font-family: var(--font-display); font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.mx-back:hover { background: var(--laranja-escuro); }
+.mx-x { background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 8px; cursor: pointer; color: var(--texto-suave); display: flex; }
+.mx-x:hover { border-color: var(--azul); color: var(--azul); }
+.mx-wrap { display: grid; grid-template-columns: 250px 1fr; gap: 18px; padding: 0 18px 22px; }
+@media (max-width: 860px){ .mx-wrap { grid-template-columns: 1fr; } }
+.mx-side { background: var(--branco); border: 1px solid var(--borda); border-radius: 14px; padding: 18px; text-align: center; align-self: start; }
+.mx-matlbl { font-size: 11px; color: var(--texto-suave); }
+.mx-matnum { font-family: var(--font-display); font-weight: 800; font-size: 22px; color: var(--laranja); }
+.mx-foto { width: 150px; height: 180px; border-radius: 12px; background: #FBE4D7; margin: 16px auto 18px; display: grid; place-items: center; color: #E79B74; }
+.mx-resp { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+.mx-resp-card { display: flex; align-items: center; gap: 10px; border: 1px solid var(--borda); border-radius: 10px; padding: 10px 12px; background: var(--bg); }
+.mx-resp-av { width: 32px; height: 32px; border-radius: 9px; background: var(--azul-claro); color: var(--azul); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 13px; flex-shrink: 0; }
+.mx-resp-n { font-size: 12.5px; font-weight: 600; color: var(--texto); line-height: 1.2; }
+.mx-resp-p { font-size: 11px; color: var(--texto-suave); }
+.mx-mat-foot { font-size: 11.5px; color: var(--texto-suave); margin-top: 16px; line-height: 1.4; }
+.mx-sec { background: var(--branco); border: 1px solid var(--borda); border-radius: 14px; padding: 22px; margin-bottom: 16px; }
+.mx-sec-t { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--laranja); margin-bottom: 18px; }
+.mx-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 760px){ .mx-grid { grid-template-columns: 1fr; } }
+.mx-field.full { grid-column: 1 / -1; }
+.mx-lbl { display: block; font-size: 12px; color: var(--texto); font-weight: 600; margin-bottom: 6px; }
+.mx-lbl .req { color: var(--laranja); font-weight: 500; font-size: 11px; }
+.mx-lbl .opt { color: var(--texto-suave); font-weight: 500; font-size: 11px; }
+.mx-val { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--borda); border-radius: 10px; padding: 0 14px; min-height: 46px; font-size: 13.5px; color: var(--texto); }
+.mx-val svg { width: 16px; height: 16px; color: var(--texto-suave); flex-shrink: 0; }
+.mx-val.empty { color: #A9B0BA; }
+.mx-opt { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #FDEDE5; border-radius: 10px; padding: 12px 16px; font-size: 13.5px; color: var(--texto); margin-bottom: 10px; }
+.mx-opt .mx-yn { display: inline-flex; gap: 16px; }
+.mx-opt .yn { display: inline-flex; align-items: center; gap: 6px; color: var(--texto-suave); }
+.mx-opt .yn.on { color: var(--laranja); font-weight: 700; }
+.mx-opt .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; display: inline-block; position: relative; }
+.mx-opt .yn.on .dot::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: currentColor; }
+.mx-doc { display: flex; align-items: center; gap: 14px; padding: 14px 4px; border-top: 1px solid var(--borda); font-size: 13.5px; }
+.mx-doc:first-of-type { border-top: none; }
+.mx-doc-ic { color: var(--laranja); display: flex; }
+.mx-doc-nome { font-weight: 600; color: var(--texto); min-width: 190px; }
+.mx-doc-st { flex: 1; color: var(--texto-suave); }
+.mx-doc-dt { color: #A9B0BA; font-size: 12px; }
 .fld { background:var(--branco); border:1px solid var(--borda); border-radius:10px; padding:11px 14px; }
 .fld .fl { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--texto-suave); margin-bottom:5px; font-family:var(--font-display); }
 .fld .fv { font-size:13.5px; color:var(--texto); font-weight:500; }
@@ -565,6 +725,7 @@ function abrirAluno(i, view){
 </style>
 
 <div class="sp2-overlay" id="sp2Overlay" onclick="fecharAluno()"></div>
+<div class="mx-overlay" id="mxOverlay" onclick="fecharMatricula()"></div>
 <aside class="sp2" id="sp2"></aside>
 
 </body>
