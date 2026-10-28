@@ -665,9 +665,10 @@ function abrirAluno(i, view){
 .mat-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
 @media (max-width:700px){ .mat-grid { grid-template-columns:1fr; } }
 /* modal de matrícula (leitura) */
-.mx-overlay { position: fixed; inset: 0; background: rgba(15,23,32,.5); z-index: 70; display: none; justify-content: center; padding: 22px; overflow-y: auto; }
-.mx-overlay.open { display: flex; align-items: flex-start; }
-.mx-modal { background: #F3F4F7; border-radius: 16px; width: 1180px; max-width: 100%; box-shadow: 0 22px 60px rgba(15,23,32,.28); overflow: hidden; }
+.mx-overlay { position: fixed; inset: 0; background: rgba(15,23,32,.5); z-index: 70; display: none; }
+.mx-overlay.open { display: block; }
+.mx-modal { position: fixed; top: 0; right: 0; height: 100vh; width: 940px; max-width: 100%; background: #F3F4F7; box-shadow: -16px 0 44px rgba(15,23,32,.22); overflow-y: auto; transform: translateX(100%); transition: transform .26s ease; }
+.mx-overlay.open .mx-modal { transform: translateX(0); }
 .mx-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; position: sticky; top: 0; background: #F3F4F7; z-index: 2; }
 .mx-back { background: var(--laranja); color: #fff; border: none; border-radius: 10px; padding: 9px 18px; font-family: var(--font-display); font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
 .mx-back:hover { background: var(--laranja-escuro); }
