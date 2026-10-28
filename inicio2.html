@@ -1478,10 +1478,6 @@ function abrirAluno(i, view){
   sp.innerHTML = `
     <div class="sp2-head"><div class="sp2-av">${_ini(a.nome)}</div><div><div class="sp2-name">${a.nome}</div><div class="sp2-sub">Aluno(a) · ${escNome}</div></div><button class="sp2-close" onclick="fecharServidor()" aria-label="Fechar">${close}</button></div>
     <div class="sp2-body">
-      <div class="al-tabs">
-        <button class="al-tab" data-v="freq" onclick="alunoTab('freq')">Frequência</button>
-        <button class="al-tab" data-v="notas" onclick="alunoTab('notas')">Notas</button>
-      </div>
       <div class="al-pane" data-v="freq">
         <div class="alp-grid">
           <div class="card"><div class="pcard-head"><div class="card-t">${svgP('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',17)} Frequência do mês</div><select class="mes-select" onchange="alunoFreqMes(this.value)">${MESES.map((m,mi)=>`<option value="${mi}" ${mi===9?'selected':''}>${m}</option>`).join('')}</select></div><div id="alCalWrap">${_alunoCalHtml(seed,9)}</div><div class="al-leg"><span><i style="background:#3DC200"></i>Presença</span><span><i style="background:#F0B429"></i>Presença parcial</span><span><i style="background:#E24A3A"></i>Falta</span><span><i style="background:#CBD2DB"></i>Sem aula</span></div></div>
