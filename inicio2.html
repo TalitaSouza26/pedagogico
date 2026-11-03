@@ -405,6 +405,18 @@
     .el-eye { border: 1px solid var(--borda); background: var(--branco); border-radius: 8px; color: var(--laranja); padding: 6px; display: inline-flex; cursor: pointer; text-decoration: none; flex-shrink: 0; }
     .el-eye:hover { border-color: var(--laranja); background: var(--laranja-bg); }
     .el-eye svg { width: 16px; height: 16px; }
+    /* cards de filtro por cargo (Servidores) */
+    .srv-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 10px; }
+    @media (max-width: 640px){ .srv-cards { grid-template-columns: 1fr; } }
+    .srv-card { display: flex; align-items: center; gap: 12px; background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 13px 16px; cursor: pointer; text-align: left; font-family: inherit; transition: border-color .15s, box-shadow .15s, background .15s; }
+    .srv-card:hover { border-color: var(--azul); }
+    .srv-card.active { border-color: var(--azul); background: var(--azul-claro); box-shadow: 0 2px 10px rgba(18,80,154,.12); }
+    .srv-ic { width: 40px; height: 40px; border-radius: 11px; background: var(--azul-claro); color: var(--azul); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .srv-card.active .srv-ic { background: var(--azul); color: #fff; }
+    .srv-meta { display: flex; flex-direction: column; line-height: 1.15; }
+    .srv-n { font-family: var(--font-display); font-weight: 800; font-size: 22px; color: var(--texto); }
+    .srv-l { font-size: 12.5px; color: var(--texto-suave); }
+    .srv-hint { font-size: 11.5px; color: var(--texto-suave); margin: 0 0 14px 2px; }
     /* painel do professor dentro da folha */
     .sheet-back { border: 1px solid var(--borda); background: var(--branco); border-radius: 9px; padding: 8px 13px; font-family: var(--font-display); font-size: 12.5px; font-weight: 600; color: var(--texto-suave); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-right: 6px; }
     .sheet-back:hover { border-color: var(--azul); color: var(--azul); }
@@ -1144,9 +1156,22 @@ function abrirFicha(inep, keepTab){
     ${acessosEscHtml}`;
 
   /* aba Servidores */
+  const grpOf = p => (p.grupo==='Direção'||p.grupo==='Coordenação') ? 'gestores' : p.grupo==='Professores' ? 'professores' : 'secretarios';
+  const cGest = team.filter(p=>grpOf(p)==='gestores').length;
+  const cProf = team.filter(p=>grpOf(p)==='professores').length;
+  const cSec  = team.filter(p=>grpOf(p)==='secretarios').length;
+  const icGest = svgP('<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="2" y1="13" x2="22" y2="13"/>',20);
+  const icProf = svgP('<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',20);
+  const icSec  = svgP('<path d="M8 4h8a1 1 0 011 1v0h1a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h1v0a1 1 0 011-1z"/><path d="M9 4h6" /><path d="M8 11h8M8 15h5"/>',20);
   const paneServidores = `
-    <div class="eq-list">${team.map(p=>`
-      <div class="el-row">
+    <div class="srv-cards">
+      <button type="button" class="srv-card" data-grp="gestores" onclick="filtrarServidores('gestores',this)"><span class="srv-ic">${icGest}</span><span class="srv-meta"><span class="srv-n">${cGest}</span><span class="srv-l">Gestores</span></span></button>
+      <button type="button" class="srv-card" data-grp="professores" onclick="filtrarServidores('professores',this)"><span class="srv-ic">${icProf}</span><span class="srv-meta"><span class="srv-n">${cProf}</span><span class="srv-l">Professores</span></span></button>
+      <button type="button" class="srv-card" data-grp="secretarios" onclick="filtrarServidores('secretarios',this)"><span class="srv-ic">${icSec}</span><span class="srv-meta"><span class="srv-n">${cSec}</span><span class="srv-l">Secretários</span></span></button>
+    </div>
+    <div class="srv-hint">Clique num card para filtrar · clique de novo para ver todos</div>
+    <div class="eq-list" id="srvList">${team.map(p=>`
+      <div class="el-row" data-grp="${grpOf(p)}">
         <span class="el-av">${iniciais(p.nome)}</span>
         <div class="el-info"><div class="el-nome">${p.nome}</div><div class="el-cargo">${p.cargo}</div></div>
         <button class="el-eye" onclick="abrirServidor('${e.inep}','${p.m}')" title="Ver detalhes" aria-label="Ver detalhes de ${p.nome}">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',16)}</button>
@@ -1314,6 +1339,15 @@ function alunoNotasBim(b){
   const c = window._alunoCtx; if(!c||!c.a) return;
   const wrap = document.getElementById('alNotasWrap');
   if(wrap) wrap.innerHTML = _alunoNotasHtml(c.a, c.seed, +b);
+}
+function filtrarServidores(grp, el){
+  const scope = el.closest('.stabpane') || document;
+  const cards = scope.querySelectorAll('.srv-card');
+  const jaAtivo = el.classList.contains('active');
+  cards.forEach(c=>c.classList.remove('active'));
+  const rows = scope.querySelectorAll('#srvList .el-row');
+  if(jaAtivo){ rows.forEach(r=>{ r.style.display=''; }); }
+  else { el.classList.add('active'); rows.forEach(r=>{ r.style.display = r.dataset.grp===grp ? '' : 'none'; }); }
 }
 function _matriculaModalHtml(a, escNome, seed){
   const sf = s => { let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; };
