@@ -52,35 +52,17 @@
     .muted { color: var(--texto-suave); }
     .vinc-badge { color: var(--laranja); font-family: var(--font-display); font-weight: 700; }
     .cargo-badge { color: var(--azul); font-family: var(--font-display); font-weight: 700; }
-    /* mapa da escola (salas clicáveis) */
-    .mapa-wrap { margin: 2px 0 6px; }
-    .mapa-svg { width: 100%; max-width: 860px; height: auto; display: block; margin: 0 auto; }
-    .mapa-roof { fill: var(--azul); }
-    .mapa-pole { stroke: #90A4C4; stroke-width: 2; }
-    .mapa-flag { fill: var(--laranja); }
-    .mapa-build { fill: #fff; stroke: var(--borda); stroke-width: 2; }
-    .mapa-ground { stroke: var(--borda); stroke-width: 2; }
-    .mapa-roof-t { fill: #fff; font-family: var(--font-display); font-weight: 700; font-size: 15px; letter-spacing: .3px; }
-    .sala { cursor: pointer; }
-    .sala-bg { fill: #F7F8FA; stroke: var(--borda); stroke-width: 1.5; transition: fill .15s, stroke .15s; }
-    .sala:hover .sala-bg { fill: #EEF3FA; stroke: var(--azul); }
-    .sala.on .sala-bg { fill: #FFF3EA; stroke: var(--laranja); }
-    .sala:focus { outline: none; }
-    .sala:focus-visible .sala-bg { stroke: var(--azul); stroke-width: 2.5; }
-    .sala-icon { stroke: var(--azul); transition: stroke .15s; }
-    .sala.on .sala-icon { stroke: var(--laranja); }
-    .sala-num { font-family: var(--font-display); font-weight: 800; font-size: 30px; fill: var(--texto); }
-    .sala.on .sala-num { fill: var(--laranja); }
-    .sala-tit { font-family: var(--font-display); font-weight: 700; font-size: 14.5px; fill: var(--texto); }
-    .sala-sub { font-size: 12px; fill: var(--texto-suave); }
-    .sala-door { fill: #E7ECF2; stroke: var(--borda); stroke-width: 1.5; transition: fill .15s, stroke .15s; }
-    .sala.on .sala-door { fill: #F3D9C6; stroke: var(--laranja); }
-    .sala-knob { fill: #9AA6B4; }
-    .lamp { fill: #CBD2DB; transition: fill .2s; }
-    .sala.on .lamp { fill: #F6B73C; }
-    .lamp-wire { stroke: #B6BEC9; stroke-width: 1.5; }
-    .lampglow { fill: #F7C64A; opacity: 0; transition: opacity .25s; }
-    .sala.on .lampglow { opacity: .4; }
+    /* cards de filtro por cargo */
+    .srv-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 10px; }
+    @media (max-width: 640px){ .srv-cards { grid-template-columns: 1fr; } }
+    .srv-card { display: flex; align-items: center; gap: 12px; background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 13px 16px; cursor: pointer; text-align: left; font-family: inherit; transition: border-color .15s, box-shadow .15s, background .15s; }
+    .srv-card:hover { border-color: var(--azul); }
+    .srv-card.active { border-color: var(--azul); background: var(--azul-claro); box-shadow: 0 2px 10px rgba(18,80,154,.12); }
+    .srv-ic { width: 40px; height: 40px; border-radius: 11px; background: var(--azul-claro); color: var(--azul); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .srv-card.active .srv-ic { background: var(--azul); color: #fff; }
+    .srv-meta { display: flex; flex-direction: column; line-height: 1.15; }
+    .srv-n { font-family: var(--font-display); font-weight: 800; font-size: 22px; color: var(--texto); }
+    .srv-l { font-size: 12.5px; color: var(--texto-suave); }
     .srv-hint { font-size: 11.5px; color: var(--texto-suave); margin: 0 0 14px 2px; }
 
     .overlay { position: fixed; inset: 0; background: rgba(15,23,32,.45); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; }
@@ -213,8 +195,8 @@
       <a class="back-btn" id="backEscola" style="display:none"></a>
 
 
-      <div id="salaMapa" class="mapa-wrap"></div>
-      <div class="srv-hint" style="text-align:center;margin-bottom:16px;">Clique numa sala para filtrar · clique de novo para ver todas</div>
+      <div class="srv-cards" id="srvCards"></div>
+      <div class="srv-hint">Clique num card para filtrar · clique de novo para ver todos</div>
 
       <div class="tbl-toolbar">
         <div class="section-title" id="listTitle">Servidores</div>
@@ -337,48 +319,17 @@ const GRP_OF = s => (s.grupo==='Direção'||s.grupo==='Coordenação') ? 'gestor
 const GRP_LBL = { gestores:'Gestores', professores:'Professores', secretarios:'Secretários' };
 // normaliza valor vindo da URL (?cargo=) para a chave de grupo
 if(filtroCargo && !GRP_LBL[filtroCargo]){ filtroCargo = ({'Direção':'gestores','Coordenação':'gestores','Professores':'professores','Secretaria':'secretarios'})[filtroCargo] || ''; }
-const SALA_ICON = {
-  gestores:'<circle cx="12" cy="6" r="2.5"/><path d="M8 12a4 4 0 018 0"/><rect x="3" y="14" width="18" height="2.4" rx="0.6"/><path d="M5.5 16.4V21M18.5 16.4V21"/>',
-  professores:'<rect x="4" y="3" width="16" height="12" rx="1"/><line x1="7" y1="7" x2="16" y2="7"/><line x1="7" y1="10.5" x2="13" y2="10.5"/><path d="M8 15l-2 6"/><path d="M16 15l2 6"/>',
-  secretarios:'<rect x="5" y="3" width="14" height="18" rx="1.5"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="10.5" y1="6" x2="13.5" y2="6"/><line x1="10.5" y1="12" x2="13.5" y2="12"/><line x1="10.5" y1="18" x2="13.5" y2="18"/>'
-};
-const SALAS = [
-  { key:'gestores', titulo:'Sala de Direção', sub:'gestores', x:58, w:262 },
-  { key:'professores', titulo:'Sala dos Professores', sub:'professores', x:332, w:336 },
-  { key:'secretarios', titulo:'Secretaria', sub:'secretários', x:680, w:262 },
-];
-function renderMapa(){
+function renderSrvCards(){
   const cont = { gestores:0, professores:0, secretarios:0 };
   SERVIDORES.forEach(s=>cont[GRP_OF(s)]++);
-  const room = s => {
-    const cx = s.x + s.w/2;
-    const on = filtroCargo===s.key;
-    return `<g class="sala${on?' on':''}" onclick="toggleCargo('${s.key}')" role="button" tabindex="0" aria-pressed="${on}" aria-label="Filtrar ${s.titulo}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCargo('${s.key}')}">
-      <rect class="sala-bg" x="${s.x}" y="82" width="${s.w}" height="196" rx="10"/>
-      <circle class="lampglow" cx="${cx}" cy="103" r="16"/>
-      <line class="lamp-wire" x1="${cx}" y1="86" x2="${cx}" y2="99"/>
-      <circle class="lamp" cx="${cx}" cy="103" r="5"/>
-      <g class="sala-icon" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(${cx-24},120) scale(2)">${SALA_ICON[s.key]}</g>
-      <text class="sala-num" x="${cx}" y="210" text-anchor="middle">${cont[s.key].toLocaleString('pt-BR')}</text>
-      <text class="sala-tit" x="${cx}" y="234" text-anchor="middle">${s.titulo}</text>
-      <text class="sala-sub" x="${cx}" y="251" text-anchor="middle">${s.sub}</text>
-      <rect class="sala-door" x="${cx-22}" y="258" width="44" height="20" rx="3"/>
-      <circle class="sala-knob" cx="${cx+14}" cy="268" r="1.7"/>
-    </g>`;
-  };
-  const svg = `<svg viewBox="0 0 1000 300" class="mapa-svg" role="img" aria-label="Mapa da escola — clique numa sala para filtrar">
-    <polygon class="mapa-roof" points="40,72 120,34 880,34 960,72"/>
-    <line class="mapa-pole" x1="500" y1="34" x2="500" y2="16"/>
-    <path class="mapa-flag" d="M500 17 L522 23 L500 29 Z"/>
-    <rect class="mapa-build" x="40" y="70" width="920" height="210" rx="14"/>
-    <text class="mapa-roof-t" x="500" y="60" text-anchor="middle">ESCOLA</text>
-    <line class="mapa-ground" x1="20" y1="280" x2="980" y2="280"/>
-    ${SALAS.map(room).join('')}
-  </svg>`;
-  document.getElementById('salaMapa').innerHTML = svg;
+  const icGest = svgP('<circle cx="12" cy="6" r="2.5"/><path d="M8 12a4 4 0 018 0"/><rect x="3" y="14" width="18" height="2.4" rx="0.6"/><path d="M5.5 16.4V21M18.5 16.4V21"/>',20);
+  const icProf = svgP('<rect x="4" y="3" width="16" height="12" rx="1"/><line x1="7" y1="7" x2="16" y2="7"/><line x1="7" y1="10.5" x2="13" y2="10.5"/><path d="M8 15l-2 6"/><path d="M16 15l2 6"/>',20);
+  const icSec  = svgP('<rect x="5" y="3" width="14" height="18" rx="1.5"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="10.5" y1="6" x2="13.5" y2="6"/><line x1="10.5" y1="12" x2="13.5" y2="12"/><line x1="10.5" y1="18" x2="13.5" y2="18"/>',20);
+  const card = (grp,label,icon)=>`<button type="button" class="srv-card${filtroCargo===grp?' active':''}" onclick="toggleCargo('${grp}')"><span class="srv-ic">${icon}</span><span class="srv-meta"><span class="srv-n">${cont[grp].toLocaleString('pt-BR')}</span><span class="srv-l">${label}</span></span></button>`;
+  document.getElementById('srvCards').innerHTML = card('gestores','Gestores',icGest)+card('professores','Professores',icProf)+card('secretarios','Secretários',icSec);
 }
-function toggleCargo(grp){ filtroCargo = (filtroCargo===grp) ? '' : grp; pagina=1; renderMapa(); renderLista(); }
-function limparCargo(){ filtroCargo=''; document.getElementById('chipCargo').style.display='none'; pagina=1; renderMapa(); renderLista(); }
+function toggleCargo(grp){ filtroCargo = (filtroCargo===grp) ? '' : grp; pagina=1; renderSrvCards(); renderLista(); }
+function limparCargo(){ filtroCargo=''; document.getElementById('chipCargo').style.display='none'; pagina=1; renderSrvCards(); renderLista(); }
 
 const POR_PAGINA = 50;
 let pagina = 1;
@@ -506,7 +457,7 @@ function fechar(){
   if(lastFocus&&lastFocus.focus) lastFocus.focus();
 }
 
-renderMapa();
+renderSrvCards();
 renderLista();
 const h = location.hash.slice(1);
 if(h && SERVIDORES.some(s=>s.m===h)) abrir(h);
