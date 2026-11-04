@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Pedagógico — Servidores</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; display: flex; height: 100vh; overflow: hidden; font-size: 13px; color: #333; }
+    .sidebar { display: flex; flex-direction: column; }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; }
+    .logo-img { width: 104px; height: auto; display: block; }
+    .nav { flex: 1 1 auto; }
+    .nav-item { display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background .15s; text-decoration: none; }
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .logout { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .logout svg { width: 16px; height: 16px; }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 12px; }
+    .user-info { text-align: right; }
+    .cal-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .ctx-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 7px 12px; font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--texto); }
+    .ctx-pill svg { width: 15px; height: 15px; color: var(--laranja); }
+    .ctx-pill select { border: none; background: none; font: inherit; color: inherit; cursor: pointer; outline: none; max-width: 260px; }
+    .stamp { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--texto-suave); }
+    .view-wrap { flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--branco); }
+    .content { padding: 26px 34px; }
+    .section-title { font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--texto); }
+    .section-hint { font-size: 12px; color: var(--texto-suave); font-weight: 400; }
+    .back-btn { display: inline-flex; align-items: center; gap: 7px; background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 8px 14px; font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--texto-suave); cursor: pointer; margin-bottom: 16px; text-decoration: none; }
+    .back-btn:hover { border-color: var(--azul); color: var(--azul); }
+    .back-btn svg { width: 15px; height: 15px; }
+    .tbl-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .search { display: inline-flex; align-items: center; gap: 8px; background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 8px 12px; min-width: 280px; }
+    .search:focus-within { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(18,80,154,.10); }
+    .search input { border: none; outline: none; font-family: var(--font-display); font-size: 13.5px; width: 100%; color: var(--texto); background: none; }
+    .search svg { width: 15px; height: 15px; color: var(--texto-suave); }
+    .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--laranja-bg); color: var(--laranja-escuro); border: none; border-radius: 20px; padding: 6px 12px; font-family: var(--font-display); font-size: 12.5px; font-weight: 600; cursor: pointer; }
+    .tbl-wrap { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); overflow: hidden; }
+    .tbl { width: 100%; border-collapse: collapse; }
+    .tbl th { text-align: left; padding: 12px 14px; font-family: var(--font-display); font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); background: var(--bg); border-bottom: 1px solid var(--borda); white-space: nowrap; }
+    .tbl td { padding: 12px 14px; border-bottom: 1px solid var(--borda); font-size: 13px; color: var(--texto); vertical-align: middle; }
+    .tbl tbody tr:last-child td { border-bottom: none; }
+    .tbl tbody tr { cursor: pointer; }
+    .tbl tbody tr:hover td { background: var(--azul-claro); }
+    .cell-name { display: flex; align-items: center; gap: 11px; }
+    .cell-name b { font-weight: 600; }
+    .row-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--azul); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 11px; flex-shrink: 0; }
+    .muted { color: var(--texto-suave); }
+    .vinc-badge { color: var(--laranja); font-family: var(--font-display); font-weight: 700; }
+    .cargo-badge { color: var(--azul); font-family: var(--font-display); font-weight: 700; }
+    /* abas de filtro por cargo */
+    .s2-sub { color: var(--texto-suave); font-size: 14px; margin: -4px 0 18px; }
+    .seg-row { display: flex; gap: 4px; border-bottom: 1px solid var(--borda); margin-bottom: 20px; overflow-x: auto; }
+    .seg { display: inline-flex; align-items: center; gap: 8px; background: none; border: none; border-bottom: 3px solid transparent; margin-bottom: -1px; padding: 12px 16px; cursor: pointer; font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--texto-suave); white-space: nowrap; }
+    .seg:hover { color: var(--texto); }
+    .seg.on { color: var(--azul); border-bottom-color: var(--azul); }
+    .seg-badge { background: #EDEFF2; color: var(--texto-suave); border-radius: 20px; padding: 2px 11px; font-size: 12.5px; font-weight: 700; }
+    .seg.on .seg-badge { background: var(--azul-claro); color: var(--azul); }
+    /* filtros */
+    .s2-filters { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+    @media (max-width: 900px){ .s2-filters { grid-template-columns: 1fr 1fr; } }
+    .s2-filters .search { margin: 0; }
+    .s2-sel { border: 1px solid var(--borda); border-radius: 10px; padding: 11px 14px; font: inherit; font-size: 13.5px; color: var(--texto); background: var(--branco); cursor: pointer; }
+    .s2-sel.ghost { border: none; background: none; font-family: var(--font-display); font-weight: 700; color: var(--texto); padding: 6px 2px; }
+    .s2-listhead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
+    .s2-ordenar { font-size: 13px; color: var(--texto-suave); display: flex; align-items: center; gap: 2px; }
+    /* lista */
+    .row-sub { font-size: 11.5px; color: var(--texto-suave); margin-top: 2px; }
+    .row-chev { color: #B6BEC9; display: inline-flex; }
+    .tbl tbody tr { cursor: pointer; }
+    .vinc-pill-on { background: var(--azul-claro); color: var(--azul); border-radius: 20px; padding: 3px 11px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .vinc-pill-off { background: #EDEFF2; color: var(--texto-suave); border-radius: 20px; padding: 3px 11px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+    /* paginação numerada */
+    .s2-pager { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; flex-wrap: wrap; gap: 12px; }
+    .s2-pg-right { display: flex; align-items: center; gap: 14px; }
+    .s2-pages { display: flex; align-items: center; gap: 6px; }
+    .s2-pg { min-width: 34px; height: 34px; border: 1px solid var(--borda); background: var(--branco); border-radius: 9px; font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--texto); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0 6px; }
+    .s2-pg:hover { border-color: var(--azul); }
+    .s2-pg.on { background: var(--azul); color: #fff; border-color: var(--azul); }
+    .s2-pg.nav { color: var(--texto-suave); }
+    .s2-pg[disabled] { opacity: .45; cursor: default; }
+    .s2-pg.dots { border: none; background: none; cursor: default; min-width: 18px; color: var(--texto-suave); }
+    /* card: vínculo profissional */
+    .pcard-head2 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .pcard-head2 .t { font-family: var(--font-display); font-weight: 700; font-size: 15px; }
+    .pcard-x { border: 1px solid var(--borda); background: var(--branco); border-radius: 9px; padding: 6px; cursor: pointer; color: var(--texto-suave); display: flex; }
+    .pcard-x:hover { border-color: var(--azul); color: var(--azul); }
+    .pcard-av2 { width: 64px; height: 64px; border-radius: 16px; background: var(--azul); color: #fff; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 22px; flex-shrink: 0; }
+    .pc-top { display: flex; gap: 14px; align-items: center; margin-bottom: 4px; }
+    .pc-name { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--texto); line-height: 1.2; }
+    .pc-mat { font-size: 12px; color: var(--texto-suave); margin: 3px 0 7px; }
+    .pc-sec-t { font-size: 13px; font-weight: 700; color: var(--texto); margin: 18px 0 10px; display: flex; align-items: center; justify-content: space-between; }
+    .vp-card { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--borda); border-radius: 12px; padding: 13px; margin-bottom: 9px; }
+    .vp-ic { width: 40px; height: 40px; border-radius: 10px; background: var(--azul-claro); color: var(--azul); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .vp-nome { font-weight: 700; font-size: 13.5px; color: var(--texto); }
+    .vp-cargo { font-size: 12px; color: var(--texto); margin-top: 1px; }
+    .vp-turmas { font-size: 11.5px; color: var(--texto-suave); margin-top: 3px; }
+    .pc-kv { display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; font-size: 13px; margin-top: 4px; }
+    .pc-kv .k { color: var(--texto-suave); }
+    .pc-kv .v { color: var(--texto); font-weight: 600; text-align: right; }
+    /* lista + card de perfil lateral */
+    .srv-split { display: flex; gap: 20px; align-items: flex-start; }
+    .srv-main { flex: 1; min-width: 0; }
+    .srv-aside { width: 290px; flex-shrink: 0; position: sticky; top: 16px; }
+    @media (max-width: 980px){ .srv-split { flex-direction: column; } .srv-aside { width: 100%; position: static; } }
+    .tbl tbody tr.sel td { background: var(--azul-claro); }
+    .pcard { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 20px; }
+    .pcard-empty { text-align: center; color: var(--texto-suave); font-size: 13px; padding: 36px 16px; }
+    .pcard-empty svg { width: 34px; height: 34px; color: #C4CBD4; margin-bottom: 10px; }
+    .pcard-av { width: 60px; height: 60px; border-radius: 16px; background: var(--azul); color: #fff; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 20px; margin-bottom: 14px; }
+    .pcard-name { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--texto); line-height: 1.2; }
+    .pcard-badge { display: inline-block; margin-top: 8px; background: var(--azul-claro); color: var(--azul); font-size: 11.5px; font-weight: 600; padding: 3px 11px; border-radius: 20px; }
+    .pcard-kv { margin: 16px 0 18px; display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; font-size: 13px; }
+    .pcard-kv .k { color: var(--texto-suave); }
+    .pcard-kv .v { color: var(--texto); font-weight: 600; text-align: right; }
+    .pcard-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; border-radius: 10px; padding: 11px; font-family: var(--font-display); font-weight: 700; font-size: 13.5px; cursor: pointer; border: none; }
+    .pcard-btn svg { width: 16px; height: 16px; }
+    .pcard-btn.prim { background: var(--laranja); color: #fff; }
+    .pcard-btn.prim:hover { background: #d85a2c; }
+    .pcard-btn.ghost { background: var(--branco); color: var(--texto); border: 1px solid var(--borda); margin-top: 9px; }
+    .pcard-btn.ghost:hover { border-color: var(--azul); color: var(--azul); }
+    .pcard { padding: 24px; }
+    .pcard-av { width: 72px; height: 72px; border-radius: 18px; font-size: 24px; margin-bottom: 16px; }
+    .pcard-name { font-size: 20px; }
+    .pcard-sec { margin-bottom: 16px; }
+    .pcard-sec-t { font-size: 11px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: var(--texto-suave); margin-bottom: 8px; }
+    .pcard-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pcard-chip { background: var(--azul-claro); color: var(--azul); font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 8px; }
+    .ra-stats { display: flex; gap: 8px; margin-bottom: 12px; }
+    .ra-stat { flex: 1; background: var(--bg); border: 1px solid var(--borda); border-radius: 10px; padding: 9px 6px; text-align: center; }
+    .ra-n { display: block; font-family: var(--font-display); font-weight: 800; font-size: 19px; color: var(--texto); }
+    .ra-l { font-size: 10.5px; color: var(--texto-suave); }
+    .ra-bar { height: 8px; background: #EAECF0; border-radius: 5px; overflow: hidden; }
+    .ra-fill { height: 100%; background: #2E8B00; border-radius: 5px; }
+    .ra-cap { font-size: 11.5px; color: var(--texto-suave); margin-top: 7px; }
+    /* perfil completo do professor (igual à ficha) */
+    .pdisc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    @media (max-width: 760px){ .pdisc-grid { grid-template-columns: repeat(2, 1fr); } }
+    .pdisc { display: flex; align-items: center; gap: 8px; padding: 9px 11px; border-radius: 10px; font-size: 11.5px; font-weight: 600; border: 1px solid; line-height: 1.15; }
+    .pdisc.on { color: var(--c); background: var(--cbg); border-color: var(--c); }
+    .pdisc.off { color: #C2C8D0; background: transparent; border-color: var(--borda); }
+    .pdisc .pdi { display: flex; flex-shrink: 0; }
+    .aula-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media (max-width: 760px){ .aula-cards { grid-template-columns: 1fr; } }
+    .aula-card { background: var(--branco); border: 1px solid var(--borda); border-top: 3px solid var(--azul); border-radius: 12px; padding: 16px; }
+    .aula-top { display: flex; align-items: center; gap: 8px; }
+    .aula-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .aula-lbl { font-size: 12px; color: var(--texto-suave); font-weight: 700; }
+    .aula-val { font-family: var(--font-display); font-weight: 800; font-size: 26px; margin-top: 12px; line-height: 1; }
+
+    .overlay { position: fixed; inset: 0; background: rgba(15,23,32,.45); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; }
+    .overlay.open { opacity: 1; pointer-events: auto; }
+    .sp { position: fixed; left: 0; right: 0; bottom: 0; top: auto; width: 100%; max-width: 100%; height: 92vh; background: var(--branco); border-top: 1px solid var(--borda); border-radius: 22px 22px 0 0; box-shadow: 0 -14px 50px rgba(15,23,32,.2); transform: translateY(102%); transition: transform .3s cubic-bezier(.2,.75,.3,1); z-index: 41; display: flex; flex-direction: column; }
+    .sp.narrow { width: 100%; }
+    .sp.open { transform: translateY(0); }
+    .sp-topbar { border-radius: 22px 22px 0 0; }
+    .sp-body { max-width: 1120px; width: 100%; margin: 0 auto; box-sizing: border-box; }
+    .sp-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-bottom: 1px solid var(--borda); background: var(--bg); }
+    .sp-topbar .t { font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--texto); }
+    .sp-close { border: 1px solid var(--borda); background: var(--branco); border-radius: 8px; cursor: pointer; color: var(--texto-suave); padding: 7px; display: flex; }
+    .sp-close:hover { border-color: var(--azul); color: var(--azul); }
+    .sp-close svg { width: 16px; height: 16px; }
+    .sp-body { padding: 20px; overflow-y: auto; flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-content: start; }
+    @media (max-width: 760px){ .sp-body { grid-template-columns: 1fr; } }
+    .card { background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio); padding: 18px; }
+    .sv-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+    @media (max-width: 760px){ .sv-kpis { grid-template-columns: 1fr; } }
+    .sv-kpi { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .sv-kpi-l { display: flex; align-items: center; gap: 13px; min-width: 0; }
+    .sv-kpi-ic { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .sv-kpi-ic svg { width: 21px; height: 21px; }
+    .sv-kpi-lbl { font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--texto-suave); }
+    .sv-kpi-val { font-family: var(--font-display); font-weight: 800; font-size: 30px; color: var(--laranja); line-height: 1; white-space: nowrap; }
+    .pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+    .pager-info { font-size: 12.5px; color: var(--texto-suave); }
+    .pager-ctrls { display: flex; align-items: center; gap: 8px; }
+    .pg-btn { border: 1px solid var(--borda); background: var(--branco); border-radius: 8px; padding: 7px 12px; font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--texto); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .pg-btn:hover:not(:disabled) { border-color: var(--azul); color: var(--azul); }
+    .pg-btn:disabled { opacity: .45; cursor: default; }
+    .pg-btn svg { width: 14px; height: 14px; }
+    .pg-pos { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--texto); }
+    .prof-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .prof-av { width: 58px; height: 58px; border-radius: 50%; background: var(--azul); color: #fff; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 20px; flex-shrink: 0; }
+    .prof-name { font-family: var(--font-display); font-weight: 700; font-size: 19px; color: var(--texto); }
+    .prof-sub { font-size: 12.5px; color: var(--texto-suave); margin-top: 2px; }
+    .prof-kv { display: grid; grid-template-columns: 22px auto; gap: 10px 8px; align-items: center; font-size: 13px; margin-top: 4px; }
+    .prof-kv svg { width: 15px; height: 15px; color: var(--texto-suave); }
+    .prof-kv .k { color: var(--texto-suave); }
+    .prof-kv .kline { grid-column: 1 / -1; display: grid; grid-template-columns: 22px 90px 1fr; gap: 8px; align-items: center; }
+    .status-track { height: 8px; border-radius: 4px; background: #ECEFF4; overflow: hidden; flex: 1; }
+    .atua { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--borda); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .atua-lbl { font-family: var(--font-display); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); }
+    .etapa { border-radius: 20px; padding: 6px 14px; font-family: var(--font-display); font-size: 12.5px; font-weight: 600; border: 1px solid var(--borda); background: var(--branco); color: var(--texto); }
+    .etapa.on-laranja { background: var(--laranja-bg); color: var(--laranja-escuro); border-color: #F3D2C0; }
+    .etapa.on-azul { background: var(--azul-claro); color: var(--azul); border-color: #C8DCF3; }
+    .etapa.on-verde { background: var(--verde-bg); color: #2E8B00; border-color: #BCE6A8; }
+    .etapa.on-roxo { background: #EFEAF7; color: #6B3FA0; border-color: #DCD0EC; }
+    .disc-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .disc { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--borda); border-radius: 10px; padding: 8px 12px 8px 8px; background: var(--branco); font-size: 12px; font-weight: 600; color: var(--texto); }
+    .disc .di { width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #F0F2F6; color: #C2C7CE; flex-shrink: 0; }
+    .disc .di svg { width: 15px; height: 15px; }
+    .disc.on { color: var(--texto); border-color: var(--c); }
+    .disc.on .di { background: var(--cbg); color: var(--c); }
+    .mini-tbl { width: 100%; border-collapse: collapse; }
+    .mini-tbl th { text-align: left; padding: 8px 6px; font-family: var(--font-display); font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); border-bottom: 1px solid var(--borda); }
+    .mini-tbl td { padding: 11px 6px; border-bottom: 1px solid var(--borda); font-size: 12.5px; }
+    .mini-tbl tr:last-child td { border-bottom: none; }
+    .eye { border: none; background: none; cursor: pointer; color: var(--laranja); padding: 6px; border-radius: 8px; display: inline-flex; align-items: center; }
+    .eye:hover { color: var(--laranja-escuro); background: var(--laranja-bg); }
+    .eye svg { width: 18px; height: 18px; }
+    .empty { text-align: center; padding: 30px 10px; color: var(--texto-suave); }
+    .empty svg { width: 38px; height: 38px; color: #C7CDD4; margin-bottom: 10px; }
+    .sp-foot { padding: 12px 20px; border-top: 1px solid var(--borda); background: var(--bg); font-size: 11px; color: var(--texto-suave); line-height: 1.5; }
+    .sp-foot svg { width: 13px; height: 13px; vertical-align: -2px; margin-right: 4px; }
+    .sp-tabs { display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid var(--borda); }
+    .sp-tab { padding: 12px 16px; border: none; background: none; border-bottom: 3px solid transparent; margin-bottom: -1px; font-family: var(--font-display); font-size: 13.5px; font-weight: 500; color: var(--texto-suave); cursor: pointer; }
+    .sp-tab:hover { color: var(--texto); }
+    .sp-tab.active { color: var(--laranja); border-bottom-color: var(--laranja); font-weight: 700; }
+    .sp-simple { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+    .b-cargo { background: var(--verde-bg); color: #2E8B00; }
+    .tabpane { display: flex; flex-direction: column; gap: 12px; }
+    .tabpane[hidden] { display: none; }
+    .fcard { background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio-sm); padding: 14px 16px; }
+    .flabel { font-family: var(--font-display); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); margin-bottom: 6px; }
+    .fval { font-size: 14px; color: var(--texto); font-weight: 500; }
+    .fval.empty { color: #B9BEC6; padding: 0; text-align: left; }
+    .vinc-card { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 1px solid var(--borda); border-radius: var(--raio-sm); padding: 12px 14px; }
+    .vinc-ic { width: 34px; height: 34px; border-radius: 9px; background: var(--azul-claro); color: var(--azul); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .vinc-nome { font-size: 13px; font-weight: 500; color: var(--texto); flex: 1; }
+    .vinc-cargo { font-size: 11.5px; font-weight: 600; color: var(--laranja-escuro); background: var(--laranja-bg); border-radius: 20px; padding: 4px 12px; white-space: nowrap; }
+    .vinc-cargos { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .badge { border-radius: 20px; font-family: var(--font-display); font-weight: 600; font-size: 11px; padding: 3px 11px; display: inline-block; white-space: nowrap; }
+    .b-exercicio { background: var(--verde-bg); color: #2E8B00; }
+    .b-licenca { background: #FDF3D9; color: var(--ambar-escuro); }
+    .b-afastado { background: #FDE9E9; color: var(--vermelho); }
+    .b-cedido { background: var(--azul-claro); color: var(--azul); }
+    .help-btn { position: fixed; bottom: 20px; right: 20px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+  </style>
+  <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="logo.png" alt="Rede Municipal" class="logo-img" />
+    <span class="portal-tag">Painel Pedagógico</span>
+  </div>
+  <nav class="nav">
+    <a href="inicio2.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6 7 18.2l1.9-5.8L4 8.8h6.1z"/></svg> Início</a>
+    <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Visão geral</a>
+    <a href="indices.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Desempenho</a>
+    <a href="turmas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01M15 10h.01"/></svg> Escolas</a>
+    <a href="alunos.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Alunos</a>
+    <a href="horario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Servidores</a>
+    <a href="servidores2.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Servidores 2</a>
+    <a href="calendario.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendário</a>
+    <a href="comunicacao.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Comunicação</a>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 5.34L3.93 6.75M21 12h-2M5 12H3M19.07 19.07l-1.41-1.41M5.34 18.66l-1.41 1.41M12 19v2M12 3V1"/></svg> Configurações</div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sair da conta</div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <svg class="page-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f26522" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg>
+      <div><div class="topbar-title">Servidores</div><div class="topbar-sub" id="pageSub">Rede Municipal de Ensino · Porto Seguro/BA</div></div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-info"><div class="user-name">Ana Ribeiro</div><div class="user-role">Secretaria de Educação</div></div>
+      <div class="avatar">AR</div>
+    </div>
+  </div>
+
+
+  <div class="view-wrap">
+    <div class="content">
+      <a class="back-btn" id="backEscola" style="display:none"></a>
+
+
+      <div class="s2-sub">Consulte os profissionais da rede e seus vínculos.</div>
+
+      <div class="seg-row" id="srvCards"></div>
+
+      <div class="s2-filters">
+        <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="busca" placeholder="Buscar nome ou matrícula" oninput="onBusca()" aria-label="Buscar" /></label>
+        <select class="s2-sel" id="fEscola" onchange="onBusca()"><option value="">Escola</option></select>
+        <select class="s2-sel" id="fCargo" onchange="onBusca()"><option value="">Cargo</option></select>
+        <select class="s2-sel" id="fVinc" onchange="onBusca()"><option value="">Vínculos</option><option value="1">1 vínculo</option><option value="m">Mais de um</option></select>
+      </div>
+
+      <div class="s2-listhead">
+        <div class="section-title" id="listTitle">Servidores</div>
+        <div class="s2-ordenar">Ordenar: <select class="s2-sel ghost" id="fOrd" onchange="onBusca()"><option value="az">Nome A–Z</option><option value="za">Nome Z–A</option></select></div>
+      </div>
+
+      <div class="srv-split">
+        <div class="srv-main">
+          <div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>Servidor</th><th>Cargo</th><th>Vínculos</th><th>Escola</th><th></th></tr></thead>
+            <tbody id="listBody"></tbody>
+          </table></div>
+          <div class="s2-pager">
+            <span class="pager-info" id="pagerInfo"></span>
+            <div class="s2-pg-right">
+              <select class="s2-sel" id="porPagina" onchange="setPorPagina(this.value)"><option value="8">8 por página</option><option value="20">20 por página</option><option value="50">50 por página</option></select>
+              <div class="s2-pages" id="pgNums"></div>
+            </div>
+          </div>
+        </div>
+        <aside class="srv-aside"><div class="pcard" id="srvPerfil"></div></aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="fechar()"></div>
+<aside class="sp" id="sp" role="dialog" aria-modal="true" aria-labelledby="spName" tabindex="-1"></aside>
+<div class="help-btn">?</div>
+
+<script src="perfil.js"></script>
+<script>
+const iniciais = n => n.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+const svgP = (p,c=16) => `<svg viewBox="0 0 24 24" width="${c}" height="${c}" fill="none" stroke="currentColor" stroke-width="2">${p}</svg>`;
+const pad2 = n => String(n).padStart(2,'0');
+const ETAPAS_ALL = [ { nome:'Ed. Infantil', cor:'verde' }, { nome:'Fundamental I', cor:'laranja' }, { nome:'Fundamental II', cor:'azul' }, { nome:'EJA I', cor:'roxo' }, { nome:'EJA II', cor:'roxo' } ];
+const DISC_ALL = [
+  { nome:'Agroecologia', c:'#2E8B00', bg:'#D8F3CC', ic:'<path d="M11 20A7 7 0 019 6c4 0 6 3 6 3s-1 11-4 11z"/><path d="M11 20c0-4 2-8 5-10"/>' },
+  { nome:'Arte', c:'#D6409F', bg:'#F7E4F1', ic:'<circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 000 20 2 2 0 002-2 2 2 0 011.8-2H18a4 4 0 004-4 10 10 0 00-10-10z"/>' },
+  { nome:'Ciências', c:'#12509A', bg:'#EAF1FA', ic:'<path d="M9 2v6l-5 9a2 2 0 002 3h12a2 2 0 002-3l-5-9V2"/><line x1="8" y1="2" x2="16" y2="2"/>' },
+  { nome:'Diversidade Afro e Indígena', c:'#ED6939', bg:'#FDEEE8', ic:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/>' },
+  { nome:'Educação Física', c:'#ED6939', bg:'#FDEEE8', ic:'<circle cx="12" cy="5" r="2"/><path d="M12 7v6l-3 8M12 13l3 8M6 10l6-2 6 2"/>' },
+  { nome:'Ensino Religioso', c:'#B5790F', bg:'#FDF3D9', ic:'<path d="M12 2v20M6 8h12"/>' },
+  { nome:'Geografia', c:'#12509A', bg:'#EAF1FA', ic:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/>' },
+  { nome:'Leitura e Produção de Texto', c:'#6B3FA0', bg:'#EFEAF7', ic:'<path d="M4 19V5a2 2 0 012-2h11l3 3v13a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><line x1="8" y1="8" x2="15" y2="8"/><line x1="8" y1="12" x2="15" y2="12"/>' },
+  { nome:'História', c:'#B5790F', bg:'#FDF3D9', ic:'<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/>' },
+  { nome:'História de Porto Seguro', c:'#B5790F', bg:'#FDF3D9', ic:'<path d="M3 21h18M6 21V8l6-4 6 4v13"/><path d="M10 21v-5h4v5"/>' },
+  { nome:'Língua Inglesa', c:'#12509A', bg:'#EAF1FA', ic:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/>' },
+  { nome:'Língua Portuguesa', c:'#ED6939', bg:'#FDEEE8', ic:'<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>' },
+  { nome:'Matemática', c:'#3DC200', bg:'#D8F3CC', ic:'<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/>' },
+];
+const SIT_LBL = { exercicio:'Em exercício', licenca:'Licença', afastado:'Afastado', cedido:'Cedido' };
+
+const NOMES_ESC = [
+'E.M. Cidade Alta','E.M. Baianão','E.M. Frei Calixto','CMEI Estrela do Mar',"E.M. Arraial d'Ajuda",'E.M. Trancoso','E.M. Vera Cruz','E.M. Pindorama','CMEI Primeiros Passos','E.M. Coroa Vermelha',
+'E.M. Caraíva','E.M. Vale do Jequitibá','E.M. Mundaí','E.M. Taperapuã','E.M. Cambolo','CMEI Girassol','E.M. Juçara','E.M. Mirante','E.M. Itaquena','E.M. Guaiú',
+'E.M. Nova Brasília','E.M. Parque Ecológico','CMEI Pequeno Príncipe','E.M. Fontana','E.M. Alto do Mercado','E.M. Gruta Azul','E.M. Ponta Grande','E.M. Rio da Prata','E.M. Vale Verde','CMEI Semente do Saber',
+'E.M. Monte Pascoal','E.M. Pataxó','E.M. Aldeia Jaqueira','E.M. Barra Velha','E.M. Corumbau','E.M. Km 40','E.M. Santo André','E.M. Santa Cruz','E.M. Outeiro','E.M. Recife de Fora',
+'CMEI Arco-Íris','E.M. Vila de Trancoso','E.M. Nova Aliança','E.M. José de Anchieta','E.M. Pero Vaz','E.M. Tancredo Neves','E.M. Paulo Freire','E.M. Anísio Teixeira','CMEI Mundo Encantado','E.M. Castro Alves',
+'E.M. Rui Barbosa','E.M. Cecília Meireles','E.M. Monteiro Lobato','E.M. Darcy Ribeiro','E.M. Zumbi dos Palmares','E.M. Chico Mendes','CMEI Vovó Maria','E.M. Nova Alegria','E.M. Boa Esperança','E.M. Campo Verde'
+];
+const ESCOLAS = {}; NOMES_ESC.forEach((n,i)=> ESCOLAS[String(31097401+i)] = n);
+
+const FIRST = ['Ana','Bruno','Carla','Diego','Elaine','Fábio','Gisele','Hugo','Iara','João','Karla','Luís','Marta','Nara','Otávio','Paula','Rafael','Sônia','Tiago','Vera','Wesley','Yara','Cléber','Zélia','Marcos','Priscila','Anderson','Luciana','Fernanda','Roberto'];
+const LAST = ['Silva','Souza','Oliveira','Santos','Rocha','Fontes','Melo','Prado','Carvalho','Barros','Nunes','Alves','Farias','Menezes','Ribeiro','Gomes','Antunes','Castro','Duarte','Teles','Aquino','Vasconcelos','Andrade','Pinto'];
+const DISC_POOL = DISC_ALL.map(d=>d.nome);
+const TURMA_POOL = ['1º ANO A','2º ANO A','3º ANO A','4º ANO B','5º ANO A','6º ANO A','7º ANO B','8º ANO A','9º ANO A'];
+const VINCULOS = ['efetivo','efetivo','contrato','designado'];
+
+function gerarEquipe(inep){
+  const nomeEsc = ESCOLAS[inep] || ''; const cmei = nomeEsc.startsWith('CMEI');
+  const base = parseInt(inep.slice(-3)); const rr = k => ((base*9301 + k*49297) % 233280) / 233280;
+  const team = []; let idx = 0;
+  const add = (grupo, cargo, opts={}) => {
+    const _l1 = LAST[Math.floor(rr(101+idx*3)*LAST.length)];
+    let _l2 = LAST[Math.floor(rr(104+idx*7)*LAST.length)]; if(_l2===_l1) _l2 = LAST[(LAST.indexOf(_l1)+1)%LAST.length];
+    const nome = FIRST[Math.floor(rr(100+idx*3)*FIRST.length)] + ' ' + _l1 + ' ' + _l2;
+    const sr = rr(102+idx*3);
+    const situacao = sr>0.94 ? 'cedido' : sr>0.9 ? 'afastado' : sr>0.85 ? 'licenca' : 'exercicio';
+    const detalhe = situacao==='licenca'?'Licença maternidade':situacao==='afastado'?'Afastamento para tratamento de saúde':situacao==='cedido'?'Cedido à Secretaria':null;
+    const carga = grupo==='Professores' ? [20,40][Math.floor(rr(103+idx*3)*2)] : 40;
+    const acesso = rr(105+idx*3)>0.22 ? pad2(1+Math.floor(rr(106+idx*3)*27))+'/07/2026' : 'nunca';
+    const myIdx = parseInt(inep) - 31097401;
+    const cargos = [cargo];
+    if (rr(110+idx*3) > 0.86) cargos.push(cargo.includes('Professor') ? 'Coordenador(a) pedagógico(a)' : 'Professor(a)');
+    const lotacoes = [{ escola: nomeEsc, cargos }];
+    const multiChance = grupo==='Professores' ? 0.5 : 0.85;
+    if (rr(108+idx*3) > multiChance){ const extra = rr(109+idx*3) > 0.82 ? 2 : 1; for(let k=0;k<extra;k++){ let j = Math.floor(rr(120+idx*3+k)*60); if(j===myIdx) j=(j+1)%60; lotacoes.push({ escola: ESCOLAS[String(31097401+j)]||nomeEsc, cargos:[cargo] }); } }
+    const vinculos = lotacoes.length;
+    const ncargos = new Set(lotacoes.flatMap(l=>l.cargos)).size;
+    team.push({ m: inep.slice(2)+pad2(idx), nome, cargo, grupo, vinculo: VINCULOS[Math.floor(rr(107+idx*3)*4)], carga, situacao, detalhe, acesso, escola: inep, lotacoes, vinculos, ncargos, etapas:[], disc:[], turmas:[], ocor:[], ...opts });
+    idx++;
+  };
+  add('Direção','Diretor(a)');
+  const nc = cmei ? 1 : 2 + Math.floor(rr(1)*2); for(let i=0;i<nc;i++) add('Coordenação','Coordenador(a) pedagógico(a)');
+  const np = cmei ? 8 + Math.floor(rr(2)*8) : 16 + Math.floor(rr(2)*22);
+  for(let i=0;i<np;i++){
+    const d = DISC_POOL[Math.floor(rr(300+i)*DISC_POOL.length)];
+    const etapa = cmei ? 'Ed. Infantil' : (rr(320+i)>0.5 ? 'Fundamental I' : 'Fundamental II');
+    const nt = 1 + Math.floor(rr(340+i)*2);
+    const turmas = Array.from({length:nt}, (_,k)=>({ t: TURMA_POOL[Math.floor(rr(360+i*2+k)*TURMA_POOL.length)], n: etapa, turno: rr(380+i+k)>0.5?'Matutino':'Vespertino' }));
+    const ocor = rr(400+i)>0.86 ? [{ t: turmas[0].t, tipo:'Infrequência', data: pad2(1+Math.floor(rr(410+i)*27))+'/07/2026' }] : [];
+    add('Professores', 'Professor(a)', { etapas:[etapa], disc:[d], turmas, ocor });
+  }
+  add('Secretaria','Secretário(a) escolar');
+  if(!cmei || rr(3)>0.4) add('Secretaria','Auxiliar de secretaria');
+  return team;
+}
+
+const params = new URLSearchParams(location.search);
+const ESCOPO = (window.inepsEmEscopo ? window.inepsEmEscopo() : null);
+const inScope = i => !ESCOPO || ESCOPO.has(i);
+let filtroCargo = params.get('cargo') || '';
+// Rede inteira (no escopo do perfil): junta a equipe de todas as escolas
+let SERVIDORES = [];
+Object.keys(ESCOLAS).filter(inScope).forEach(inep => { SERVIDORES = SERVIDORES.concat(gerarEquipe(inep)); });
+
+const VINC_LBL = { efetivo:'Efetivo', contrato:'Contratado', designado:'Designado' };
+document.getElementById('pageSub').textContent = 'Rede Municipal · Porto Seguro/BA';
+
+const GRP_OF = s => s.grupo==='Direção' ? 'gestao' : s.grupo==='Coordenação' ? 'coord' : s.grupo==='Professores' ? 'docentes' : 'secretaria';
+const GRP_LBL = { gestao:'Gestão', coord:'Coordenação', docentes:'Docentes', secretaria:'Secretaria' };
+// normaliza valor vindo da URL (?cargo=) para a chave de grupo
+if(filtroCargo && !GRP_LBL[filtroCargo]){ filtroCargo = ({'Direção':'gestao','Coordenação':'coord','Professores':'docentes','Secretaria':'secretaria'})[filtroCargo] || ''; }
+const SEGS = [
+  { g:'todos', t:'Todos', s:'Equipe completa' },
+  { g:'gestao', t:'Gestão', s:'Direção' },
+  { g:'coord', t:'Coordenação', s:'Pedagógica' },
+  { g:'docentes', t:'Docentes', s:'Professores(as)' },
+  { g:'secretaria', t:'Secretaria', s:'Administrativo' },
+];
+function renderSrvCards(){
+  const cont = { gestao:0, coord:0, docentes:0, secretaria:0 };
+  SERVIDORES.forEach(s=>cont[GRP_OF(s)]++);
+  const num = g => g==='todos' ? SERVIDORES.length : (cont[g]||0);
+  const seg = o => { const on = (o.g==='todos') ? !filtroCargo : filtroCargo===o.g; return `<button type="button" class="seg${on?' on':''}" data-g="${o.g}" onclick="selSeg('${o.g}')">${o.t}<span class="seg-badge">${num(o.g).toLocaleString('pt-BR')}</span></button>`; };
+  document.getElementById('srvCards').innerHTML = SEGS.map(seg).join('');
+}
+function selSeg(g){ filtroCargo = (g==='todos') ? '' : g; pagina=1; renderSrvCards(); renderLista(); }
+function matricula(s){ return String(seedFrom('mat'+s.m)%900000 + 100000).padStart(6,'0'); }
+function popularFiltros(){
+  const escolas = [...new Set(SERVIDORES.map(s=>ESCOLAS[s.escola]).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const cargos = [...new Set(SERVIDORES.map(s=>s.cargo))].sort((a,b)=>a.localeCompare(b));
+  document.getElementById('fEscola').insertAdjacentHTML('beforeend', escolas.map(e=>`<option value="${e}">${e}</option>`).join(''));
+  document.getElementById('fCargo').insertAdjacentHTML('beforeend', cargos.map(c=>`<option value="${c}">${c}</option>`).join(''));
+}
+
+let POR_PAGINA = 8;
+let pagina = 1;
+function setPorPagina(v){ POR_PAGINA = parseInt(v)||8; pagina = 1; renderLista(); }
+function irPaginaN(n){ pagina = n; renderLista(); window.scrollTo({top:0,behavior:'smooth'}); }
+function filtradosServ(){
+  const q = (document.getElementById('busca').value||'').toLowerCase();
+  const fe = document.getElementById('fEscola').value;
+  const fc = document.getElementById('fCargo').value;
+  const fv = document.getElementById('fVinc').value;
+  const ord = document.getElementById('fOrd').value;
+  const arr = SERVIDORES.filter(s=>{
+    if(filtroCargo && GRP_OF(s)!==filtroCargo) return false;
+    if(fe && (ESCOLAS[s.escola]||'')!==fe) return false;
+    if(fc && s.cargo!==fc) return false;
+    if(fv==='1' && s.vinculos>1) return false;
+    if(fv==='m' && s.vinculos<=1) return false;
+    if(q && !(s.nome.toLowerCase().includes(q)||matricula(s).includes(q))) return false;
+    return true;
+  });
+  arr.sort((a,b)=> ord==='za' ? b.nome.localeCompare(a.nome) : a.nome.localeCompare(b.nome));
+  return arr;
+}
+function renderLista(){
+  const lista = filtradosServ();
+  const total = lista.length;
+  const max = Math.max(1, Math.ceil(total/POR_PAGINA));
+  if(pagina>max) pagina = max;
+  const ini = (pagina-1)*POR_PAGINA;
+  const slice = lista.slice(ini, ini+POR_PAGINA);
+  document.getElementById('listTitle').textContent = `${total.toLocaleString('pt-BR')} servidor${total===1?'':'es'}`;
+  const chev = svgP('<polyline points="9 18 15 12 9 6"/>',18);
+  document.getElementById('listBody').innerHTML = slice.map(s=>`
+    <tr data-m="${s.m}" class="${s.m===selectedM?'sel':''}" tabindex="0" onclick="selServidor('${s.m}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selServidor('${s.m}')}">
+      <td><div class="cell-name"><span class="row-avatar">${iniciais(s.nome)}</span><div><b>${s.nome}</b><div class="row-sub">Matrícula: ${matricula(s)}</div></div></div></td>
+      <td>${s.ncargos>1 ? `<span class="cargo-badge">${s.ncargos} cargos</span>` : s.cargo}</td>
+      <td>${s.vinculos>1 ? `<span class="vinc-pill-on">${s.vinculos} vínculos</span>` : '<span class="vinc-pill-off">1 vínculo</span>'}</td>
+      <td>${ESCOLAS[s.escola]||'—'}</td>
+      <td style="text-align:right"><span class="row-chev">${chev}</span></td>
+    </tr>`).join('') || `<tr><td colspan="5" class="muted" style="text-align:center;padding:30px;">Nenhum servidor encontrado.</td></tr>`;
+  document.getElementById('pagerInfo').textContent = total ? `${(ini+1).toLocaleString('pt-BR')}–${Math.min(ini+POR_PAGINA,total).toLocaleString('pt-BR')} de ${total.toLocaleString('pt-BR')} servidores` : 'Nenhum servidor';
+  renderPgNums(max);
+}
+function renderPgNums(max){
+  const box = document.getElementById('pgNums'); if(!box) return; const p = pagina;
+  const btn = (n,txt,cls,dis)=>`<button class="s2-pg ${cls||''}" ${dis?'disabled':''} ${dis?'':`onclick="irPaginaN(${n})"`}>${txt||n}</button>`;
+  const dots = `<span class="s2-pg dots">…</span>`;
+  const set = new Set([1,2,3,p-1,p,p+1,max]);
+  const pages = [...set].filter(n=>n>=1&&n<=max).sort((a,b)=>a-b);
+  let out = btn(p-1,'‹','nav',p<=1), prev=0;
+  pages.forEach(n=>{ if(n-prev>1) out+=dots; out+=btn(n,'', n===p?'on':''); prev=n; });
+  out += btn(p+1,'›','nav',p>=max);
+  box.innerHTML = out;
+}
+function onBusca(){ pagina = 1; renderLista(); }
+
+let selectedM = null;
+function selServidor(m){
+  selectedM = m;
+  document.querySelectorAll('#listBody tr').forEach(tr=>tr.classList.toggle('sel', tr.dataset.m===m));
+  renderPerfil();
+}
+function renderPerfil(){
+  const box = document.getElementById('srvPerfil'); if(!box) return;
+  const s = selectedM && SERVIDORES.find(x=>x.m===selectedM);
+  if(!s){
+    box.innerHTML = `<div class="pcard-empty">${svgP('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',34)}<div>Selecione um servidor<br>para ver o perfil</div></div>`;
+    return;
+  }
+  const setor = GRP_LBL[GRP_OF(s)] || '—';
+  const ultimo = s.acesso==='nunca' ? 'Nunca acessou' : s.acesso;
+  const vincN = s.vinculos>1 ? `${s.vinculos} vínculos` : '1 vínculo';
+  const bank = '<path d="M3 21h18"/><path d="M5 21V8l7-4 7 4v13"/><path d="M9 21v-5h6v5"/><path d="M9 11h.01M15 11h.01"/>';
+  const vpCards = s.lotacoes.map(l=>{
+    const cargo = l.cargos.join(' · ');
+    const turmasTxt = (s.grupo==='Professores') ? (s.turmas.length?`${s.turmas.length} turma${s.turmas.length>1?'s':''} vinculada${s.turmas.length>1?'s':''}`:'Sem turmas vinculadas') : 'Atuação administrativa';
+    return `<div class="vp-card"><div class="vp-ic">${svgP(bank,20)}</div><div><div class="vp-nome">${l.escola}</div><div class="vp-cargo">${cargo}</div><div class="vp-turmas">${turmasTxt}</div></div></div>`;
+  }).join('');
+  box.innerHTML = `
+    <div class="pcard-head2"><div class="t">Detalhes do servidor</div><button class="pcard-x" onclick="limparPerfil()" aria-label="Fechar">${svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',16)}</button></div>
+    <div class="pc-top"><div class="pcard-av2">${iniciais(s.nome)}</div><div><div class="pc-name">${s.nome}</div><div class="pc-mat">Matrícula: ${matricula(s)}</div><span class="pcard-badge">${s.cargo}</span></div></div>
+    <div class="pc-kv">
+      <span class="k">Setor</span><span class="v">${setor}</span>
+      <span class="k">Último acesso</span><span class="v">${ultimo}</span>
+    </div>
+    <div class="pc-sec-t">Vínculo profissional <span class="vinc-pill-on">${vincN}</span></div>
+    ${vpCards}
+    <button class="pcard-btn prim" style="margin-top:14px;" onclick="abrir('${s.m}')">${svgP('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',16)} Ver perfil completo</button>
+    <button class="pcard-btn ghost" onclick="location.href='comunicacao.html'">${svgP('<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>',16)} Enviar mensagem</button>`;
+}
+function limparPerfil(){ selectedM=null; document.querySelectorAll('#listBody tr').forEach(tr=>tr.classList.remove('sel')); renderPerfil(); }
+
+let lastFocus=null;
+function abrir(m){
+  const s = SERVIDORES.find(x=>x.m===m); if(!s) return;
+  lastFocus = document.activeElement;
+  const sp0 = document.getElementById('sp');
+  if(s.grupo!=='Professores'){ sp0.classList.add('narrow'); sp0.innerHTML = simpleHtml(s); }
+  else { sp0.classList.remove('narrow'); sp0.innerHTML = richHtml(s); }
+  document.getElementById('overlay').classList.add('open');
+  sp0.classList.add('open');
+  history.replaceState(null,'',`horario.html#${s.m}`);
+  sp0.focus();
+  document.addEventListener('keydown', escHandler);
+}
+function aulasInfo(s){
+  const total = Math.max(120, (s.turmas.length||1) * (150 + seedFrom(s.m+'aa')%90));
+  const pct = 82 + seedFrom(s.m+'av')%17;
+  const valid = Math.round(total*pct/100);
+  return { total, valid, pend: total - valid, pct };
+}
+function richHtml(s){
+  const nunca = s.acesso==='nunca';
+  const au = aulasInfo(s);
+  const aulasCard = `<div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;margin-bottom:12px;">Registro de aulas · ano letivo</div>
+    <div class="aula-cards">
+      <div class="aula-card" style="border-top-color:#12509A"><div class="aula-top"><span class="aula-dot" style="background:#12509A"></span><span class="aula-lbl">Aulas no ano</span></div><div class="aula-val" style="color:#12509A">${au.total.toLocaleString('pt-BR')}</div></div>
+      <div class="aula-card" style="border-top-color:#2E8B00"><div class="aula-top"><span class="aula-dot" style="background:#2E8B00"></span><span class="aula-lbl">Aulas validadas</span></div><div class="aula-val" style="color:#2E8B00">${au.valid.toLocaleString('pt-BR')}</div></div>
+      <div class="aula-card" style="border-top-color:var(--laranja)"><div class="aula-top"><span class="aula-dot" style="background:var(--laranja)"></span><span class="aula-lbl">Pendentes de validação</span></div><div class="aula-val" style="color:var(--laranja)">${au.pend.toLocaleString('pt-BR')}</div></div>
+    </div></div>`;
+  const etapasHtml = (s.etapas.length ? s.etapas : []).map(nome=>{ const et = ETAPAS_ALL.find(e=>e.nome===nome); return `<span class="etapa on-${et?et.cor:'azul'}">${nome}</span>`; }).join('') || '<span class="muted" style="font-size:12.5px;">—</span>';
+  const discHtml = DISC_ALL.map(d=>{ const on = s.disc.includes(d.nome); return `<div class="pdisc ${on?'on':'off'}" style="--c:${d.c};--cbg:${d.bg}"><span class="pdi">${svgP(d.ic,15)}</span>${d.nome}</div>`; }).join('');
+  const turmasCard = `
+    <div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:12px;">${svgP('<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/>',18)} Quadro de turmas</div>
+      ${s.turmas.length? `<table class="mini-tbl"><thead><tr><th>Turma</th><th>Nível de Ensino</th><th>Turno</th><th></th></tr></thead><tbody>${s.turmas.map(t=>`<tr><td><b>${t.t}</b></td><td class="muted">${t.n}</td><td>${t.turno}</td><td class="eye">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',16)}</td></tr>`).join('')}</tbody></table>` : `<div class="empty">${svgP('<circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/>',38)}<div>Nenhuma turma vinculada</div></div>` }
+    </div>`;
+  const ocorCard = `
+    <div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:12px;">${svgP('<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',18)} Registro de ocorrências</div>
+      ${s.ocor.length? `<table class="mini-tbl"><thead><tr><th>Turma</th><th>Tipo</th><th>Data</th></tr></thead><tbody>${s.ocor.map(o=>`<tr><td>${o.t}</td><td>${o.tipo}</td><td class="muted">${o.data}</td></tr>`).join('')}</tbody></table>` : `<div class="empty">${svgP('<circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/>',38)}<div>Nenhum registro encontrado</div></div>` }
+    </div>`;
+  const linkIc = '<path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>';
+  const temMultiplo = s.lotacoes.length>1 || s.lotacoes.some(l=>l.cargos.length>1);
+  const lotacoesCard = temMultiplo ? `<div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:12px;">${svgP(linkIc,18)} Vínculos</div>${s.lotacoes.map(l=>`<div class="vinc-card" style="margin-bottom:8px;"><span class="vinc-ic">${svgP(linkIc,18)}</span><span class="vinc-nome">${l.escola}</span><span class="vinc-cargos">${l.cargos.map(c=>`<span class="vinc-cargo">${c}</span>`).join('')}</span></div>`).join('')}</div>` : '';
+  return `
+    <div class="sp-topbar"><div class="t">Detalhe do servidor</div>
+      <button class="sp-close" onclick="fechar()" aria-label="Fechar">${svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',16)}</button></div>
+    <div class="sp-body">
+      <div class="card">
+        <div class="prof-head"><div class="prof-av">${iniciais(s.nome)}</div>
+          <div><div class="prof-name" id="spName">${s.nome}</div><div class="prof-sub">${s.cargo} · ${ESCOLAS[s.escola]||''}</div></div></div>
+        <div class="prof-kv">
+          ${svgP('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',15)}<span class="k">${nunca?'Nunca acessou a plataforma':'Último acesso em '+s.acesso}</span>
+        </div>
+        <div class="atua"><span class="atua-lbl">Atua em</span>${etapasHtml}</div>
+      </div>
+      <div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;margin-bottom:12px;">Disciplinas</div><div class="pdisc-grid">${discHtml}</div></div>
+      ${aulasCard}
+      ${turmasCard}
+      ${ocorCard}
+      ${lotacoesCard}
+    </div>
+    <div class="sp-foot">${svgP('<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>',13)} Este painel não exibe avaliação de desempenho, saúde, processo administrativo ou dados bancários (política da rede). Acesso registrado em auditoria.</div>`;
+}
+function seedFrom(str){ let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; }
+function gerarCPF(m){ let x=seedFrom('cpf'+m); const dig=()=>{ x=(x*1103515245+12345)>>>0; return Math.floor((x/65536)%10); }; const n=Array.from({length:11},dig); return `${n.slice(0,3).join('')}.${n.slice(3,6).join('')}.${n.slice(6,9).join('')}-${n.slice(9).join('')}`; }
+function gerarNasc(m){ const x=seedFrom('nasc'+m); const d=1+x%28, mo=1+Math.floor(x/28)%12, y=1975+Math.floor(x/400)%25; return `${pad2(d)}/${pad2(mo)}/${y}`; }
+function simpleHtml(s){
+  const email = s.nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z]/g,'')+'@eprof.app';
+  const d = s.m.slice(-4);
+  const contato = `(73) 9 ${d}-${String(4000+(parseInt(d)%5000)).padStart(4,'0')}`;
+  const ativo = s.situacao==='exercicio';
+  const status = ativo ? 'Ativo' : SIT_LBL[s.situacao];
+  return `
+    <div class="sp-topbar"><div class="t">Visualizar usuário</div>
+      <button class="sp-close" onclick="fechar()" aria-label="Fechar">${svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',16)}</button></div>
+    <div class="sp-simple">
+      <div class="card" style="display:flex;align-items:center;gap:14px;">
+        <div class="prof-av">${iniciais(s.nome)}</div>
+        <div><div class="prof-name" style="font-size:18px;">${s.nome}</div>
+          <div style="margin-top:7px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <span class="vinc-cargo">${s.cargo}</span>
+            <span class="badge b-${s.situacao}">${status}</span>
+          </div></div>
+      </div>
+      ${fcard('CPF', gerarCPF(s.m))}
+      ${fcard('Data de nascimento', gerarNasc(s.m))}
+      ${fcard('E-mail', email)}
+      ${fcard('Contato', contato)}
+    </div>
+    <div class="sp-foot">${svgP('<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>',13)} Acesso a este perfil é registrado em auditoria.</div>`;
+}
+function fcard(label,val,empty){ return `<div class="fcard"><div class="flabel">${label}</div><div class="fval${empty?' empty':''}">${val}</div></div>`; }
+function spTab(btn,name){
+  document.querySelectorAll('#sp .sp-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#sp .tabpane').forEach(p=>{ p.hidden = p.dataset.pane!==name; });
+}
+function escHandler(e){ if(e.key==='Escape') fechar(); }
+function fechar(){
+  document.getElementById('sp').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.removeEventListener('keydown', escHandler);
+  history.replaceState(null,'',`horario.html`);
+  if(lastFocus&&lastFocus.focus) lastFocus.focus();
+}
+
+popularFiltros();
+renderSrvCards();
+renderLista();
+renderPerfil();
+const h = location.hash.slice(1);
+if(h && SERVIDORES.some(s=>s.m===h)) abrir(h);
+</script>
+
+</body>
+</html>
