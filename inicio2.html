@@ -1699,9 +1699,10 @@ function abrirProfessor(inep, m){
   const discHtml = base.map(nome=>{ const d = DISC_ICONS[nome] || {c:'#12509A',bg:'#EAF1FA',ic:'<circle cx="12" cy="12" r="9"/>'}; const on = ativas.has(nome); return `<div class="pdisc ${on?'on':'off'}" style="--c:${d.c};--cbg:${d.bg}"><span class="pdi">${svgP(d.ic,15)}</span>${nome}</div>`; }).join('');
   // turmas com disciplina (para filtro) + ocorrências
   // aulas no ano x validadas (diário de classe)
-  const aulasAno = Math.max(120, (s.turmas.length||1) * (150 + seedFrom(s.m+'aa')%90));
+  const _nuncaAc = s.acesso==='nunca';
+  const aulasAno = _nuncaAc ? 0 : Math.max(120, (s.turmas.length||1) * (150 + seedFrom(s.m+'aa')%90));
   const pctVal = 82 + seedFrom(s.m+'av')%17; // 82–98%
-  const validadas = Math.round(aulasAno * pctVal/100);
+  const validadas = _nuncaAc ? 0 : Math.round(aulasAno * pctVal/100);
   const pendentes = aulasAno - validadas;
   const ativasArr = [...ativas];
   const turmasD = s.turmas.map((t,i)=> ({ ...t, disc: ativasArr.length ? ativasArr[seedFrom(s.m+t.t+i)%ativasArr.length] : '' }));

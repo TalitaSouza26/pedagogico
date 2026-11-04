@@ -541,6 +541,7 @@ function abrir(m){
   document.addEventListener('keydown', escHandler);
 }
 function aulasInfo(s){
+  if(s.acesso==='nunca') return { total:0, valid:0, pend:0, pct:0 };
   const total = Math.max(120, (s.turmas.length||1) * (150 + seedFrom(s.m+'aa')%90));
   const pct = 82 + seedFrom(s.m+'av')%17;
   const valid = Math.round(total*pct/100);
