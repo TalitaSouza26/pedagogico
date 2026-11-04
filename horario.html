@@ -423,7 +423,7 @@ function renderLista(){
     <tr data-m="${s.m}" class="${s.m===selectedM?'sel':''}" tabindex="0" onclick="selServidor('${s.m}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selServidor('${s.m}')}">
       <td><div class="cell-name"><span class="row-avatar">${iniciais(s.nome)}</span><b>${s.nome}</b></div></td>
       <td>${s.ncargos>1 ? `<span class="cargo-badge">${s.ncargos} cargos</span>` : s.cargo}</td>
-      <td>${VINC_LBL[s.vinculo]||'—'}${s.vinculos>1 ? ` <span class="vinc-badge">${s.vinculos} vínculos</span>` : ''}</td>
+      <td>${s.vinculos>1 ? `<span class="vinc-badge">${s.vinculos} vínculos</span>` : '<span class="muted">1 vínculo</span>'}</td>
       <td>${ESCOLAS[s.escola]||'—'}</td>
       <td style="text-align:right"><button class="eye" onclick="event.stopPropagation();abrir('${s.m}')" aria-label="Ver perfil completo de ${s.nome}">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',18)}</button></td>
     </tr>`).join('') || `<tr><td colspan="5" class="muted" style="text-align:center;padding:30px;">Nenhum servidor encontrado.</td></tr>`;
@@ -449,7 +449,7 @@ function renderPerfil(){
   }
   const prof = s.grupo==='Professores';
   const setor = GRP_LBL[GRP_OF(s)] || '—';
-  const vinc = (VINC_LBL[s.vinculo]||'—') + (s.vinculos>1 ? ` · ${s.vinculos} vínculos` : '');
+  const vinc = s.vinculos>1 ? `${s.vinculos} vínculos` : '1 vínculo';
   const turmas = prof ? (s.turmas.length ? `${s.turmas.length} turma${s.turmas.length>1?'s':''}` : 'Sem turma') : '—';
   const carga = s.carga ? `${s.carga}h/semana` : '—';
   const ultimo = s.acesso==='nunca' ? 'Nunca acessou' : s.acesso;
