@@ -61,9 +61,8 @@
     .seg-badge { background: #EDEFF2; color: var(--texto-suave); border-radius: 20px; padding: 2px 11px; font-size: 12.5px; font-weight: 700; }
     .seg.on .seg-badge { background: var(--azul-claro); color: var(--azul); }
     /* filtros */
-    .s2-filters { display: grid; grid-template-columns: 1.8fr 1fr 1fr; gap: 12px; margin-bottom: 18px; }
-    @media (max-width: 900px){ .s2-filters { grid-template-columns: 1fr 1fr; } }
-    .s2-filters .search { margin: 0; }
+    .s2-filters { margin-bottom: 18px; }
+    .s2-filters .search { margin: 0; max-width: 420px; }
     .s2-sel { border: 1px solid var(--borda); border-radius: 10px; padding: 11px 14px; font: inherit; font-size: 13.5px; color: var(--texto); background: var(--branco); cursor: pointer; }
     .s2-sel.ghost { border: none; background: none; font-family: var(--font-display); font-weight: 700; color: var(--texto); padding: 6px 2px; }
     .s2-listhead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
@@ -292,8 +291,6 @@
       <div class="s2-filters">
         <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="busca" placeholder="Buscar nome ou matrícula" oninput="onBusca()" aria-label="Buscar" /></label>
-        <select class="s2-sel" id="fEscola" onchange="onBusca()"><option value="">Escola</option></select>
-        <select class="s2-sel" id="fCargo" onchange="onBusca()"><option value="">Cargo</option></select>
       </div>
 
       <div class="s2-listhead">
@@ -435,12 +432,6 @@ function renderSrvCards(){
 }
 function selSeg(g){ filtroCargo = (g==='todos') ? '' : g; pagina=1; renderSrvCards(); renderLista(); }
 function matricula(s){ return String(seedFrom('mat'+s.m)%900000 + 100000).padStart(6,'0'); }
-function popularFiltros(){
-  const escolas = [...new Set(SERVIDORES.map(s=>ESCOLAS[s.escola]).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  const cargos = [...new Set(SERVIDORES.map(s=>s.cargo))].sort((a,b)=>a.localeCompare(b));
-  document.getElementById('fEscola').insertAdjacentHTML('beforeend', escolas.map(e=>`<option value="${e}">${e}</option>`).join(''));
-  document.getElementById('fCargo').insertAdjacentHTML('beforeend', cargos.map(c=>`<option value="${c}">${c}</option>`).join(''));
-}
 
 let POR_PAGINA = 8;
 let pagina = 1;
@@ -448,13 +439,9 @@ function setPorPagina(v){ POR_PAGINA = parseInt(v)||8; pagina = 1; renderLista()
 function irPaginaN(n){ pagina = n; renderLista(); window.scrollTo({top:0,behavior:'smooth'}); }
 function filtradosServ(){
   const q = (document.getElementById('busca').value||'').toLowerCase();
-  const fe = document.getElementById('fEscola').value;
-  const fc = document.getElementById('fCargo').value;
   const ord = document.getElementById('fOrd').value;
   const arr = SERVIDORES.filter(s=>{
     if(filtroCargo && GRP_OF(s)!==filtroCargo) return false;
-    if(fe && (ESCOLAS[s.escola]||'')!==fe) return false;
-    if(fc && s.cargo!==fc) return false;
     if(q && !(s.nome.toLowerCase().includes(q)||matricula(s).includes(q))) return false;
     return true;
   });
@@ -634,7 +621,6 @@ function fechar(){
   if(lastFocus&&lastFocus.focus) lastFocus.focus();
 }
 
-popularFiltros();
 renderSrvCards();
 renderLista();
 renderPerfil();
