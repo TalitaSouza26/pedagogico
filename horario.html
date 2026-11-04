@@ -53,25 +53,26 @@
     .vinc-badge { color: var(--laranja); font-family: var(--font-display); font-weight: 700; }
     .cargo-badge { color: var(--azul); font-family: var(--font-display); font-weight: 700; }
     /* segmentos de filtro por cargo */
-    .seg-row { display: flex; gap: 10px; margin-bottom: 18px; overflow-x: auto; padding-bottom: 4px; }
-    .seg { display: flex; align-items: center; gap: 11px; background: var(--branco); border: 1px solid var(--borda); border-radius: 12px; padding: 9px 16px 9px 9px; cursor: pointer; font-family: inherit; white-space: nowrap; flex-shrink: 0; transition: border-color .15s, box-shadow .15s; }
-    .seg:hover { border-color: #cfd6df; }
-    .seg.on { box-shadow: 0 2px 10px rgba(15,23,32,.08); }
-    .seg-badge { min-width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 14px; padding: 0 7px; }
-    .seg-txt { display: flex; flex-direction: column; line-height: 1.18; text-align: left; }
-    .seg-t { font-family: var(--font-display); font-weight: 700; font-size: 13.5px; color: var(--texto); }
-    .seg-s { font-size: 11px; color: var(--texto-suave); }
-    .seg[data-g="todos"] .seg-badge { background: #EAECEF; color: var(--texto); }
-    .seg[data-g="todos"].on { border-color: var(--texto); }
-    .seg[data-g="todos"].on .seg-badge { background: var(--texto); color: #fff; }
-    .seg[data-g="gestao"] .seg-badge { background: var(--azul-claro); color: var(--azul); }
-    .seg[data-g="gestao"].on { border-color: var(--azul); }
-    .seg[data-g="coord"] .seg-badge { background: #E3F5DC; color: #2E8B00; }
-    .seg[data-g="coord"].on { border-color: #2E8B00; }
-    .seg[data-g="docentes"] .seg-badge { background: #FDE7DB; color: var(--laranja); }
-    .seg[data-g="docentes"].on { border-color: var(--laranja); }
-    .seg[data-g="secretaria"] .seg-badge { background: #EDE4F6; color: var(--roxo); }
-    .seg[data-g="secretaria"].on { border-color: var(--roxo); }
+    .seg-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 18px; }
+    @media (max-width: 920px){ .seg-row { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 560px){ .seg-row { grid-template-columns: repeat(2, 1fr); } }
+    .seg { display: flex; align-items: center; gap: 12px; background: var(--branco); border: 1.5px solid var(--borda); border-radius: 14px; padding: 14px; cursor: pointer; font-family: inherit; text-align: left; transition: border-color .15s, box-shadow .15s, transform .1s, background .15s; }
+    .seg:hover { border-color: #cfd6df; transform: translateY(-1px); }
+    .seg.on { box-shadow: 0 5px 16px rgba(15,23,32,.09); }
+    .seg-badge { min-width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 15px; padding: 0 8px; flex-shrink: 0; letter-spacing: .2px; }
+    .seg-txt { display: flex; flex-direction: column; line-height: 1.22; min-width: 0; }
+    .seg-t { font-family: var(--font-display); font-weight: 700; font-size: 14px; color: var(--texto); }
+    .seg-s { font-size: 11.5px; color: var(--texto-suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .seg[data-g="todos"] .seg-badge { background: #ECEEF1; color: #46525E; }
+    .seg[data-g="gestao"] .seg-badge { background: #E8F0FA; color: #4A77AC; }
+    .seg[data-g="coord"] .seg-badge { background: #EAF4E3; color: #5F9A44; }
+    .seg[data-g="docentes"] .seg-badge { background: #FBEBE1; color: #CC7A4D; }
+    .seg[data-g="secretaria"] .seg-badge { background: #EEE8F6; color: #8169AC; }
+    .seg.on[data-g="todos"] { border-color: #C2C8CF; background: #F7F8F9; }
+    .seg.on[data-g="gestao"] { border-color: #AFC8E8; background: #F3F8FD; }
+    .seg.on[data-g="coord"] { border-color: #BBDCAB; background: #F4FAF0; }
+    .seg.on[data-g="docentes"] { border-color: #F1C7AE; background: #FDF5EF; }
+    .seg.on[data-g="secretaria"] { border-color: #CDBDE2; background: #F7F2FC; }
 
     .overlay { position: fixed; inset: 0; background: rgba(15,23,32,.45); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; }
     .overlay.open { opacity: 1; pointer-events: auto; }
