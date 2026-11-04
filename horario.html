@@ -94,6 +94,20 @@
     .pcard-btn.prim:hover { background: #d85a2c; }
     .pcard-btn.ghost { background: var(--branco); color: var(--texto); border: 1px solid var(--borda); margin-top: 9px; }
     .pcard-btn.ghost:hover { border-color: var(--azul); color: var(--azul); }
+    .pcard { padding: 24px; }
+    .pcard-av { width: 72px; height: 72px; border-radius: 18px; font-size: 24px; margin-bottom: 16px; }
+    .pcard-name { font-size: 20px; }
+    .pcard-sec { margin-bottom: 16px; }
+    .pcard-sec-t { font-size: 11px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: var(--texto-suave); margin-bottom: 8px; }
+    .pcard-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pcard-chip { background: var(--azul-claro); color: var(--azul); font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 8px; }
+    .ra-stats { display: flex; gap: 8px; margin-bottom: 12px; }
+    .ra-stat { flex: 1; background: var(--bg); border: 1px solid var(--borda); border-radius: 10px; padding: 9px 6px; text-align: center; }
+    .ra-n { display: block; font-family: var(--font-display); font-weight: 800; font-size: 19px; color: var(--texto); }
+    .ra-l { font-size: 10.5px; color: var(--texto-suave); }
+    .ra-bar { height: 8px; background: #EAECF0; border-radius: 5px; overflow: hidden; }
+    .ra-fill { height: 100%; background: #2E8B00; border-radius: 5px; }
+    .ra-cap { font-size: 11.5px; color: var(--texto-suave); margin-top: 7px; }
 
     .overlay { position: fixed; inset: 0; background: rgba(15,23,32,.45); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; }
     .overlay.open { opacity: 1; pointer-events: auto; }
@@ -419,10 +433,20 @@ function renderPerfil(){
     box.innerHTML = `<div class="pcard-empty">${svgP('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',34)}<div>Selecione um servidor<br>para ver o perfil</div></div>`;
     return;
   }
+  const prof = s.grupo==='Professores';
   const setor = GRP_LBL[GRP_OF(s)] || '—';
   const vinc = (VINC_LBL[s.vinculo]||'—') + (s.vinculos>1 ? ` · ${s.vinculos} vínculos` : '');
-  const turmas = s.grupo==='Professores' ? (s.turmas.length ? `${s.turmas.length} turma${s.turmas.length>1?'s':''}` : 'Sem turma') : '—';
+  const turmas = prof ? (s.turmas.length ? `${s.turmas.length} turma${s.turmas.length>1?'s':''}` : 'Sem turma') : '—';
   const carga = s.carga ? `${s.carga}h/semana` : '—';
+  const ultimo = s.acesso==='nunca' ? 'Nunca acessou' : s.acesso;
+  let extra = '';
+  if(prof){
+    const au = aulasInfo(s);
+    const chips = s.disc.length ? s.disc.map(d=>`<span class="pcard-chip">${d}</span>`).join('') : '<span class="muted" style="font-size:12px;">Sem disciplina</span>';
+    extra = `
+      <div class="pcard-sec"><div class="pcard-sec-t">Disciplinas</div><div class="pcard-chips">${chips}</div></div>
+      <div class="pcard-sec"><div class="pcard-sec-t">Aulas validadas</div><div class="ra-bar"><div class="ra-fill" style="width:${au.pct}%"></div></div><div class="ra-cap">${au.pct}% validadas · ${au.pend} pendente${au.pend===1?'':'s'}</div></div>`;
+  }
   box.innerHTML = `
     <div class="pcard-av">${iniciais(s.nome)}</div>
     <div class="pcard-name">${s.nome}</div>
@@ -433,7 +457,9 @@ function renderPerfil(){
       <span class="k">Carga horária</span><span class="v">${carga}</span>
       <span class="k">Turmas</span><span class="v">${turmas}</span>
       <span class="k">Escola</span><span class="v">${ESCOLAS[s.escola]||'—'}</span>
+      <span class="k">Último acesso</span><span class="v">${ultimo}</span>
     </div>
+    ${extra}
     <button class="pcard-btn prim" onclick="abrir('${s.m}')">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',16)} Ver perfil completo</button>
     <button class="pcard-btn ghost" onclick="location.href='comunicacao.html'">${svgP('<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>',16)} Enviar mensagem</button>`;
 }
@@ -451,8 +477,20 @@ function abrir(m){
   sp0.focus();
   document.addEventListener('keydown', escHandler);
 }
+function aulasInfo(s){
+  const sd = seedFrom('aulas'+s.m);
+  const total = 40 + sd%80;
+  const pend = s.turmas.length ? (sd>>>3)%Math.max(1, Math.round(total*0.14)) : 0;
+  const valid = total - pend;
+  return { total, valid, pend, pct: Math.round(valid/total*100) };
+}
 function richHtml(s){
   const nunca = s.acesso==='nunca';
+  const au = aulasInfo(s);
+  const aulasCard = `<div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:12px;">${svgP('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',18)} Registro de aulas</div>
+    <div class="ra-stats"><div class="ra-stat"><span class="ra-n">${au.total}</span><span class="ra-l">Registradas</span></div><div class="ra-stat"><span class="ra-n" style="color:#2E8B00">${au.valid}</span><span class="ra-l">Validadas</span></div><div class="ra-stat"><span class="ra-n" style="color:var(--laranja)">${au.pend}</span><span class="ra-l">Pendentes</span></div></div>
+    <div class="ra-bar"><div class="ra-fill" style="width:${au.pct}%"></div></div>
+    <div class="ra-cap">${au.pct}% das aulas validadas no bimestre</div></div>`;
   const etapasHtml = (s.etapas.length ? s.etapas : []).map(nome=>{ const et = ETAPAS_ALL.find(e=>e.nome===nome); return `<span class="etapa on-${et?et.cor:'azul'}">${nome}</span>`; }).join('') || '<span class="muted" style="font-size:12.5px;">—</span>';
   const discHtml = s.disc.length ? s.disc.map(nome=>{ const d = DISC_ALL.find(x=>x.nome===nome) || {c:'var(--azul)',bg:'var(--azul-claro)',ic:'<circle cx="12" cy="12" r="9"/>'}; return `<div class="disc on" style="--c:${d.c};--cbg:${d.bg}"><span class="di">${svgP(d.ic,15)}</span>${nome}</div>`; }).join('') : '<div class="muted" style="font-size:12.5px;">Sem disciplina vinculada</div>';
   const turmasCard = `
@@ -479,6 +517,7 @@ function richHtml(s){
         <div class="atua"><span class="atua-lbl">Atua em</span>${etapasHtml}</div>
       </div>
       <div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;margin-bottom:12px;">Disciplinas</div><div class="disc-grid">${discHtml}</div></div>
+      ${aulasCard}
       ${turmasCard}
       ${ocorCard}
       ${lotacoesCard}
