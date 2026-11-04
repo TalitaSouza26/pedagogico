@@ -405,6 +405,43 @@
     .el-eye { border: 1px solid var(--borda); background: var(--branco); border-radius: 8px; color: var(--laranja); padding: 6px; display: inline-flex; cursor: pointer; text-decoration: none; flex-shrink: 0; }
     .el-eye:hover { border-color: var(--laranja); background: var(--laranja-bg); }
     .el-eye svg { width: 16px; height: 16px; }
+    /* ficha · servidor: lista + card lateral */
+    .srv2-split { display: flex; gap: 20px; align-items: flex-start; }
+    .srv2-main { flex: 1; min-width: 0; }
+    .srv2-aside { width: 300px; flex-shrink: 0; position: sticky; top: 4px; }
+    @media (max-width: 900px){ .srv2-split { flex-direction: column; } .srv2-aside { width: 100%; position: static; } }
+    #srvList .el-row { cursor: pointer; }
+    #srvList .el-row.sel { background: var(--azul-claro); }
+    .el-chev { color: #B6BEC9; display: inline-flex; flex-shrink: 0; }
+    .el-chev svg { width: 16px; height: 16px; }
+    .svcard { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 20px; }
+    .svc-empty { text-align: center; color: var(--texto-suave); font-size: 13px; padding: 36px 14px; }
+    .svc-empty svg { width: 34px; height: 34px; color: #C4CBD4; margin-bottom: 10px; }
+    .svc-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .svc-head .t { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--texto); }
+    .svc-x { border: 1px solid var(--borda); background: var(--branco); border-radius: 9px; padding: 6px; cursor: pointer; color: var(--texto-suave); display: flex; }
+    .svc-x:hover { border-color: var(--azul); color: var(--azul); }
+    .svc-top { display: flex; gap: 14px; align-items: center; margin-bottom: 6px; }
+    .svc-av { width: 60px; height: 60px; border-radius: 16px; background: var(--azul); color: #fff; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 20px; flex-shrink: 0; }
+    .svc-name { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--texto); line-height: 1.2; }
+    .svc-mat { font-size: 12px; color: var(--texto-suave); margin: 3px 0 7px; }
+    .svc-badge { display: inline-block; background: var(--azul-claro); color: var(--azul); font-size: 11.5px; font-weight: 600; padding: 3px 11px; border-radius: 20px; }
+    .svc-kv { display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; font-size: 13px; margin: 14px 0 4px; }
+    .svc-kv .k { color: var(--texto-suave); }
+    .svc-kv .v { color: var(--texto); font-weight: 600; text-align: right; }
+    .svc-sec-t { font-size: 13px; font-weight: 700; color: var(--texto); margin: 16px 0 10px; display: flex; align-items: center; justify-content: space-between; }
+    .svc-vp { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--borda); border-radius: 12px; padding: 13px; margin-bottom: 9px; }
+    .svc-vp-ic { width: 40px; height: 40px; border-radius: 10px; background: var(--azul-claro); color: var(--azul); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .svc-vp-nome { font-weight: 700; font-size: 13.5px; color: var(--texto); }
+    .svc-vp-cargo { font-size: 12px; color: var(--texto); margin-top: 1px; }
+    .svc-vp-turmas { font-size: 11.5px; color: var(--texto-suave); margin-top: 3px; }
+    .svc-pill { background: var(--azul-claro); color: var(--azul); border-radius: 20px; padding: 3px 11px; font-size: 12px; font-weight: 700; }
+    .svc-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; border-radius: 10px; padding: 11px; font-family: var(--font-display); font-weight: 700; font-size: 13.5px; cursor: pointer; border: none; }
+    .svc-btn svg { width: 16px; height: 16px; }
+    .svc-btn.prim { background: var(--laranja); color: #fff; }
+    .svc-btn.prim:hover { background: var(--laranja-escuro); }
+    .svc-btn.ghost { background: var(--branco); color: var(--texto); border: 1px solid var(--borda); margin-top: 9px; }
+    .svc-btn.ghost:hover { border-color: var(--azul); color: var(--azul); }
     /* cards de filtro por cargo (Servidores) */
     .srv-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 10px; }
     @media (max-width: 640px){ .srv-cards { grid-template-columns: 1fr; } }
@@ -1164,19 +1201,25 @@ function abrirFicha(inep, keepTab){
   const icGest = svgP('<circle cx="12" cy="6" r="2.5"/><path d="M8 12a4 4 0 018 0"/><rect x="3" y="14" width="18" height="2.4" rx="0.6"/><path d="M5.5 16.4V21M18.5 16.4V21"/>',20);
   const icProf = svgP('<rect x="4" y="3" width="16" height="12" rx="1"/><line x1="7" y1="7" x2="16" y2="7"/><line x1="7" y1="10.5" x2="13" y2="10.5"/><path d="M8 15l-2 6"/><path d="M16 15l2 6"/>',20);
   const icSec  = svgP('<rect x="5" y="3" width="14" height="18" rx="1.5"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="10.5" y1="6" x2="13.5" y2="6"/><line x1="10.5" y1="12" x2="13.5" y2="12"/><line x1="10.5" y1="18" x2="13.5" y2="18"/>',20);
+  window._fichaTeam = team; window._fichaEscServ = e;
   const paneServidores = `
     <div class="srv-cards">
       <button type="button" class="srv-card" data-grp="gestores" onclick="filtrarServidores('gestores',this)"><span class="srv-ic">${icGest}</span><span class="srv-meta"><span class="srv-n">${cGest}</span><span class="srv-l">Gestores</span></span></button>
       <button type="button" class="srv-card" data-grp="professores" onclick="filtrarServidores('professores',this)"><span class="srv-ic">${icProf}</span><span class="srv-meta"><span class="srv-n">${cProf}</span><span class="srv-l">Professores</span></span></button>
       <button type="button" class="srv-card" data-grp="secretarios" onclick="filtrarServidores('secretarios',this)"><span class="srv-ic">${icSec}</span><span class="srv-meta"><span class="srv-n">${cSec}</span><span class="srv-l">Secretários</span></span></button>
     </div>
-    <div class="srv-hint">Clique num card para filtrar · clique de novo para ver todos</div>
-    <div class="eq-list" id="srvList">${team.map(p=>`
-      <div class="el-row" data-grp="${grpOf(p)}">
-        <span class="el-av">${iniciais(p.nome)}</span>
-        <div class="el-info"><div class="el-nome">${p.nome}</div><div class="el-cargo">${p.cargo}</div></div>
-        <button class="el-eye" onclick="abrirServidor('${e.inep}','${p.m}')" title="Ver detalhes" aria-label="Ver detalhes de ${p.nome}">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',16)}</button>
-      </div>`).join('')}</div>`;
+    <div class="srv-hint">Clique num card para filtrar · clique num servidor para ver o perfil</div>
+    <div class="srv2-split">
+      <div class="srv2-main">
+        <div class="eq-list" id="srvList">${team.map(p=>`
+          <div class="el-row" data-grp="${grpOf(p)}" data-m="${p.m}" tabindex="0" onclick="fichaSelServidor('${p.m}')" onkeydown="if(event.key==='Enter'){fichaSelServidor('${p.m}')}">
+            <span class="el-av">${iniciais(p.nome)}</span>
+            <div class="el-info"><div class="el-nome">${p.nome}</div><div class="el-cargo">${p.cargo}</div></div>
+            <span class="el-chev">${svgP('<polyline points="9 18 15 12 9 6"/>',16)}</span>
+          </div>`).join('')}</div>
+      </div>
+      <aside class="srv2-aside"><div class="svcard" id="fichaSrvPerfil"><div class="svc-empty">${svgP('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',34)}<div>Selecione um servidor<br>para ver o perfil</div></div></div></aside>
+    </div>`;
 
   /* aba Turmas */
   const paneTurmas = turmas.length ? `<table class="pt-tbl"><thead><tr><th>Turma</th><th>Turno</th><th style="text-align:right;">Alunos</th></tr></thead><tbody>${turmas.map(t=>`<tr><td><b>${t.nome}</b></td><td class="muted">${t.turno}</td><td style="text-align:right;font-weight:600;">${t.alunos}</td></tr>`).join('')}</tbody></table>` : `<div class="p-empty">Nenhuma turma cadastrada</div>`;
@@ -1349,6 +1392,33 @@ function filtrarServidores(grp, el){
   const rows = scope.querySelectorAll('#srvList .el-row');
   if(jaAtivo){ rows.forEach(r=>{ r.style.display=''; }); }
   else { el.classList.add('active'); rows.forEach(r=>{ r.style.display = r.dataset.grp===grp ? '' : 'none'; }); }
+}
+let _fichaSelM = null;
+function _fichaSetor(p){ return p.grupo==='Direção' ? 'Gestão' : p.grupo==='Coordenação' ? 'Coordenação' : p.grupo==='Professores' ? 'Docentes' : 'Secretaria'; }
+function fichaSelServidor(m){
+  _fichaSelM = m;
+  document.querySelectorAll('#srvList .el-row').forEach(r=>r.classList.toggle('sel', r.dataset.m===m));
+  fichaRenderPerfil();
+}
+function fichaLimpaPerfil(){ _fichaSelM=null; document.querySelectorAll('#srvList .el-row').forEach(r=>r.classList.remove('sel')); fichaRenderPerfil(); }
+function fichaRenderPerfil(){
+  const box = document.getElementById('fichaSrvPerfil'); if(!box) return;
+  const team = window._fichaTeam||[], e = window._fichaEscServ||{};
+  const p = _fichaSelM && team.find(x=>x.m===_fichaSelM);
+  if(!p){ box.innerHTML = `<div class="svc-empty">${svgP('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',34)}<div>Selecione um servidor<br>para ver o perfil</div></div>`; return; }
+  const mat = String(seedFrom('mat'+p.m)%900000+100000).padStart(6,'0');
+  const ultimo = p.acesso==='nunca' ? 'Nunca acessou' : p.acesso;
+  const vincN = p.vinculos>1 ? `${p.vinculos} vínculos` : '1 vínculo';
+  const bank = '<path d="M3 21h18"/><path d="M5 21V8l7-4 7 4v13"/><path d="M9 21v-5h6v5"/><path d="M9 11h.01M15 11h.01"/>';
+  const vp = (p.lotacoes||[]).map(l=>{ const cargo=l.cargos.join(' · '); const turmasTxt = p.grupo==='Professores' ? (p.turmas.length?`${p.turmas.length} turma${p.turmas.length>1?'s':''} vinculada${p.turmas.length>1?'s':''}`:'Sem turmas vinculadas') : 'Atuação administrativa'; return `<div class="svc-vp"><div class="svc-vp-ic">${svgP(bank,20)}</div><div><div class="svc-vp-nome">${l.escola}</div><div class="svc-vp-cargo">${cargo}</div><div class="svc-vp-turmas">${turmasTxt}</div></div></div>`; }).join('');
+  box.innerHTML = `
+    <div class="svc-head"><div class="t">Detalhes do servidor</div><button class="svc-x" onclick="fichaLimpaPerfil()" aria-label="Fechar">${svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',16)}</button></div>
+    <div class="svc-top"><div class="svc-av">${_ini(p.nome)}</div><div><div class="svc-name">${p.nome}</div><div class="svc-mat">Matrícula: ${mat}</div><span class="svc-badge">${p.cargo}</span></div></div>
+    <div class="svc-kv"><span class="k">Setor</span><span class="v">${_fichaSetor(p)}</span><span class="k">Último acesso</span><span class="v">${ultimo}</span></div>
+    <div class="svc-sec-t">Vínculo profissional <span class="svc-pill">${vincN}</span></div>
+    ${vp}
+    <button class="svc-btn prim" style="margin-top:14px;" onclick="abrirServidor('${e.inep}','${p.m}')">${svgP('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',16)} Ver perfil completo</button>
+    <button class="svc-btn ghost" onclick="location.href='comunicacao.html'">${svgP('<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>',16)} Enviar mensagem</button>`;
 }
 function _matriculaModalHtml(a, escNome, seed){
   const sf = s => { let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; };
