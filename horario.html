@@ -447,7 +447,7 @@ function renderLista(){
       <td>${s.ncargos>1 ? `<span class="cargo-badge">${s.ncargos} cargos</span>` : s.cargo}</td>
       <td>${s.vinculos>1 ? `<span class="vinc-badge">${s.vinculos} vínculos</span>` : '<span class="muted">1 vínculo</span>'}</td>
       <td>${ESCOLAS[s.escola]||'—'}</td>
-      <td style="text-align:right"><button class="eye" onclick="event.stopPropagation();abrir('${s.m}')" aria-label="Ver perfil completo de ${s.nome}">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',18)}</button></td>
+      <td style="text-align:right"><span style="color:#B6BEC9;display:inline-flex">${svgP('<polyline points="9 18 15 12 9 6"/>',18)}</span></td>
     </tr>`).join('') || `<tr><td colspan="5" class="muted" style="text-align:center;padding:30px;">Nenhum servidor encontrado.</td></tr>`;
   document.getElementById('pagerInfo').textContent = total ? `Mostrando ${(ini+1).toLocaleString('pt-BR')}–${Math.min(ini+POR_PAGINA,total).toLocaleString('pt-BR')} de ${total.toLocaleString('pt-BR')}` : '';
   document.getElementById('pgPos').textContent = `${pagina} / ${max}`;
@@ -536,7 +536,7 @@ function richHtml(s){
   const discHtml = DISC_ALL.map(d=>{ const on = s.disc.includes(d.nome); return `<div class="pdisc ${on?'on':'off'}" style="--c:${d.c};--cbg:${d.bg}"><span class="pdi">${svgP(d.ic,15)}</span>${d.nome}</div>`; }).join('');
   const turmasCard = `
     <div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:12px;">${svgP('<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/>',18)} Quadro de turmas</div>
-      ${s.turmas.length? `<table class="mini-tbl"><thead><tr><th>Turma</th><th>Nível de Ensino</th><th>Turno</th><th></th></tr></thead><tbody>${s.turmas.map(t=>`<tr><td><b>${t.t}</b></td><td class="muted">${t.n}</td><td>${t.turno}</td><td class="eye">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',16)}</td></tr>`).join('')}</tbody></table>` : `<div class="empty">${svgP('<circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/>',38)}<div>Nenhuma turma vinculada</div></div>` }
+      ${s.turmas.length? `<table class="mini-tbl"><thead><tr><th>Turma</th><th>Nível de Ensino</th><th>Turno</th></tr></thead><tbody>${s.turmas.map(t=>`<tr><td><b>${t.t}</b></td><td class="muted">${t.n}</td><td>${t.turno}</td></tr>`).join('')}</tbody></table>` : `<div class="empty">${svgP('<circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/>',38)}<div>Nenhuma turma vinculada</div></div>` }
     </div>`;
   const ocorCard = `
     <div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:12px;">${svgP('<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',18)} Registro de ocorrências</div>
