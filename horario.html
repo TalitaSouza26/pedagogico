@@ -73,6 +73,27 @@
     .seg.on[data-g="coord"] { border-color: #BBDCAB; background: #F4FAF0; }
     .seg.on[data-g="docentes"] { border-color: #F1C7AE; background: #FDF5EF; }
     .seg.on[data-g="secretaria"] { border-color: #CDBDE2; background: #F7F2FC; }
+    /* lista + card de perfil lateral */
+    .srv-split { display: flex; gap: 20px; align-items: flex-start; }
+    .srv-main { flex: 1; min-width: 0; }
+    .srv-aside { width: 290px; flex-shrink: 0; position: sticky; top: 16px; }
+    @media (max-width: 980px){ .srv-split { flex-direction: column; } .srv-aside { width: 100%; position: static; } }
+    .tbl tbody tr.sel td { background: var(--azul-claro); }
+    .pcard { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 20px; }
+    .pcard-empty { text-align: center; color: var(--texto-suave); font-size: 13px; padding: 36px 16px; }
+    .pcard-empty svg { width: 34px; height: 34px; color: #C4CBD4; margin-bottom: 10px; }
+    .pcard-av { width: 60px; height: 60px; border-radius: 16px; background: linear-gradient(160deg, var(--laranja), var(--azul)); color: #fff; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 20px; margin-bottom: 14px; }
+    .pcard-name { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--texto); line-height: 1.2; }
+    .pcard-badge { display: inline-block; margin-top: 8px; background: var(--azul-claro); color: var(--azul); font-size: 11.5px; font-weight: 600; padding: 3px 11px; border-radius: 20px; }
+    .pcard-kv { margin: 16px 0 18px; display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; font-size: 13px; }
+    .pcard-kv .k { color: var(--texto-suave); }
+    .pcard-kv .v { color: var(--texto); font-weight: 600; text-align: right; }
+    .pcard-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; border-radius: 10px; padding: 11px; font-family: var(--font-display); font-weight: 700; font-size: 13.5px; cursor: pointer; border: none; }
+    .pcard-btn svg { width: 16px; height: 16px; }
+    .pcard-btn.prim { background: var(--laranja); color: #fff; }
+    .pcard-btn.prim:hover { background: #d85a2c; }
+    .pcard-btn.ghost { background: var(--branco); color: var(--texto); border: 1px solid var(--borda); margin-top: 9px; }
+    .pcard-btn.ghost:hover { border-color: var(--azul); color: var(--azul); }
 
     .overlay { position: fixed; inset: 0; background: rgba(15,23,32,.45); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; }
     .overlay.open { opacity: 1; pointer-events: auto; }
@@ -214,19 +235,24 @@
           <button class="chip" id="chipCargo" style="display:none" onclick="limparCargo()"></button>
         </div>
       </div>
-      <div class="tbl-wrap"><table class="tbl">
-        <thead><tr><th>Servidor</th><th>Cargo</th><th>Vínculo</th><th>Escola</th><th></th></tr></thead>
-        <tbody id="listBody"></tbody>
-      </table></div>
-      <div class="pager">
-        <span class="pager-info" id="pagerInfo"></span>
-        <div class="pager-ctrls">
-          <button class="pg-btn" id="btnPrev" onclick="irPagina(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Anterior</button>
-          <span class="pg-pos" id="pgPos"></span>
-          <button class="pg-btn" id="btnNext" onclick="irPagina(1)">Próxima <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+      <div class="srv-split">
+        <div class="srv-main">
+          <div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>Servidor</th><th>Cargo</th><th>Vínculo</th><th>Escola</th><th></th></tr></thead>
+            <tbody id="listBody"></tbody>
+          </table></div>
+          <div class="pager">
+            <span class="pager-info" id="pagerInfo"></span>
+            <div class="pager-ctrls">
+              <button class="pg-btn" id="btnPrev" onclick="irPagina(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Anterior</button>
+              <span class="pg-pos" id="pgPos"></span>
+              <button class="pg-btn" id="btnNext" onclick="irPagina(1)">Próxima <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+            </div>
+          </div>
+          <div class="section-hint" style="margin-top:12px;">Nenhum aluno é identificado neste painel. Origem: Folha/RH da prefeitura.</div>
         </div>
+        <aside class="srv-aside"><div class="pcard" id="srvPerfil"></div></aside>
       </div>
-      <div class="section-hint" style="margin-top:12px;">Nenhum aluno é identificado neste painel. Origem: Folha/RH da prefeitura.</div>
     </div>
   </div>
 </div>
@@ -366,12 +392,12 @@ function renderLista(){
   const chip = document.getElementById('chipCargo');
   if(filtroCargo){ chip.style.display='inline-flex'; chip.innerHTML = `${GRP_LBL[filtroCargo]||filtroCargo} ✕`; } else chip.style.display='none';
   document.getElementById('listBody').innerHTML = slice.map(s=>`
-    <tr tabindex="0" onclick="abrir('${s.m}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrir('${s.m}')}">
+    <tr data-m="${s.m}" class="${s.m===selectedM?'sel':''}" tabindex="0" onclick="selServidor('${s.m}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selServidor('${s.m}')}">
       <td><div class="cell-name"><span class="row-avatar">${iniciais(s.nome)}</span><b>${s.nome}</b></div></td>
       <td>${s.ncargos>1 ? `<span class="cargo-badge">${s.ncargos} cargos</span>` : s.cargo}</td>
       <td>${VINC_LBL[s.vinculo]||'—'}${s.vinculos>1 ? ` <span class="vinc-badge">${s.vinculos} vínculos</span>` : ''}</td>
       <td>${ESCOLAS[s.escola]||'—'}</td>
-      <td style="text-align:right"><button class="eye" onclick="event.stopPropagation();abrir('${s.m}')" aria-label="Ver detalhes de ${s.nome}">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',18)}</button></td>
+      <td style="text-align:right"><button class="eye" onclick="event.stopPropagation();abrir('${s.m}')" aria-label="Ver perfil completo de ${s.nome}">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',18)}</button></td>
     </tr>`).join('') || `<tr><td colspan="5" class="muted" style="text-align:center;padding:30px;">Nenhum servidor encontrado.</td></tr>`;
   document.getElementById('pagerInfo').textContent = total ? `Mostrando ${(ini+1).toLocaleString('pt-BR')}–${Math.min(ini+POR_PAGINA,total).toLocaleString('pt-BR')} de ${total.toLocaleString('pt-BR')}` : '';
   document.getElementById('pgPos').textContent = `${pagina} / ${max}`;
@@ -379,6 +405,38 @@ function renderLista(){
   document.getElementById('btnNext').disabled = pagina>=max;
 }
 function onBusca(){ pagina = 1; renderLista(); }
+
+let selectedM = null;
+function selServidor(m){
+  selectedM = m;
+  document.querySelectorAll('#listBody tr').forEach(tr=>tr.classList.toggle('sel', tr.dataset.m===m));
+  renderPerfil();
+}
+function renderPerfil(){
+  const box = document.getElementById('srvPerfil'); if(!box) return;
+  const s = selectedM && SERVIDORES.find(x=>x.m===selectedM);
+  if(!s){
+    box.innerHTML = `<div class="pcard-empty">${svgP('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',34)}<div>Selecione um servidor<br>para ver o perfil</div></div>`;
+    return;
+  }
+  const setor = GRP_LBL[GRP_OF(s)] || '—';
+  const vinc = (VINC_LBL[s.vinculo]||'—') + (s.vinculos>1 ? ` · ${s.vinculos} vínculos` : '');
+  const turmas = s.grupo==='Professores' ? (s.turmas.length ? `${s.turmas.length} turma${s.turmas.length>1?'s':''}` : 'Sem turma') : '—';
+  const carga = s.carga ? `${s.carga}h/semana` : '—';
+  box.innerHTML = `
+    <div class="pcard-av">${iniciais(s.nome)}</div>
+    <div class="pcard-name">${s.nome}</div>
+    <span class="pcard-badge">${s.ncargos>1 ? s.ncargos+' cargos' : s.cargo}</span>
+    <div class="pcard-kv">
+      <span class="k">Setor</span><span class="v">${setor}</span>
+      <span class="k">Vínculo</span><span class="v">${vinc}</span>
+      <span class="k">Carga horária</span><span class="v">${carga}</span>
+      <span class="k">Turmas</span><span class="v">${turmas}</span>
+      <span class="k">Escola</span><span class="v">${ESCOLAS[s.escola]||'—'}</span>
+    </div>
+    <button class="pcard-btn prim" onclick="abrir('${s.m}')">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',16)} Ver perfil completo</button>
+    <button class="pcard-btn ghost" onclick="location.href='comunicacao.html'">${svgP('<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>',16)} Enviar mensagem</button>`;
+}
 
 let lastFocus=null;
 function abrir(m){
@@ -472,6 +530,7 @@ function fechar(){
 
 renderSrvCards();
 renderLista();
+renderPerfil();
 const h = location.hash.slice(1);
 if(h && SERVIDORES.some(s=>s.m===h)) abrir(h);
 </script>
