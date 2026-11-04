@@ -451,7 +451,6 @@ function renderPerfil(){
   const setor = GRP_LBL[GRP_OF(s)] || '—';
   const vinc = s.vinculos>1 ? `${s.vinculos} vínculos` : '1 vínculo';
   const turmas = prof ? (s.turmas.length ? `${s.turmas.length} turma${s.turmas.length>1?'s':''}` : 'Sem turma') : '—';
-  const carga = s.carga ? `${s.carga}h/semana` : '—';
   const ultimo = s.acesso==='nunca' ? 'Nunca acessou' : s.acesso;
   let extra = '';
   if(prof){
@@ -465,7 +464,6 @@ function renderPerfil(){
     <div class="pcard-kv">
       <span class="k">Setor</span><span class="v">${setor}</span>
       <span class="k">Vínculo</span><span class="v">${vinc}</span>
-      <span class="k">Carga horária</span><span class="v">${carga}</span>
       <span class="k">Turmas</span><span class="v">${turmas}</span>
       <span class="k">Escola</span><span class="v">${ESCOLAS[s.escola]||'—'}</span>
       <span class="k">Último acesso</span><span class="v">${ultimo}</span>
