@@ -548,6 +548,9 @@ function aulasInfo(s){
 }
 function richHtml(s){
   const nunca = s.acesso==='nunca';
+  const _email = s.nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z]/g,'')+'@eprof.app';
+  const _d = s.m.slice(-4); const _contato = `(73) 9 ${_d}-${String(4000+(parseInt(_d)%5000)).padStart(4,'0')}`;
+  const _cpf = gerarCPF(s.m); const _nasc = gerarNasc(s.m);
   const au = aulasInfo(s);
   const aulasCard = `<div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;margin-bottom:12px;">Registro de aulas · ano letivo</div>
     <div class="aula-cards">
@@ -579,6 +582,12 @@ function richHtml(s){
           ${svgP('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',15)}<span class="k">${nunca?'Nunca acessou a plataforma':'Último acesso em '+s.acesso}</span>
         </div>
         <div class="atua"><span class="atua-lbl">Atua em</span>${etapasHtml}</div>
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--borda);display:grid;grid-template-columns:auto 1fr;gap:10px 14px;font-size:13px;">
+          <span style="color:var(--texto-suave)">CPF</span><span style="text-align:right;font-weight:600">${_cpf}</span>
+          <span style="color:var(--texto-suave)">Nascimento</span><span style="text-align:right;font-weight:600">${_nasc}</span>
+          <span style="color:var(--texto-suave)">Contato</span><span style="text-align:right;font-weight:600">${_contato}</span>
+          <span style="color:var(--texto-suave)">E-mail</span><span style="text-align:right;font-weight:600;word-break:break-all">${_email}</span>
+        </div>
       </div>
       <div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;margin-bottom:12px;">Disciplinas</div><div class="pdisc-grid">${discHtml}</div></div>
       ${aulasCard}
