@@ -292,7 +292,7 @@
 
       <div class="s2-filters">
         <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="busca" placeholder="Buscar nome ou matrícula" oninput="onBusca()" aria-label="Buscar" /></label>
+          <input type="text" id="busca" placeholder="Buscar por nome" oninput="onBusca()" aria-label="Buscar" /></label>
       </div>
 
       <div class="s2-listhead">
@@ -444,7 +444,7 @@ function filtradosServ(){
   const ord = document.getElementById('fOrd').value;
   const arr = SERVIDORES.filter(s=>{
     if(filtroCargo && GRP_OF(s)!==filtroCargo) return false;
-    if(q && !(s.nome.toLowerCase().includes(q)||matricula(s).includes(q))) return false;
+    if(q && !s.nome.toLowerCase().includes(q)) return false;
     return true;
   });
   arr.sort((a,b)=> ord==='za' ? b.nome.localeCompare(a.nome) : a.nome.localeCompare(b.nome));
@@ -461,7 +461,7 @@ function renderLista(){
   const chev = svgP('<polyline points="9 18 15 12 9 6"/>',18);
   document.getElementById('listBody').innerHTML = slice.map(s=>`
     <tr data-m="${s.m}" class="${s.m===selectedM?'sel':''}" tabindex="0" onclick="selServidor('${s.m}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selServidor('${s.m}')}">
-      <td><div class="cell-name"><span class="row-avatar">${iniciais(s.nome)}</span><div><b>${s.nome}</b><div class="row-sub">Matrícula: ${matricula(s)}</div></div></div></td>
+      <td><div class="cell-name"><span class="row-avatar">${iniciais(s.nome)}</span><b>${s.nome}</b></div></td>
       <td>${s.ncargos>1 ? `<span class="cargo-badge">${s.ncargos} cargos</span>` : s.cargo}</td>
       <td>${s.vinculos>1 ? `<span class="vinc-pill-on">${s.vinculos} vínculos</span>` : '<span class="vinc-pill-off">1 vínculo</span>'}</td>
       <td>${ESCOLAS[s.escola]||'—'}</td>
@@ -507,7 +507,7 @@ function renderPerfil(){
     + (extra>0 ? `<div class="vp-more">Vinculado a mais ${extra} escola${extra>1?'s':''} — veja em “Ver perfil completo”.</div>` : '');
   box.innerHTML = `
     <div class="pcard-head2"><div class="t">Detalhes do servidor</div><button class="pcard-x" onclick="limparPerfil()" aria-label="Fechar">${svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',16)}</button></div>
-    <div class="pc-top"><div class="pcard-av2">${iniciais(s.nome)}</div><div><div class="pc-name">${s.nome}</div><div class="pc-mat">Matrícula: ${matricula(s)}</div><span class="pcard-badge">${s.cargo}</span></div></div>
+    <div class="pc-top"><div class="pcard-av2">${iniciais(s.nome)}</div><div><div class="pc-name">${s.nome}</div><span class="pcard-badge" style="margin-top:7px;">${s.cargo}</span></div></div>
     <div class="pc-kv">
       <span class="k">Último acesso</span><span class="v">${ultimo}</span>
     </div>

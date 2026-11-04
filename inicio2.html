@@ -1408,7 +1408,6 @@ function fichaRenderPerfil(){
   const team = window._fichaTeam||[], e = window._fichaEscServ||{};
   const p = _fichaSelM && team.find(x=>x.m===_fichaSelM);
   if(!p){ box.innerHTML = `<div class="svc-empty">${svgP('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',34)}<div>Selecione um servidor<br>para ver o perfil</div></div>`; return; }
-  const mat = String(seedFrom('mat'+p.m)%900000+100000).padStart(6,'0');
   const ultimo = p.acesso==='nunca' ? 'Nunca acessou' : p.acesso;
   const vincN = p.vinculos>1 ? `${p.vinculos} vínculos` : '1 vínculo';
   const bank = '<path d="M3 21h18"/><path d="M5 21V8l7-4 7 4v13"/><path d="M9 21v-5h6v5"/><path d="M9 11h.01M15 11h.01"/>';
@@ -1418,7 +1417,7 @@ function fichaRenderPerfil(){
     + (extra>0 ? `<div class="svc-vp-more">Vinculado a mais ${extra} escola${extra>1?'s':''} — veja em “Ver perfil completo”.</div>` : '');
   box.innerHTML = `
     <div class="svc-head"><div class="t">Detalhes do servidor</div><button class="svc-x" onclick="fichaLimpaPerfil()" aria-label="Fechar">${svgP('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',16)}</button></div>
-    <div class="svc-top"><div class="svc-av">${_ini(p.nome)}</div><div><div class="svc-name">${p.nome}</div><div class="svc-mat">Matrícula: ${mat}</div><span class="svc-badge">${p.cargo}</span></div></div>
+    <div class="svc-top"><div class="svc-av">${_ini(p.nome)}</div><div><div class="svc-name">${p.nome}</div><span class="svc-badge" style="margin-top:7px;">${p.cargo}</span></div></div>
     <div class="svc-kv"><span class="k">Último acesso</span><span class="v">${ultimo}</span></div>
     <div class="svc-sec-t">Vínculo profissional <span class="svc-pill">${vincN}</span></div>
     ${vp}
