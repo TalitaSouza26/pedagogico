@@ -108,6 +108,20 @@
     .ra-bar { height: 8px; background: #EAECF0; border-radius: 5px; overflow: hidden; }
     .ra-fill { height: 100%; background: #2E8B00; border-radius: 5px; }
     .ra-cap { font-size: 11.5px; color: var(--texto-suave); margin-top: 7px; }
+    /* perfil completo do professor (igual à ficha) */
+    .pdisc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    @media (max-width: 760px){ .pdisc-grid { grid-template-columns: repeat(2, 1fr); } }
+    .pdisc { display: flex; align-items: center; gap: 8px; padding: 9px 11px; border-radius: 10px; font-size: 11.5px; font-weight: 600; border: 1px solid; line-height: 1.15; }
+    .pdisc.on { color: var(--c); background: var(--cbg); border-color: var(--c); }
+    .pdisc.off { color: #C2C8D0; background: transparent; border-color: var(--borda); }
+    .pdisc .pdi { display: flex; flex-shrink: 0; }
+    .aula-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media (max-width: 760px){ .aula-cards { grid-template-columns: 1fr; } }
+    .aula-card { background: var(--branco); border: 1px solid var(--borda); border-top: 3px solid var(--azul); border-radius: 12px; padding: 16px; }
+    .aula-top { display: flex; align-items: center; gap: 8px; }
+    .aula-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .aula-lbl { font-size: 12px; color: var(--texto-suave); font-weight: 700; }
+    .aula-val { font-family: var(--font-display); font-weight: 800; font-size: 26px; margin-top: 12px; line-height: 1; }
 
     .overlay { position: fixed; inset: 0; background: rgba(15,23,32,.45); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; }
     .overlay.open { opacity: 1; pointer-events: auto; }
@@ -478,21 +492,22 @@ function abrir(m){
   document.addEventListener('keydown', escHandler);
 }
 function aulasInfo(s){
-  const sd = seedFrom('aulas'+s.m);
-  const total = 40 + sd%80;
-  const pend = s.turmas.length ? (sd>>>3)%Math.max(1, Math.round(total*0.14)) : 0;
-  const valid = total - pend;
-  return { total, valid, pend, pct: Math.round(valid/total*100) };
+  const total = Math.max(120, (s.turmas.length||1) * (150 + seedFrom(s.m+'aa')%90));
+  const pct = 82 + seedFrom(s.m+'av')%17;
+  const valid = Math.round(total*pct/100);
+  return { total, valid, pend: total - valid, pct };
 }
 function richHtml(s){
   const nunca = s.acesso==='nunca';
   const au = aulasInfo(s);
-  const aulasCard = `<div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:12px;">${svgP('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',18)} Registro de aulas</div>
-    <div class="ra-stats"><div class="ra-stat"><span class="ra-n">${au.total}</span><span class="ra-l">Registradas</span></div><div class="ra-stat"><span class="ra-n" style="color:#2E8B00">${au.valid}</span><span class="ra-l">Validadas</span></div><div class="ra-stat"><span class="ra-n" style="color:var(--laranja)">${au.pend}</span><span class="ra-l">Pendentes</span></div></div>
-    <div class="ra-bar"><div class="ra-fill" style="width:${au.pct}%"></div></div>
-    <div class="ra-cap">${au.pct}% das aulas validadas no bimestre</div></div>`;
+  const aulasCard = `<div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;margin-bottom:12px;">Registro de aulas · ano letivo</div>
+    <div class="aula-cards">
+      <div class="aula-card" style="border-top-color:#12509A"><div class="aula-top"><span class="aula-dot" style="background:#12509A"></span><span class="aula-lbl">Aulas no ano</span></div><div class="aula-val" style="color:#12509A">${au.total.toLocaleString('pt-BR')}</div></div>
+      <div class="aula-card" style="border-top-color:#2E8B00"><div class="aula-top"><span class="aula-dot" style="background:#2E8B00"></span><span class="aula-lbl">Aulas validadas</span></div><div class="aula-val" style="color:#2E8B00">${au.valid.toLocaleString('pt-BR')}</div></div>
+      <div class="aula-card" style="border-top-color:var(--laranja)"><div class="aula-top"><span class="aula-dot" style="background:var(--laranja)"></span><span class="aula-lbl">Pendentes de validação</span></div><div class="aula-val" style="color:var(--laranja)">${au.pend.toLocaleString('pt-BR')}</div></div>
+    </div></div>`;
   const etapasHtml = (s.etapas.length ? s.etapas : []).map(nome=>{ const et = ETAPAS_ALL.find(e=>e.nome===nome); return `<span class="etapa on-${et?et.cor:'azul'}">${nome}</span>`; }).join('') || '<span class="muted" style="font-size:12.5px;">—</span>';
-  const discHtml = s.disc.length ? s.disc.map(nome=>{ const d = DISC_ALL.find(x=>x.nome===nome) || {c:'var(--azul)',bg:'var(--azul-claro)',ic:'<circle cx="12" cy="12" r="9"/>'}; return `<div class="disc on" style="--c:${d.c};--cbg:${d.bg}"><span class="di">${svgP(d.ic,15)}</span>${nome}</div>`; }).join('') : '<div class="muted" style="font-size:12.5px;">Sem disciplina vinculada</div>';
+  const discHtml = DISC_ALL.map(d=>{ const on = s.disc.includes(d.nome); return `<div class="pdisc ${on?'on':'off'}" style="--c:${d.c};--cbg:${d.bg}"><span class="pdi">${svgP(d.ic,15)}</span>${d.nome}</div>`; }).join('');
   const turmasCard = `
     <div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:12px;">${svgP('<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/>',18)} Quadro de turmas</div>
       ${s.turmas.length? `<table class="mini-tbl"><thead><tr><th>Turma</th><th>Nível de Ensino</th><th>Turno</th><th></th></tr></thead><tbody>${s.turmas.map(t=>`<tr><td><b>${t.t}</b></td><td class="muted">${t.n}</td><td>${t.turno}</td><td class="eye">${svgP('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',16)}</td></tr>`).join('')}</tbody></table>` : `<div class="empty">${svgP('<circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/>',38)}<div>Nenhuma turma vinculada</div></div>` }
@@ -516,7 +531,7 @@ function richHtml(s){
         </div>
         <div class="atua"><span class="atua-lbl">Atua em</span>${etapasHtml}</div>
       </div>
-      <div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;margin-bottom:12px;">Disciplinas</div><div class="disc-grid">${discHtml}</div></div>
+      <div class="card"><div style="font-family:var(--font-display);font-weight:600;font-size:15px;margin-bottom:12px;">Disciplinas</div><div class="pdisc-grid">${discHtml}</div></div>
       ${aulasCard}
       ${turmasCard}
       ${ocorCard}
