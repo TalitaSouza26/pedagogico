@@ -455,11 +455,8 @@ function renderPerfil(){
   const ultimo = s.acesso==='nunca' ? 'Nunca acessou' : s.acesso;
   let extra = '';
   if(prof){
-    const au = aulasInfo(s);
     const chips = s.disc.length ? s.disc.map(d=>`<span class="pcard-chip">${d}</span>`).join('') : '<span class="muted" style="font-size:12px;">Sem disciplina</span>';
-    extra = `
-      <div class="pcard-sec"><div class="pcard-sec-t">Disciplinas</div><div class="pcard-chips">${chips}</div></div>
-      <div class="pcard-sec"><div class="pcard-sec-t">Aulas validadas</div><div class="ra-bar"><div class="ra-fill" style="width:${au.pct}%"></div></div><div class="ra-cap">${au.pct}% validadas · ${au.pend} pendente${au.pend===1?'':'s'}</div></div>`;
+    extra = `<div class="pcard-sec"><div class="pcard-sec-t">Disciplinas</div><div class="pcard-chips">${chips}</div></div>`;
   }
   box.innerHTML = `
     <div class="pcard-av">${iniciais(s.nome)}</div>
